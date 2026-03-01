@@ -12,6 +12,8 @@ CREATE TABLE contributors (
     name VARCHAR(255) NOT NULL,
     affiliation VARCHAR(255),
     role VARCHAR(255),
+    bio TEXT,
+    avatar VARCHAR(512),
     url VARCHAR(512),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

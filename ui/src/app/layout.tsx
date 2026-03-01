@@ -11,9 +11,20 @@ export const metadata: Metadata = {
   description: 'Knowledge management system',
 };
 
+const themeScript = `
+(function() {
+  var stored = localStorage.getItem('theme');
+  var theme = stored || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  document.documentElement.classList.add(theme);
+})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="flex min-h-screen">
           <Sidebar />

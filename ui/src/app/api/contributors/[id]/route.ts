@@ -19,7 +19,7 @@ export async function GET(
       // Contributor detail
       const [contributorRows] = await conn.query<RowDataPacket[]>(
         `SELECT
-           p.id, p.name, p.affiliation, p.role, p.url, p.notes, p.created_at
+           p.id, p.name, p.affiliation, p.role, p.bio, p.avatar, p.url, p.notes, p.created_at
          FROM contributors p
          WHERE p.id = ?`,
         [contributorId]
@@ -95,6 +95,21 @@ export async function PATCH(
     if (body.role !== undefined) {
       updates.push('role = ?');
       values.push(body.role);
+    }
+
+    if (body.bio !== undefined) {
+      updates.push('bio = ?');
+      values.push(body.bio);
+    }
+
+    if (body.avatar !== undefined) {
+      updates.push('avatar = ?');
+      values.push(body.avatar);
+    }
+
+    if (body.url !== undefined) {
+      updates.push('url = ?');
+      values.push(body.url);
     }
 
     if (updates.length === 0) {

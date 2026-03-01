@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import LinkChip from '@/components/LinkChip';
+import MarkdownViewer from '@/components/MarkdownViewer';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
 
@@ -49,7 +50,6 @@ export default function ArtifactsContent() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<ArtifactDetail | null>(null);
-  const [showContent, setShowContent] = useState(false);
 
   const selectedId = searchParams.get('id');
   const status = searchParams.get('status') || '';
@@ -89,10 +89,7 @@ export default function ArtifactsContent() {
     }
     fetch(`/api/artifacts/${selectedId}`)
       .then((r) => r.json())
-      .then((d) => {
-        setDetail(d);
-        setShowContent(false);
-      })
+      .then(setDetail)
       .catch(console.error);
   }, [selectedId]);
 
@@ -232,26 +229,7 @@ export default function ArtifactsContent() {
 
                 <div className={s.detailSection}>
                   <div className={s.detailLabel}>Content</div>
-                  {!showContent ? (
-                    <button
-                      className={ps.contentToggle}
-                      onClick={() => setShowContent(true)}
-                    >
-                      Show full content
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        className={ps.contentToggle}
-                        onClick={() => setShowContent(false)}
-                      >
-                        Hide content
-                      </button>
-                      <div className={ps.contentBlock}>
-                        {detail.content_md}
-                      </div>
-                    </>
-                  )}
+                  <MarkdownViewer content={detail.content_md} />
                 </div>
               </>
             )}

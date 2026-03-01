@@ -30,6 +30,20 @@ const secondaryNav = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [stats, setStats] = useState<PipelineStats | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const current = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+    setTheme(current);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(next);
+    localStorage.setItem('theme', next);
+    setTheme(next);
+  };
 
   useEffect(() => {
     fetch('/api/dashboard')
@@ -84,6 +98,13 @@ export default function Sidebar() {
           <div className={s.pipelineLegend}>collected / distilled / decomposed</div>
         </div>
       )}
+
+      <button className={s.themeToggle} onClick={toggleTheme}>
+        <span>{theme === 'dark' ? '\u263E' : '\u2600'}</span>
+        <span className={s.themeToggleLabel}>
+          {theme === 'dark' ? 'Light' : 'Dark'}
+        </span>
+      </button>
     </aside>
   );
 }

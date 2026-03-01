@@ -1,25 +1,31 @@
 @import "tailwindcss";
 
-// ── Design tokens ───────────────────────────────────────────────
+html {
+  font-size: 18px;
+}
+
+// ── Shared tokens (theme-independent) ──────────────────────────
 :root {
-  // Backgrounds
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+// ── Dark theme ─────────────────────────────────────────────────
+html.dark {
   --bg-primary: #0a0a0a;
   --bg-surface: #18181b;
   --bg-raised: #27272a;
   --bg-hover: rgba(39, 39, 42, 0.5);
 
-  // Borders
   --border-default: #27272a;
   --border-subtle: #3f3f46;
 
-  // Text
   --text-primary: #e4e4e7;
   --text-secondary: #a1a1aa;
   --text-muted: #71717a;
   --text-placeholder: #52525b;
   --text-on-primary: #ffffff;
 
-  // Accent foregrounds
   --accent-blue: #60a5fa;
   --accent-green: #4ade80;
   --accent-yellow: #facc15;
@@ -31,7 +37,6 @@
   --accent-pink: #f472b6;
   --accent-amber: #fbbf24;
 
-  // Accent tinted backgrounds (50% opacity tints for cards/badges)
   --bg-blue: rgba(30, 58, 138, 0.5);
   --bg-green: rgba(20, 83, 45, 0.5);
   --bg-yellow: rgba(113, 63, 18, 0.5);
@@ -43,7 +48,6 @@
   --bg-pink: rgba(131, 24, 67, 0.5);
   --bg-amber: rgba(120, 53, 15, 0.5);
 
-  // Accent borders (darker shade of each accent)
   --border-blue: #1e3a8a;
   --border-green: #14532d;
   --border-yellow: #854d0e;
@@ -55,15 +59,95 @@
   --border-pink: #831843;
   --border-amber: #78350f;
 
-  // Interactive
   --btn-primary: #2563eb;
   --btn-primary-hover: #3b82f6;
-
-  // Fonts
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
+// ── Light theme ────────────────────────────────────────────────
+html.light {
+  --bg-primary: #ffffff;
+  --bg-surface: #f4f4f5;
+  --bg-raised: #e4e4e7;
+  --bg-hover: rgba(228, 228, 231, 0.5);
+
+  --border-default: #e4e4e7;
+  --border-subtle: #d4d4d8;
+
+  --text-primary: #18181b;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+  --text-placeholder: #a1a1aa;
+  --text-on-primary: #ffffff;
+
+  --accent-blue: #2563eb;
+  --accent-green: #16a34a;
+  --accent-yellow: #ca8a04;
+  --accent-orange: #ea580c;
+  --accent-red: #dc2626;
+  --accent-purple: #9333ea;
+  --accent-indigo: #4f46e5;
+  --accent-cyan: #0891b2;
+  --accent-pink: #db2777;
+  --accent-amber: #d97706;
+
+  --bg-blue: rgba(219, 234, 254, 0.7);
+  --bg-green: rgba(220, 252, 231, 0.7);
+  --bg-yellow: rgba(254, 249, 195, 0.7);
+  --bg-orange: rgba(255, 237, 213, 0.7);
+  --bg-red: rgba(254, 226, 226, 0.7);
+  --bg-purple: rgba(243, 232, 255, 0.7);
+  --bg-indigo: rgba(224, 231, 255, 0.7);
+  --bg-cyan: rgba(207, 250, 254, 0.7);
+  --bg-pink: rgba(252, 231, 243, 0.7);
+  --bg-amber: rgba(254, 243, 199, 0.7);
+
+  --border-blue: #93c5fd;
+  --border-green: #86efac;
+  --border-yellow: #fde047;
+  --border-orange: #fdba74;
+  --border-red: #fca5a5;
+  --border-purple: #d8b4fe;
+  --border-indigo: #a5b4fc;
+  --border-cyan: #67e8f9;
+  --border-pink: #f9a8d4;
+  --border-amber: #fcd34d;
+
+  --btn-primary: #2563eb;
+  --btn-primary-hover: #1d4ed8;
+}
+
+// ── Syntax highlighting (scoped by theme) ──────────────────────
+html.dark {
+  .hljs { color: #adbac7; }
+  .hljs-keyword, .hljs-selector-tag { color: #f47067; }
+  .hljs-string, .hljs-attr { color: #96d0ff; }
+  .hljs-comment, .hljs-quote { color: #768390; }
+  .hljs-number, .hljs-literal { color: #6cb6ff; }
+  .hljs-title, .hljs-section { color: #dcbdfb; }
+  .hljs-built_in { color: #f69d50; }
+  .hljs-variable, .hljs-template-variable { color: #6cb6ff; }
+  .hljs-type, .hljs-params { color: #6cb6ff; }
+  .hljs-meta { color: #768390; }
+  .hljs-addition { color: #b4f1b4; }
+  .hljs-deletion { color: #ffd8d3; }
+}
+
+html.light {
+  .hljs { color: #24292e; }
+  .hljs-keyword, .hljs-selector-tag { color: #d73a49; }
+  .hljs-string, .hljs-attr { color: #032f62; }
+  .hljs-comment, .hljs-quote { color: #6a737d; font-style: italic; }
+  .hljs-number, .hljs-literal { color: #005cc5; }
+  .hljs-title, .hljs-section { color: #6f42c1; }
+  .hljs-built_in { color: #e36209; }
+  .hljs-variable, .hljs-template-variable { color: #005cc5; }
+  .hljs-type, .hljs-params { color: #005cc5; }
+  .hljs-meta { color: #6a737d; }
+  .hljs-addition { color: #22863a; }
+  .hljs-deletion { color: #b31d28; }
+}
+
+// ── Tailwind theme bridge ──────────────────────────────────────
 @theme inline {
   --color-background: var(--bg-primary);
   --color-foreground: var(--text-primary);
@@ -83,7 +167,7 @@ a {
   text-decoration: none;
 }
 
-// ── Status badge classes (used via className mapping) ───────────
+// ── Status badge classes ────────────────────────────────────────
 .status-collected {
   background: var(--bg-yellow);
   color: var(--accent-yellow);

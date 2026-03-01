@@ -22,6 +22,7 @@ This skill is responsible for ALL database storage. Content retrieval for specif
 
 - **markdown-formatting** skill: All `content_md` must follow its rules.
 - **video-retriever** skill: Delegates YouTube retrieval (metadata, transcript, speaker attribution). Collect receives the output and handles storage.
+- **contributor-info** skill: After inserting new contributors, invoke to populate their bio, avatar, and URL fields.
 
 ## Database Connection
 
@@ -199,6 +200,10 @@ For YouTube videos, include caption type and attribution confidence in `notes`.
 INSERT INTO source_contributors (source_id, contributor_id, role)
 VALUES (<source_id>, <contributor_id>, '<role>');
 ```
+
+**Enrich new contributor profiles:**
+
+For each newly inserted contributor (not pre-existing), invoke the **contributor-info** skill to populate their `bio`, `avatar`, and `url` fields. For batch collections with many new contributors, defer enrichment and note it in the confirmation output instead.
 
 ### 8. Confirm
 

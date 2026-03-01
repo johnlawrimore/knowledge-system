@@ -62,7 +62,7 @@ export default function Dashboard() {
           <div className={s.statLabel}>Evidence</div>
           <div className={s.statValue}>{data.counts.evidence}</div>
           <div className={s.statDetail}>
-            avg credibility: {data.counts.avgCredibility?.toFixed(1) ?? 'n/a'}
+            avg credibility: {data.counts.avgCredibility != null ? Number(data.counts.avgCredibility).toFixed(1) : 'n/a'}
           </div>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function Dashboard() {
               <Link key={t.theme_id} href={`/themes?id=${t.theme_id}`} className={s.themeRow}>
                 <div className={s.themeName}>{t.theme_name}</div>
                 <div className={s.themeMeta}>
-                  {t.claim_count} claims, avg {t.avg_claim_score?.toFixed(1) ?? 'n/a'}
+                  {t.claim_count} claims, avg {t.avg_claim_score != null ? Number(t.avg_claim_score).toFixed(1) : 'n/a'}
                 </div>
               </Link>
             ))

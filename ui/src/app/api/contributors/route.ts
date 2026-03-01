@@ -13,6 +13,8 @@ export async function GET() {
            p.name,
            p.affiliation,
            p.role,
+           p.bio,
+           p.avatar,
            p.url,
            p.created_at,
            COUNT(DISTINCT s.id) AS source_count,
@@ -22,7 +24,7 @@ export async function GET() {
          LEFT JOIN sources s ON sc.source_id = s.id
          LEFT JOIN evidence e ON s.id = e.source_id
          LEFT JOIN claim_evidence ce ON e.id = ce.evidence_id
-         GROUP BY p.id, p.name, p.affiliation, p.role, p.url, p.created_at
+         GROUP BY p.id, p.name, p.affiliation, p.role, p.bio, p.avatar, p.url, p.created_at
          ORDER BY claim_count DESC`
       );
 

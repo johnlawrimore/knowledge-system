@@ -9,10 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "highlight.js": "^11.11.1",
     "mysql2": "^3.18.2",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
     "sass": "^1.97.3"
   },
   "devDependencies": {

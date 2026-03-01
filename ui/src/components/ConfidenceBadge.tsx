@@ -12,13 +12,14 @@ export default function ConfidenceBadge({
   confidence,
   score,
 }: {
-  confidence: string;
+  confidence: string | null | undefined;
   score?: number | null;
 }) {
-  const cls = styleMap[confidence] || s.developing;
+  const level = confidence || 'unsupported';
+  const cls = styleMap[level] || s.developing;
   return (
     <span className={cls}>
-      {confidence.toUpperCase()}
+      {level.toUpperCase()}
       {score != null && <span className={s.score}>({score})</span>}
     </span>
   );
