@@ -1,0 +1,93 @@
+.sidebar {
+  width: 13rem;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-default);
+
+  h1 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+  }
+}
+
+.nav {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.spacer {
+  height: 0.5rem;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+}
+
+.navLinkActive {
+  @extend .navLink;
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.navIcon {
+  font-size: 0.625rem;
+}
+
+.navIconSecondary {
+  @extend .navIcon;
+  opacity: 0.5;
+}
+
+.pipelineFooter {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-default);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pipelineLabel {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.pipelineCounts {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.countCollected { color: var(--accent-yellow); }
+.countDistilled { color: var(--accent-blue); }
+.countDecomposed { color: var(--accent-green); }
+
+.pipelineLegend {
+  font-size: 0.625rem;
+  margin-top: 0.125rem;
+}

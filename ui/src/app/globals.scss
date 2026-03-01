@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+// ── Design tokens ───────────────────────────────────────────────
+:root {
+  // Backgrounds
+  --bg-primary: #0a0a0a;
+  --bg-surface: #18181b;
+  --bg-raised: #27272a;
+  --bg-hover: rgba(39, 39, 42, 0.5);
+
+  // Borders
+  --border-default: #27272a;
+  --border-subtle: #3f3f46;
+
+  // Text
+  --text-primary: #e4e4e7;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-placeholder: #52525b;
+  --text-on-primary: #ffffff;
+
+  // Accent foregrounds
+  --accent-blue: #60a5fa;
+  --accent-green: #4ade80;
+  --accent-yellow: #facc15;
+  --accent-orange: #fb923c;
+  --accent-red: #f87171;
+  --accent-purple: #c084fc;
+  --accent-indigo: #818cf8;
+  --accent-cyan: #22d3ee;
+  --accent-pink: #f472b6;
+  --accent-amber: #fbbf24;
+
+  // Accent tinted backgrounds (50% opacity tints for cards/badges)
+  --bg-blue: rgba(30, 58, 138, 0.5);
+  --bg-green: rgba(20, 83, 45, 0.5);
+  --bg-yellow: rgba(113, 63, 18, 0.5);
+  --bg-orange: rgba(124, 45, 18, 0.5);
+  --bg-red: rgba(127, 29, 29, 0.5);
+  --bg-purple: rgba(88, 28, 135, 0.5);
+  --bg-indigo: rgba(49, 46, 129, 0.5);
+  --bg-cyan: rgba(22, 78, 99, 0.5);
+  --bg-pink: rgba(131, 24, 67, 0.5);
+  --bg-amber: rgba(120, 53, 15, 0.5);
+
+  // Accent borders (darker shade of each accent)
+  --border-blue: #1e3a8a;
+  --border-green: #14532d;
+  --border-yellow: #854d0e;
+  --border-orange: #7c2d12;
+  --border-red: #7f1d1d;
+  --border-purple: #581c87;
+  --border-indigo: #312e81;
+  --border-cyan: #164e63;
+  --border-pink: #831843;
+  --border-amber: #78350f;
+
+  // Interactive
+  --btn-primary: #2563eb;
+  --btn-primary-hover: #3b82f6;
+
+  // Fonts
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+// ── Base ────────────────────────────────────────────────────────
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+// ── Status badge classes (used via className mapping) ───────────
+.status-collected {
+  background: var(--bg-yellow);
+  color: var(--accent-yellow);
+  border-color: var(--border-yellow);
+}
+
+.status-distilling {
+  background: var(--bg-blue);
+  color: var(--accent-blue);
+  border-color: var(--border-blue);
+  animation: pulse 2s infinite;
+}
+
+.status-distilled {
+  background: var(--bg-blue);
+  color: var(--accent-blue);
+  border-color: var(--border-blue);
+}
+
+.status-decomposing {
+  background: var(--bg-purple);
+  color: var(--accent-purple);
+  border-color: var(--border-purple);
+  animation: pulse 2s infinite;
+}
+
+.status-decomposed {
+  background: var(--bg-green);
+  color: var(--accent-green);
+  border-color: var(--border-green);
+}
+
+.status-draft {
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+
+.status-reviewed {
+  background: var(--bg-blue);
+  color: var(--accent-blue);
+  border-color: var(--border-blue);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

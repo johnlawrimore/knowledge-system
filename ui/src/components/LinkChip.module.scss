@@ -1,0 +1,84 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.chipLink {
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 0.125rem;
+  padding: 0;
+  color: inherit;
+  line-height: 1;
+
+  &:hover { color: var(--text-primary); }
+}
+
+.topic {
+  @extend .chip;
+  background: var(--bg-indigo);
+  color: var(--accent-indigo);
+  border-color: var(--border-indigo);
+}
+
+.theme {
+  @extend .chip;
+  background: var(--bg-purple);
+  color: var(--accent-purple);
+  border-color: var(--border-purple);
+}
+
+.tag {
+  @extend .chip;
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+
+.source {
+  @extend .chip;
+  background: var(--bg-amber);
+  color: var(--accent-amber);
+  border-color: var(--border-amber);
+}
+
+.contributor {
+  @extend .chip;
+  background: var(--bg-cyan);
+  color: var(--accent-cyan);
+  border-color: var(--border-cyan);
+}
+
+.claim {
+  @extend .chip;
+  background: var(--bg-green);
+  color: var(--accent-green);
+  border-color: var(--border-green);
+}
+
+.cluster {
+  @extend .chip;
+  background: var(--bg-pink);
+  color: var(--accent-pink);
+  border-color: var(--border-pink);
+}
+
+.default {
+  @extend .chip;
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}

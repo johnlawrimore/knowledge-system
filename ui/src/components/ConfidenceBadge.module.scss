@@ -1,0 +1,48 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  border: 1px solid;
+}
+
+.score {
+  opacity: 0.75;
+}
+
+.strong {
+  @extend .badge;
+  background: var(--bg-green);
+  color: var(--accent-green);
+  border-color: var(--border-green);
+}
+
+.moderate {
+  @extend .badge;
+  background: var(--bg-blue);
+  color: var(--accent-blue);
+  border-color: var(--border-blue);
+}
+
+.developing {
+  @extend .badge;
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+
+.contested {
+  @extend .badge;
+  background: var(--bg-orange);
+  color: var(--accent-orange);
+  border-color: var(--border-orange);
+}
+
+.unsupported {
+  @extend .badge;
+  background: var(--bg-red);
+  color: var(--accent-red);
+  border-color: var(--border-red);
+}

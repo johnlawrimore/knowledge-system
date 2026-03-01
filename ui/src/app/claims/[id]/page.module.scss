@@ -1,0 +1,249 @@
+.page {
+  padding: 1.5rem;
+  max-width: 64rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+}
+
+// ── Claim header ────────────────────────────────────────────────
+.claimHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.claimId {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.claimType {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.statementBox {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+// ── Metadata sections ───────────────────────────────────────────
+.metaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metaSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.metaLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.addBtn {
+  background: none;
+  border: 1px dashed var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+  }
+}
+
+// ── Divider ─────────────────────────────────────────────────────
+.divider {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: 1.5rem 0;
+}
+
+// ── Evidence section ────────────────────────────────────────────
+.sectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.evidenceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.evidenceCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid;
+}
+
+.evidenceSupports { border-left-color: var(--accent-green); }
+.evidenceContradicts { border-left-color: var(--accent-red); }
+.evidenceQualifies { border-left-color: var(--accent-amber); }
+
+.evidenceHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.stanceBadge {
+  font-weight: 600;
+}
+
+.stanceSupports { color: var(--accent-green); }
+.stanceContradicts { color: var(--accent-red); }
+.stanceQualifies { color: var(--accent-amber); }
+
+.evidenceContent {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 0.375rem;
+}
+
+.evidenceReasoning {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 0.375rem;
+}
+
+.evidenceSource {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+
+  a {
+    color: var(--accent-blue);
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// ── Relationships ───────────────────────────────────────────────
+.relList {
+  margin-bottom: 1.5rem;
+}
+
+.relItem {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+}
+
+.relType {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  min-width: 6rem;
+}
+
+.relClaim {
+  color: var(--accent-blue);
+  &:hover { text-decoration: underline; }
+}
+
+// ── Cluster section ─────────────────────────────────────────────
+.clusterBox {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.clusterTitle {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.clusterMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.siblingList {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.siblingItem {
+  color: var(--accent-blue);
+  padding: 0.125rem 0;
+
+  &:hover { text-decoration: underline; }
+}
+
+// ── Notes section ───────────────────────────────────────────────
+.notesSection {
+  margin-bottom: 1.5rem;
+}
+
+// ── Loading / empty ─────────────────────────────────────────────
+.loading {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-placeholder);
+  font-style: italic;
+}
