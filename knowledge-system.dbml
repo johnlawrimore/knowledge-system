@@ -1,0 +1,209 @@
+// ============================================================================
+// Knowledge Management System
+// Paste into https://dbdiagram.io/d
+// ============================================================================
+
+// --- STAGE 1: COLLECTION ---
+
+Table contributors {
+  id int [pk, increment]
+  name varchar(255) [not null]
+  affiliation varchar(255)
+  role varchar(255)
+  url varchar(512)
+  notes text
+  created_at timestamp
+}
+
+Table sources {
+  id int [pk, increment]
+  title varchar(500) [not null]
+  source_type enum('youtube_video','podcast','blog_post','website','academic_paper','book','book_chapter','conference_talk','newsletter','social_media','report','documentation','other') [not null]
+  url varchar(1024)
+  publication_date date
+  date_collected timestamp
+  evaluation_results json
+  content_md longtext [not null]
+  word_count int
+  status enum('collected','distilling','distilled','decomposing','decomposed') [not null, default: 'collected']
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table source_contributors {
+  source_id int [not null]
+  contributor_id int [not null]
+  role enum('author','speaker','interviewer','interviewee','host','panelist','editor','other') [not null, default: 'author']
+  indexes { (source_id, contributor_id, role) [pk] }
+}
+
+Ref: source_contributors.source_id > sources.id [delete: cascade]
+Ref: source_contributors.contributor_id > contributors.id [delete: restrict]
+
+// --- STAGE 2: DISTILLATION ---
+
+Table artifacts {
+  id int [pk, increment]
+  title varchar(500) [not null]
+  content_md longtext [not null]
+  word_count int
+  source_strategy enum('single_source','multi_source') [not null, default: 'single_source']
+  evaluation_results json
+  status enum('draft','reviewed','decomposed') [not null, default: 'draft']
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table artifact_sources {
+  artifact_id int [not null]
+  source_id int [not null]
+  contribution_note text
+  indexes { (artifact_id, source_id) [pk] }
+}
+
+Ref: artifact_sources.artifact_id > artifacts.id [delete: cascade]
+Ref: artifact_sources.source_id > sources.id [delete: restrict]
+
+// --- STAGE 3: DECOMPOSITION ---
+
+Table topics {
+  id int [pk, increment]
+  name varchar(255) [not null, unique]
+  description text
+  parent_topic_id int
+  sort_order int [default: 0]
+  created_at timestamp
+}
+
+Ref: topics.parent_topic_id > topics.id
+
+Table themes {
+  id int [pk, increment]
+  name varchar(255) [not null, unique]
+  thesis text [not null]
+  description text
+  created_at timestamp
+}
+
+Table claim_clusters {
+  id int [pk, increment]
+  summary text
+  reviewer_notes text
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table claims {
+  id int [pk, increment]
+  statement text [not null]
+  claim_type enum('assertion','principle','framework','recommendation','prediction','definition','observation','other') [not null, default: 'assertion']
+  cluster_id int
+  reviewer_notes text
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: claims.cluster_id > claim_clusters.id [delete: set null]
+
+Table claim_relationships {
+  id int [pk, increment]
+  claim_id_a int [not null]
+  claim_id_b int [not null]
+  relationship enum('contradicts','refines','generalizes','depends_on','enables','tensions_with','other') [not null]
+  notes text
+  created_at timestamp
+}
+
+Ref: claim_relationships.claim_id_a > claims.id [delete: cascade]
+Ref: claim_relationships.claim_id_b > claims.id [delete: cascade]
+
+Table claim_topics {
+  claim_id int [not null]
+  topic_id int [not null]
+  indexes { (claim_id, topic_id) [pk] }
+}
+
+Ref: claim_topics.claim_id > claims.id [delete: cascade]
+Ref: claim_topics.topic_id > topics.id [delete: cascade]
+
+Table claim_themes {
+  claim_id int [not null]
+  theme_id int [not null]
+  indexes { (claim_id, theme_id) [pk] }
+}
+
+Ref: claim_themes.claim_id > claims.id [delete: cascade]
+Ref: claim_themes.theme_id > themes.id [delete: cascade]
+
+Table claim_tags {
+  claim_id int [not null]
+  tag varchar(100) [not null]
+  indexes { (claim_id, tag) [pk] }
+}
+
+Ref: claim_tags.claim_id > claims.id [delete: cascade]
+
+// --- EVIDENCE ---
+
+Table evidence {
+  id int [pk, increment]
+  content text [not null]
+  source_id int [not null]
+  artifact_id int
+  evidence_type enum('empirical','case_study','expert_opinion','anecdotal','theoretical','statistical','other') [not null, default: 'expert_opinion']
+  verbatim_quote text
+  evaluation_results json
+  derived_from_evidence_id int
+  notes text
+  created_at timestamp
+}
+
+Ref: evidence.source_id > sources.id [delete: restrict]
+Ref: evidence.artifact_id > artifacts.id [delete: set null]
+Ref: evidence.derived_from_evidence_id > evidence.id [delete: set null]
+
+Table claim_evidence {
+  claim_id int [not null]
+  evidence_id int [not null]
+  stance enum('supports','contradicts','qualifies') [not null, default: 'supports']
+  strength enum('strong','moderate','weak') [not null, default: 'moderate']
+  reasoning text
+  notes text
+  indexes { (claim_id, evidence_id) [pk] }
+}
+
+Ref: claim_evidence.claim_id > claims.id [delete: cascade]
+Ref: claim_evidence.evidence_id > evidence.id [delete: cascade]
+
+// --- TABLE GROUPS ---
+
+TableGroup collection {
+  contributors
+  sources
+  source_contributors
+}
+
+TableGroup distillation {
+  artifacts
+  artifact_sources
+}
+
+TableGroup decomposition {
+  topics
+  themes
+  claim_clusters
+  claims
+  claim_relationships
+  claim_topics
+  claim_themes
+  claim_tags
+}
+
+TableGroup evidence_layer {
+  evidence
+  claim_evidence
+}
