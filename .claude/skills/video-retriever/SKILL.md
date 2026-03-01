@@ -48,7 +48,6 @@ Use `yt-dlp` to extract video metadata as JSON:
 yt-dlp --dump-json --no-download "VIDEO_URL"
 ```
 
-
 From the JSON output, extract and present the following fields:
 
 | Field         | JSON key            |
@@ -62,7 +61,7 @@ From the JSON output, extract and present the following fields:
 | View count    | `view_count`        |
 | URL           | `webpage_url`       |
 
-Format `upload_date` from `YYYYMMDD` to `YYYY-MM-DD`. If the upload date is in the future (after the current date), still record and display it as provided. Note in the metadata output that the publish date is in the future, which may indicate a scheduled or pre-release video. This ensures future-dated videos are handled and flagged for downstream consumers.
+Format `upload_date` from `YYYYMMDD` to `YYYY-MM-DD`.
 
 ## Step 2 — Retrieve Transcript
 
