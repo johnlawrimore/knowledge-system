@@ -15,14 +15,17 @@ The database is MySQL 8.0, accessed via the `mysql` MCP tool.
 
 | Skill | Trigger Phrases | Purpose |
 |-------|----------------|---------|
+| **process** | "process", "process this URL", "run full pipeline" | End-to-end pipeline: collect → distill → decompose → cluster → categorize → evaluate → status |
 | **collect** | "collect", "ingest", "add source", URL pasted | Ingest raw sources. Delegates YouTube retrieval to video-retriever. Handles all DB storage. |
 | **video-retriever** | "retrieve video", "get transcript", YouTube URL | Extract metadata, transcript, speaker attribution from YouTube (retrieval only — no DB) |
 | **distill** | "distill", "distill source #X", "distill next" | Create artifacts from sources |
 | **decompose** | "decompose", "extract claims", "decompose next" | Extract claims + evidence from artifacts |
 | **cluster** | "cluster", "find duplicates", "group claims" | Group equivalent claims |
+| **categorize** | "categorize", "assign topics", "tag new claims" | Assign topics, themes, and tags to claims |
 | **evaluate** | "evaluate", "assess", "score", "rate" | Score credibility and quality |
 | **manage** | "create topic", "add theme", "tag", "organize" | CRUD for topics, themes, tags, editorial |
 | **status** | "status", "dashboard", "what needs work" | Pipeline reporting and gap analysis |
+| **contributor-info** | "enrich contributors", "research contributor" | Populate contributor bio, avatar, URL |
 | **markdown-formatting** | (referenced by other skills, not invoked directly) | Formatting rules for all markdown content |
 
 ## Pipeline Flow
@@ -35,16 +38,27 @@ URL/Upload
     └─ Other ───▶ collect ◀──────────┘
                     │
                     ▼
-                 distill ──▶ decompose
-                                │
-                  ┌─────────────┼──────────────┐
-                  ▼             ▼              ▼
-              cluster       evaluate        manage
-                  │             │              │
-                  └─────────────┼──────────────┘
-                                ▼
-                             status
+                 distill
+                    │
+                    ▼
+                decompose
+                    │
+                    ▼
+                 cluster
+                    │
+                    ▼
+               categorize
+                    │
+                    ▼
+                evaluate
+                    │
+                    ▼
+                 status
+
+         manage ── manual curation at any stage
 ```
+
+The **process** skill runs all stages in sequence. Each stage can also be invoked independently.
 
 All markdown content (sources, artifacts) follows **markdown-formatting** rules.
 
