@@ -1,3 +1,4 @@
+import { confidenceLabel } from '@/lib/enumLabels';
 import s from './ConfidenceBadge.module.scss';
 
 const styleMap: Record<string, string> = {
@@ -19,7 +20,7 @@ export default function ConfidenceBadge({
   const cls = styleMap[level] || s.developing;
   return (
     <span className={cls}>
-      {level.toUpperCase()}
+      {confidenceLabel(level).toUpperCase()}
       {score != null && <span className={s.score}>({score})</span>}
     </span>
   );

@@ -7,6 +7,7 @@ import MarkdownViewer from '@/components/MarkdownViewer';
 import ClaimsList from '@/components/ClaimsList';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
 import { SOURCE_TYPES } from '@/lib/sourceTypes';
+import { contributorRoleLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
 import s from './page.module.scss';
@@ -17,6 +18,7 @@ interface SourceListItem {
   id: number;
   title: string;
   source_type: string;
+  publication: string | null;
   word_count: number;
   status: string;
   date_collected: string;
@@ -28,6 +30,7 @@ interface SourceDetail {
   title: string;
   source_type: string;
   url: string | null;
+  publication: string | null;
   publication_date: string | null;
   word_count: number;
   status: string;
@@ -176,8 +179,11 @@ export default function SourcesContent() {
               <>
                 <div className={s.detailTitle}>{detail.title}</div>
                 <div className={s.detailMeta}>
-                  <SourceTypeBadge type={detail.source_type} size={16} /> &middot;{' '}
-                  {formatDate(detail.publication_date)} &middot;{' '}
+                  <SourceTypeBadge type={detail.source_type} size={16} />
+                  {detail.publication && (
+                    <> &middot; {detail.publication}</>
+                  )}
+                  {' '}&middot; {formatDate(detail.publication_date)} &middot;{' '}
                   {detail.word_count?.toLocaleString()} words
                   {detail.contributors.length > 0 && (
                     <> &middot; {detail.contributors[0].name}</>
@@ -228,11 +234,20 @@ export default function SourcesContent() {
                             )}
                             <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
                             {c.affiliation && <span>({c.affiliation})</span>}
-                            <span className={s.contributorRole}>{c.contributor_role}</span>
+                            <span className={s.contributorRole}>{contributorRoleLabel(c.contributor_role)}</span>
                           </div>
                         ))}
                       </div>
                     )}
+
+                    <div className={s.detailSection}>
+                      <div className={s.detailLabel}>Publication</div>
+                      <InlineEdit
+                        value={detail.publication}
+                        onSave={(v) => patchSource('publication', v)}
+                        placeholder="Add publication..."
+                      />
+                    </div>
 
                     {detail.url && (
                       <div className={s.detailSection}>

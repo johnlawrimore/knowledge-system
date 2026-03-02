@@ -62,7 +62,6 @@ Apply domain tags and editorial flags. Follow conventions:
 
 | Prefix | Purpose | Examples |
 |---|---|---|
-| `source:<id>` | Provenance (should already exist from decompose) | `source:3` |
 | `book-ch-<n>` | Composition targeting | `book-ch-1` |
 | (no prefix) | Domain labels | `tdd`, `code-review`, `ai-agents`, `context-engineering` |
 | (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |

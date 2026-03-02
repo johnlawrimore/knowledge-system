@@ -23,6 +23,7 @@ Table sources {
   title varchar(500) [not null]
   source_type enum('youtube_video','podcast','blog_post','website','academic_paper','book','book_chapter','conference_talk','newsletter','social_media','report','research','documentation','other') [not null]
   url varchar(1024)
+  publication varchar(255)
   publication_date date
   date_collected timestamp
   evaluation_results json

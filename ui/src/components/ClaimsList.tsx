@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
+import { claimTypeLabel } from '@/lib/enumLabels';
 import s from './ClaimsList.module.scss';
 
 interface Claim {
@@ -140,7 +141,7 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
               <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
                 <div className={s.claimHeader}>
                   <span className={s.claimId}>#{c.id}</span>
-                  <span className={s.claimType}>{c.claim_type}</span>
+                  <span className={s.claimType}>{claimTypeLabel(c.claim_type)}</span>
                   <ConfidenceBadge confidence={c.computed_confidence} score={c.score} />
                 </div>
                 <div className={s.claimStatement}>{c.statement}</div>

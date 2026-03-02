@@ -139,12 +139,11 @@ export async function PATCH(
 
   try {
     const body = await request.json();
-    const { notes, evaluation_results } = body;
+    const { notes, evaluation_results, publication } = body;
 
-    // Only allow updating notes and evaluation_results
-    if (notes === undefined && evaluation_results === undefined) {
+    if (notes === undefined && evaluation_results === undefined && publication === undefined) {
       return NextResponse.json(
-        { error: 'Request must include notes and/or evaluation_results' },
+        { error: 'Request must include notes, evaluation_results, and/or publication' },
         { status: 400 }
       );
     }
@@ -164,6 +163,11 @@ export async function PATCH(
           ? evaluation_results
           : JSON.stringify(evaluation_results)
       );
+    }
+
+    if (publication !== undefined) {
+      updates.push('publication = ?');
+      values.push(publication);
     }
 
     values.push(String(sourceId));
@@ -192,7 +196,7 @@ export async function PATCH(
 
       // Return the updated source
       const [updatedRows] = await conn.query<RowDataPacket[]>(
-        'SELECT id, notes, evaluation_results FROM sources WHERE id = ?',
+        'SELECT id, notes, evaluation_results, publication FROM sources WHERE id = ?',
         [sourceId]
       );
 
@@ -212,6 +216,7 @@ export async function PATCH(
         id: updated.id,
         notes: updated.notes,
         evaluation_results: parsedEval,
+        publication: updated.publication,
       });
     } finally {
       conn.release();

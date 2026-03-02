@@ -29,6 +29,7 @@ CREATE TABLE sources (
         'newsletter', 'social_media', 'report', 'research', 'documentation', 'other'
     ) NOT NULL,
     url VARCHAR(1024),
+    publication VARCHAR(255)              COMMENT 'Show, podcast, blog series, or content series name',
     publication_date DATE,
     date_collected TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     evaluation_results JSON             COMMENT 'Flexible evaluation data: credibility, bias, relevance, etc.',

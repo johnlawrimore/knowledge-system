@@ -3,7 +3,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
-import LinkChip from '@/components/LinkChip';
+import SourceTypeBadge from '@/components/SourceTypeBadge';
+import { stanceLabel, strengthLabel } from '@/lib/enumLabels';
+import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
 
@@ -283,14 +285,17 @@ export default function ContributorsContent() {
                   {detail.sources.length === 0 ? (
                     <div className={s.detailValue}>No sources linked</div>
                   ) : (
-                    <div className={s.chipRow}>
+                    <div className={s.claimList}>
                       {detail.sources.map((src) => (
-                        <LinkChip
-                          key={src.id}
-                          href={`/sources?id=${src.id}`}
-                          label={src.title}
-                          kind="source"
-                        />
+                        <Link key={src.id} href={`/sources?id=${src.id}`} className={ps.sourceRow}>
+                          <div className={ps.sourceTitle}>{src.title}</div>
+                          <div className={ps.sourceMeta}>
+                            <SourceTypeBadge type={src.source_type} size={13} />
+                            {src.publication_date && (
+                              <><span>&middot;</span><span>{formatDate(src.publication_date)}</span></>
+                            )}
+                          </div>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -307,7 +312,7 @@ export default function ContributorsContent() {
                   ) : (
                     STANCE_ORDER.filter((stance) => stanceGroups[stance]).map((stance) => (
                       <div key={stance}>
-                        <div className={s.detailLabel}>{stance}</div>
+                        <div className={s.detailLabel}>{stanceLabel(stance)}</div>
                         <div className={s.claimList}>
                           {stanceGroups[stance].map((p, i) => (
                             <Link
@@ -316,7 +321,7 @@ export default function ContributorsContent() {
                               className={s.claimRow}
                             >
                               <span className={s.claimScore}>
-                                #{p.claim_id} · {p.strength}
+                                #{p.claim_id} · {strengthLabel(p.strength)}
                               </span>
                               {' '}
                               <span className={s.claimStatement}>

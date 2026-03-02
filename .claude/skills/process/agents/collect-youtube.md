@@ -52,6 +52,8 @@ Extract these fields from the JSON:
 | View count | `view_count` |
 | URL | `webpage_url` |
 
+**Publication:** Use the channel name as the `publication` value (e.g., "Lex Fridman Podcast", "Fireship"). For podcasts hosted on YouTube, use the show name rather than the channel name if they differ.
+
 ### 4. Retrieve Transcript
 
 ```bash
@@ -155,8 +157,8 @@ SET @contrib1 = (SELECT id FROM contributors WHERE name = '<name1>');
 SET @contrib2 = (SELECT id FROM contributors WHERE name = '<name2>');
 
 -- Insert source
-INSERT INTO sources (title, source_type, url, publication_date, content_md, status, notes)
-VALUES ('<title>', 'youtube_video', '{{url}}', '<date>', '<full_markdown>', 'collected', '<caption_type, attribution_notes>');
+INSERT INTO sources (title, source_type, url, publication, publication_date, content_md, status, notes)
+VALUES ('<title>', 'youtube_video', '{{url}}', '<channel_name>', '<date>', '<full_markdown>', 'collected', '<caption_type, attribution_notes>');
 SET @source_id = LAST_INSERT_ID();
 
 -- Link contributors to THIS source only

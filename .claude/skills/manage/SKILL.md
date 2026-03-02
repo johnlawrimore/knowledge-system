@@ -104,7 +104,6 @@ Review the list for inconsistencies (e.g., `book-ch-3` vs `book-chapter-3`) and 
 
 | Prefix | Purpose | Examples |
 |---|---|---|
-| `source:<id>` | Provenance tracking (auto-applied by decompose) | `source:12`, `source:47` |
 | `book-ch-<n>` | Composition targeting | `book-ch-1`, `book-ch-5` |
 | (no prefix) | Domain labels | `tdd`, `code-review`, `agent-architecture` |
 | (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |

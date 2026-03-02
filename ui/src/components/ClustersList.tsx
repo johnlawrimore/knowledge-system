@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import InlineEdit from '@/components/InlineEdit';
 import LinkChip from '@/components/LinkChip';
+import { claimTypeLabel, stanceLabel, strengthLabel } from '@/lib/enumLabels';
 import s from './ClustersList.module.scss';
 
 interface ClusterListItem {
@@ -162,7 +163,7 @@ export default function ClustersList() {
                             className={s.claimRow}
                           >
                             <span className={s.claimId}>
-                              #{claim.id} · {claim.claim_type}
+                              #{claim.id} · {claimTypeLabel(claim.claim_type)}
                             </span>
                             {' '}
                             <span className={s.claimStatement}>
@@ -182,7 +183,7 @@ export default function ClustersList() {
                       {detail.evidence_stats.map((es, i) => (
                         <LinkChip
                           key={i}
-                          label={`${es.stance} / ${es.strength}: ${es.count}`}
+                          label={`${stanceLabel(es.stance)} / ${strengthLabel(es.strength)}: ${es.count}`}
                           kind={es.stance === 'supports' ? 'topic' : es.stance === 'contradicts' ? 'tag' : 'theme'}
                         />
                       ))}

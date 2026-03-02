@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
+import { claimTypeLabel, stanceLabel, strengthLabel, evidenceTypeLabel } from '@/lib/enumLabels';
 import s from './page.module.scss';
 
 interface Evidence {
@@ -115,7 +116,7 @@ export default function ClaimDetailPage() {
 
       <div className={s.claimHeader}>
         <span className={s.claimId}>CLAIM #{claim.id}</span>
-        <span className={s.claimType}>{claim.claim_type}</span>
+        <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
         <ConfidenceBadge confidence={claim.computed_confidence} score={claim.score} />
       </div>
 
@@ -194,11 +195,11 @@ export default function ClaimDetailPage() {
             return (
               <div key={ev.id} className={`${s.evidenceCard} ${ss.card}`}>
                 <div className={s.evidenceHeader}>
-                  <span className={`${s.stanceBadge} ${ss.badge}`}>{ev.stance}</span>
+                  <span className={`${s.stanceBadge} ${ss.badge}`}>{stanceLabel(ev.stance)}</span>
                   <span>&middot;</span>
-                  <span>{ev.strength}</span>
+                  <span>{strengthLabel(ev.strength)}</span>
                   <span>&middot;</span>
-                  <span>{ev.evidence_type}</span>
+                  <span>{evidenceTypeLabel(ev.evidence_type)}</span>
                   {ev.credibility != null && (
                     <>
                       <span>&middot;</span>

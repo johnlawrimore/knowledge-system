@@ -61,6 +61,7 @@ export async function GET(request: NextRequest) {
            s.title,
            s.source_type,
            s.url,
+           s.publication,
            s.publication_date,
            s.word_count,
            s.status,

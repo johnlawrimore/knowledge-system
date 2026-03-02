@@ -6,6 +6,7 @@ import InlineEdit from '@/components/InlineEdit';
 import LinkChip from '@/components/LinkChip';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
 import MarkdownViewer from '@/components/MarkdownViewer';
+import { compositionStatusLabel } from '@/lib/enumLabels';
 import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
@@ -153,7 +154,7 @@ export default function CompositionsContent() {
                 >
                   <div className={s.listItemTitle}>{a.title}</div>
                   <div className={s.listItemMeta}>
-                    <span className={ps.statusBadge}>{a.status}</span>
+                    <span className={ps.statusBadge}>{compositionStatusLabel(a.status)}</span>
                     {' \u00B7 '}
                     <span>{a.word_count?.toLocaleString()} words</span>
                   </div>
@@ -173,7 +174,7 @@ export default function CompositionsContent() {
                 <div className={ps.detailMeta}>
                   {detail.word_count?.toLocaleString()} words
                   {' \u00B7 '}
-                  <span className={ps.statusBadge}>{detail.status}</span>
+                  <span className={ps.statusBadge}>{compositionStatusLabel(detail.status)}</span>
                   {' \u00B7 '}
                   {detail.claim_count} claims
                 </div>

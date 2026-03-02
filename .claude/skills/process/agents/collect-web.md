@@ -60,6 +60,7 @@ print(' '.join(e.result))
 From the content and URL, extract:
 - **title**: Article/paper title
 - **publication_date**: YYYY-MM-DD or NULL
+- **publication**: The name of the blog, newsletter, publication, or content series (e.g., "The Pragmatic Engineer", "Stratechery", "ACM Queue"). Look for site name, masthead, breadcrumbs, or series indicators. NULL if the source is a standalone page with no clear publication identity.
 - **contributors**: Author name(s), affiliation, role (capitalize role: "Software Engineer", not "software engineer")
 
 ### 4. Check for Duplicates
@@ -88,8 +89,8 @@ INSERT IGNORE INTO contributors (name, sort_name, affiliation, role) VALUES ('<n
 SET @contrib_id = (SELECT id FROM contributors WHERE name = '<name>');
 
 -- Insert source
-INSERT INTO sources (title, source_type, url, publication_date, content_md, status, notes)
-VALUES ('<title>', '<type>', '{{url}}', '<date>', '<markdown_content>', 'collected', '<notes>');
+INSERT INTO sources (title, source_type, url, publication, publication_date, content_md, status, notes)
+VALUES ('<title>', '<type>', '{{url}}', '<publication_or_NULL>', '<date>', '<markdown_content>', 'collected', '<notes>');
 SET @source_id = LAST_INSERT_ID();
 
 -- Link contributor to THIS source only

@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
+import { evidenceTypeLabel, stanceLabel, strengthLabel } from '@/lib/enumLabels';
 import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
 
@@ -214,9 +215,9 @@ export default function EvidenceContent() {
                 >
                   <div className={ps.rowHeader}>
                     <span className={ps.evidenceId}>#{ev.id}</span>
-                    <span className={ps.typeBadge}>{ev.evidence_type}</span>
+                    <span className={ps.typeBadge}>{evidenceTypeLabel(ev.evidence_type)}</span>
                     {ev.derived_from_evidence_id && (
-                      <span className={ps.typeBadge}>derived</span>
+                      <span className={ps.typeBadge}>Derived</span>
                     )}
                   </div>
                   <div className={ps.contentPreview}>
@@ -292,10 +293,10 @@ export default function EvidenceContent() {
                                       #{c.id}: {c.statement}
                                     </Link>
                                     <span className={stanceClass(c.stance)}>
-                                      {c.stance}
+                                      {stanceLabel(c.stance)}
                                     </span>
                                     <span className={ps.strengthLabel}>
-                                      {c.strength}
+                                      {strengthLabel(c.strength)}
                                     </span>
                                   </div>
                                 ))}
@@ -312,7 +313,7 @@ export default function EvidenceContent() {
                                 {expandedDetail.derived_chain.map((d) => (
                                   <div key={d.id} className={ps.derivedItem}>
                                     <div className={ps.derivedItemType}>
-                                      #{d.id} &middot; {d.evidence_type}
+                                      #{d.id} &middot; {evidenceTypeLabel(d.evidence_type)}
                                     </div>
                                     <div className={ps.derivedItemContent}>
                                       {d.content.length > 300

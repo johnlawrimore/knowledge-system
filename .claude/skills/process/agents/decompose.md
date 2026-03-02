@@ -139,17 +139,13 @@ INSERT INTO claim_evidence (claim_id, evidence_id, stance, strength, reasoning) 
 
 ```sql
 INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
-  (<id>, 'source:{{source_id}}'),
   (<id>, '<domain_tag>'),
   (<id>, '<editorial_flag>');
 ```
 
-At minimum, every claim gets `source:{{source_id}}`.
-
 **Tag conventions:**
 | Prefix | Purpose | Examples |
 |---|---|---|
-| `source:<id>` | Provenance (auto-apply) | `source:3` |
 | `book-ch-<n>` | Composition targeting | `book-ch-1` |
 | (no prefix) | Domain labels | `tdd`, `code-review`, `ai-agents`, `context-engineering` |
 | (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |
