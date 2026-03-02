@@ -64,7 +64,11 @@ export async function GET(request: NextRequest) {
            s.publication_date,
            s.word_count,
            s.status,
-           s.date_collected
+           s.date_collected,
+           (SELECT c.name FROM source_contributors sc
+            JOIN contributors c ON c.id = sc.contributor_id
+            WHERE sc.source_id = s.id
+            LIMIT 1) AS main_contributor
          FROM sources s
          ${whereClause}
          ORDER BY ${sortColumn} ${sortDirection}

@@ -20,6 +20,7 @@ interface SourceListItem {
   word_count: number;
   status: string;
   date_collected: string;
+  main_contributor: string | null;
 }
 
 interface SourceDetail {
@@ -149,8 +150,12 @@ export default function SourcesContent() {
                     <div className={s.sourceTitle}>{src.title}</div>
                     <div className={s.sourceMeta}>
                       <SourceTypeBadge type={src.source_type} size={14} />
-                      <span>&middot;</span>
-                      <span>{src.word_count?.toLocaleString()} words</span>
+                      {src.main_contributor && (
+                        <>
+                          <span>&middot;</span>
+                          <span>{src.main_contributor}</span>
+                        </>
+                      )}
                       {!isReady && (
                         <>
                           <span>&middot;</span>
@@ -174,6 +179,9 @@ export default function SourcesContent() {
                   <SourceTypeBadge type={detail.source_type} size={16} /> &middot;{' '}
                   {formatDate(detail.publication_date)} &middot;{' '}
                   {detail.word_count?.toLocaleString()} words
+                  {detail.contributors.length > 0 && (
+                    <> &middot; {detail.contributors[0].name}</>
+                  )}
                 </div>
 
                 <div className={s.contentTabs}>
