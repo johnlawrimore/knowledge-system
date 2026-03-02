@@ -69,9 +69,9 @@ All markdown content (sources, distillations, compositions) follows **markdown-f
 - **User**: `claude` / `claude2026`
 - **MCP**: `mysql` MCP server with full CRUD access
 
-### Tables (19)
+### Tables (20)
 
-**Collection**: `contributors`, `sources` (includes `distillation` column), `source_contributors`
+**Collection**: `contributors`, `publications`, `sources` (includes `distillation` column), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
 **Decomposition**: `topics`, `themes`, `claim_clusters`, `claims`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
 **Evidence**: `evidence`, `claim_evidence`

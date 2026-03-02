@@ -17,9 +17,12 @@ export async function GET(
     const conn = await pool.getConnection();
 
     try {
-      // Full source record
+      // Full source record with publication JOIN
       const [sourceRows] = await conn.query<RowDataPacket[]>(
-        'SELECT * FROM sources WHERE id = ?',
+        `SELECT s.*, pub.name AS publication
+         FROM sources s
+         LEFT JOIN publications pub ON s.publication_id = pub.id
+         WHERE s.id = ?`,
         [sourceId]
       );
 
@@ -165,14 +168,29 @@ export async function PATCH(
       );
     }
 
-    if (publication !== undefined) {
-      updates.push('publication = ?');
-      values.push(publication);
-    }
-
     values.push(String(sourceId));
 
     const conn = await pool.getConnection();
+
+    // Handle publication lookup-or-create before building the UPDATE
+    if (publication !== undefined) {
+      if (publication && publication.trim() !== '') {
+        await conn.query(
+          'INSERT IGNORE INTO publications (name) VALUES (?)',
+          [publication.trim()]
+        );
+        const [pubRows] = await conn.query<RowDataPacket[]>(
+          'SELECT id FROM publications WHERE name = ?',
+          [publication.trim()]
+        );
+        // Insert publication_id before the trailing sourceId
+        updates.push('publication_id = ?');
+        values.splice(values.length - 1, 0, String(pubRows[0].id));
+      } else {
+        updates.push('publication_id = ?');
+        values.splice(values.length - 1, 0, null);
+      }
+    }
 
     try {
       // Verify the source exists
@@ -196,7 +214,10 @@ export async function PATCH(
 
       // Return the updated source
       const [updatedRows] = await conn.query<RowDataPacket[]>(
-        'SELECT id, notes, evaluation_results, publication FROM sources WHERE id = ?',
+        `SELECT s.id, s.notes, s.evaluation_results, pub.name AS publication
+         FROM sources s
+         LEFT JOIN publications pub ON s.publication_id = pub.id
+         WHERE s.id = ?`,
         [sourceId]
       );
 

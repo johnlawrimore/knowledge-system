@@ -18,12 +18,21 @@ Table contributors {
   created_at timestamp
 }
 
+Table publications {
+  id int [pk, increment]
+  name varchar(255) [not null, unique]
+  type enum('blog','podcast','newsletter','journal','platform','conference','other') [not null, default: 'other']
+  url varchar(1024)
+  notes text
+  created_at timestamp
+}
+
 Table sources {
   id int [pk, increment]
   title varchar(500) [not null]
   source_type enum('youtube_video','podcast','blog_post','website','academic_paper','book','book_chapter','conference_talk','newsletter','social_media','report','research','documentation','other') [not null]
   url varchar(1024)
-  publication varchar(255)
+  publication_id int
   publication_date date
   date_collected timestamp
   evaluation_results json
@@ -43,6 +52,7 @@ Table source_contributors {
   indexes { (source_id, contributor_id, role) [pk] }
 }
 
+Ref: sources.publication_id > publications.id [delete: set null]
 Ref: source_contributors.source_id > sources.id [delete: cascade]
 Ref: source_contributors.contributor_id > contributors.id [delete: restrict]
 
@@ -216,6 +226,7 @@ Ref: pipeline_stages.run_id > pipeline_runs.id
 
 TableGroup collection {
   contributors
+  publications
   sources
   source_contributors
 }

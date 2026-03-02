@@ -60,7 +60,7 @@ print(' '.join(e.result))
 From the content and URL, extract:
 - **title**: Article/paper title
 - **publication_date**: YYYY-MM-DD or NULL
-- **publication**: The name of the blog, newsletter, platform, publication, or content series. Examples: "The Pragmatic Engineer", "Stratechery", "ACM Queue", "Medium", "Substack", "Dev.to", "Harvard Business Review", "IEEE Spectrum". Look for site name, masthead, breadcrumbs, platform branding, or series indicators. For platform-hosted content (Medium, Substack, Dev.to), use the platform name. NULL if the source is a standalone page with no clear publication identity.
+- **publication**: The name of the blog, newsletter, platform, publication, or content series (stored in the `publications` table). Examples: "The Pragmatic Engineer", "Stratechery", "ACM Queue", "Medium", "Substack", "Dev.to", "Harvard Business Review", "IEEE Spectrum". Look for site name, masthead, breadcrumbs, platform branding, or series indicators. For platform-hosted content (Medium, Substack, Dev.to), use the platform name. NULL if the source is a standalone page with no clear publication identity.
 - **contributors**: Author name(s), affiliation, role (capitalize role: "Software Engineer", not "software engineer")
 
 ### 4. Check for Duplicates
@@ -88,9 +88,13 @@ Write ALL statements to /tmp/collect.sql and execute as one batch. Do NOT run st
 INSERT IGNORE INTO contributors (name, sort_name, affiliation, role) VALUES ('<name>', '<LastName, FirstName>', '<affiliation>', '<role>');
 SET @contrib_id = (SELECT id FROM contributors WHERE name = '<name>');
 
--- Insert source
-INSERT INTO sources (title, source_type, url, publication, publication_date, content_md, status, notes)
-VALUES ('<title>', '<type>', '{{url}}', '<publication_or_NULL>', '<date>', '<markdown_content>', 'collected', '<notes>');
+-- Insert publication (if applicable — skip if NULL)
+INSERT IGNORE INTO publications (name) VALUES ('<publication_name>');
+SET @pub_id = (SELECT id FROM publications WHERE name = '<publication_name>');
+
+-- Insert source (use @pub_id, or NULL if no publication)
+INSERT INTO sources (title, source_type, url, publication_id, publication_date, content_md, status, notes)
+VALUES ('<title>', '<type>', '{{url}}', @pub_id, '<date>', '<markdown_content>', 'collected', '<notes>');
 SET @source_id = LAST_INSERT_ID();
 
 -- Link contributor to THIS source only

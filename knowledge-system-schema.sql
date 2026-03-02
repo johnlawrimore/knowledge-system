@@ -20,6 +20,18 @@ CREATE TABLE contributors (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE publications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('blog', 'podcast', 'newsletter', 'journal', 'platform', 'conference', 'other')
+        NOT NULL DEFAULT 'other',
+    url VARCHAR(1024),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE INDEX idx_publications_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE sources (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
@@ -29,7 +41,7 @@ CREATE TABLE sources (
         'newsletter', 'social_media', 'report', 'research', 'documentation', 'other'
     ) NOT NULL,
     url VARCHAR(1024),
-    publication VARCHAR(255)              COMMENT 'Show, podcast, blog series, or content series name',
+    publication_id INT                    COMMENT 'FK to publications table',
     publication_date DATE,
     date_collected TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     evaluation_results JSON             COMMENT 'Flexible evaluation data: credibility, bias, relevance, etc.',
@@ -47,7 +59,8 @@ CREATE TABLE sources (
     INDEX idx_sources_status (status),
     INDEX idx_sources_type (source_type),
     FULLTEXT INDEX ft_sources_content (content_md),
-    FULLTEXT INDEX ft_sources_distillation (distillation)
+    FULLTEXT INDEX ft_sources_distillation (distillation),
+    FOREIGN KEY (publication_id) REFERENCES publications(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE source_contributors (

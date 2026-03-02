@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
+import InlineComboBox from '@/components/InlineComboBox';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import ClaimsList from '@/components/ClaimsList';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
@@ -55,6 +56,8 @@ export default function SourcesContent() {
   const [detail, setDetail] = useState<SourceDetail | null>(null);
   const [contentTab, setContentTab] = useState<'about' | 'distillation' | 'original' | 'claims'>('about');
 
+  const [publicationNames, setPublicationNames] = useState<string[]>([]);
+
   const selectedId = searchParams.get('id');
   const status = searchParams.get('status') || '';
   const type = searchParams.get('type') || '';
@@ -69,6 +72,13 @@ export default function SourcesContent() {
     },
     [router, searchParams]
   );
+
+  useEffect(() => {
+    fetch('/api/publications')
+      .then((r) => r.json())
+      .then((d) => setPublicationNames((d.publications || []).map((p: { name: string }) => p.name)))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -243,9 +253,10 @@ export default function SourcesContent() {
 
                       <div className={s.detailSection}>
                         <div className={s.detailLabel}>Publication</div>
-                        <InlineEdit
+                        <InlineComboBox
                           value={detail.publication}
                           onSave={(v) => patchSource('publication', v)}
+                          suggestions={publicationNames}
                           placeholder="Add publication..."
                         />
                       </div>

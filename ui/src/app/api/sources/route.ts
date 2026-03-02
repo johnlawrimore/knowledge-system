@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
            s.title,
            s.source_type,
            s.url,
-           s.publication,
+           pub.name AS publication,
            s.publication_date,
            s.word_count,
            s.status,
@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
             WHERE sc.source_id = s.id
             LIMIT 1) AS main_contributor
          FROM sources s
+         LEFT JOIN publications pub ON s.publication_id = pub.id
          ${whereClause}
          ORDER BY ${sortColumn} ${sortDirection}
          LIMIT ? OFFSET ?`,
