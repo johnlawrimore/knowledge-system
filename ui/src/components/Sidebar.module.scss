@@ -36,6 +36,12 @@
   height: 0.5rem;
 }
 
+.separator {
+  height: 1px;
+  background: var(--sidebar-border);
+  margin: 0.5rem 0.75rem;
+}
+
 .navLink {
   display: flex;
   align-items: center;

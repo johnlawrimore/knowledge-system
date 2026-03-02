@@ -3,23 +3,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import s from './Sidebar.module.scss';
 
-const primaryNav = [
-  { href: '/', label: 'Dashboard', icon: '◆' },
-  { href: '/claims', label: 'Claims', icon: '◆' },
-];
-
-const secondaryNav = [
+const navItems = [
+  { href: '/', label: 'Dashboard', separatorAfter: true },
   { href: '/sources', label: 'Sources' },
-  { href: '/compositions', label: 'Compositions' },
+  { href: '/contributors', label: 'Contributors', separatorAfter: true },
+  { href: '/claims', label: 'Claims' },
   { href: '/evidence', label: 'Evidence' },
   { href: '/topics', label: 'Topics' },
   { href: '/themes', label: 'Themes' },
-  { href: '/tags', label: 'Tags' },
-  { href: '/contributors', label: 'Contributors' },
-  { href: '/clusters', label: 'Clusters' },
+  { href: '/tags', label: 'Tags', separatorAfter: true },
+  { href: '/compositions', label: 'Compositions' },
 ];
 
 export default function Sidebar() {
@@ -50,28 +46,16 @@ export default function Sidebar() {
       </div>
 
       <nav className={s.nav}>
-        {primaryNav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={isActive(item.href) ? s.navLinkActive : s.navLink}
-          >
-            <span className={s.navIcon}>{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
-
-        <div className={s.spacer} />
-
-        {secondaryNav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={isActive(item.href) ? s.navLinkActive : s.navLink}
-          >
-            <span className={s.navIconSecondary}>◇</span>
-            {item.label}
-          </Link>
+        {navItems.map((item) => (
+          <React.Fragment key={item.href}>
+            <Link
+              href={item.href}
+              className={isActive(item.href) ? s.navLinkActive : s.navLink}
+            >
+              {item.label}
+            </Link>
+            {item.separatorAfter && <div className={s.separator} />}
+          </React.Fragment>
         ))}
       </nav>
 
