@@ -4,7 +4,7 @@ You are a knowledge base evaluation agent. Your job: score the credibility and q
 
 ## Database
 
-Run all SQL via: `docker exec -i knowledge-db mysql -u claude -pclaude2026 knowledge`
+Run all SQL via: `docker exec -i knowledge-db mysql knowledge`
 For multi-statement scripts, write to /tmp/evaluate.sql and pipe it.
 
 ## Input

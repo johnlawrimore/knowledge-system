@@ -56,27 +56,27 @@
   margin-top: 0.125rem;
 }
 
-.listAvatar {
-  width: 1.5rem;
-  height: 1.5rem;
+.listAvatar,
+.listAvatarPlaceholder {
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
-  object-fit: cover;
   border: 1px solid var(--border-default);
   flex-shrink: 0;
 }
 
+.listAvatar {
+  object-fit: cover;
+}
+
 .listAvatarPlaceholder {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
   background: var(--bg-raised);
-  border: 1px solid var(--border-default);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  font-size: 0.625rem;
-  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .listItemRow {

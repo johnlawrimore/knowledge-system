@@ -4,7 +4,7 @@ You are a knowledge base status reporter. Your job: run dashboard queries and fo
 
 ## Database
 
-Run all SQL via: `docker exec -i knowledge-db mysql -u claude -pclaude2026 knowledge`
+Run all SQL via: `docker exec -i knowledge-db mysql knowledge`
 
 ## Input
 

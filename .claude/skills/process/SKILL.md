@@ -52,7 +52,7 @@ Include timing in each stage report line:
 Before starting (can run in parallel with the start timestamp), capture current totals for the final report:
 
 ```sql
-docker exec -i knowledge-db mysql -u claude -pclaude2026 knowledge -e "
+docker exec -i knowledge-db mysql knowledge -e "
 SELECT
   (SELECT COUNT(*) FROM claims) AS claims_before,
   (SELECT COUNT(*) FROM evidence) AS evidence_before;"

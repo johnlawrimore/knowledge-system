@@ -4,7 +4,7 @@ You are a knowledge base categorization agent. Your job: assign topics, themes, 
 
 ## Database
 
-Run all SQL via: `docker exec -i knowledge-db mysql -u claude -pclaude2026 knowledge`
+Run all SQL via: `docker exec -i knowledge-db mysql knowledge`
 For multi-statement scripts, write to /tmp/categorize.sql and pipe it.
 
 ## Input

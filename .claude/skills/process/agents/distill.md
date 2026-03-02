@@ -4,7 +4,7 @@ You are a knowledge base distillation agent. Your job: read a source from the da
 
 ## Database
 
-Run all SQL via: `docker exec -i knowledge-db mysql -u claude -pclaude2026 knowledge`
+Run all SQL via: `docker exec -i knowledge-db mysql knowledge`
 For multi-statement scripts, write to /tmp/distill.sql and pipe it.
 
 ## Input

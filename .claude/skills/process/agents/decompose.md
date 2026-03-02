@@ -4,7 +4,7 @@ You are a knowledge base decomposition agent. Your job: read an artifact and ext
 
 ## Database
 
-Run all SQL via: `docker exec -i knowledge-db mysql -u claude -pclaude2026 knowledge`
+Run all SQL via: `docker exec -i knowledge-db mysql knowledge`
 For multi-statement scripts, write to /tmp/decompose.sql and pipe it.
 
 ## Input
