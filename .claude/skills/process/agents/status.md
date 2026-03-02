@@ -21,7 +21,7 @@ SELECT * FROM v_pipeline_status;
 -- Totals
 SELECT
     (SELECT COUNT(*) FROM sources) AS total_sources,
-    (SELECT COUNT(*) FROM artifacts) AS total_artifacts,
+    (SELECT COUNT(*) FROM compositions) AS total_compositions,
     (SELECT COUNT(*) FROM claims) AS total_claims,
     (SELECT COUNT(*) FROM claim_clusters) AS total_clusters,
     (SELECT COUNT(*) FROM evidence) AS total_evidence,
@@ -38,7 +38,6 @@ SELECT * FROM v_theme_strength;
 
 -- Unevaluated entities
 SELECT 'sources' AS entity, COUNT(*) AS ct FROM sources WHERE evaluation_results IS NULL
-UNION ALL SELECT 'artifacts', COUNT(*) FROM artifacts WHERE evaluation_results IS NULL
 UNION ALL SELECT 'evidence', COUNT(*) FROM evidence WHERE evaluation_results IS NULL;
 
 -- Uncategorized claims
@@ -99,7 +98,7 @@ Knowledge Base Status
 ━━━━━━━━━━━━━━━━━━━
 Pipeline:
   Sources: X collected, X distilled, X decomposed
-  Artifacts: X draft, X reviewed, X decomposed
+  Compositions: X draft, X reviewed, X published
 
 Knowledge:
   Claims: X (in Y clusters + Z standalone)
@@ -110,7 +109,7 @@ Topic Coverage:
   <topic_name>: X claims, avg score X.XX
   ...
 
-Unevaluated: X sources, X artifacts, X evidence
+Unevaluated: X sources, X evidence
 Uncategorized claims: X
 
 Strongest Claims:
@@ -153,7 +152,7 @@ This Run (source #{{source_id}}):
 
 What Should I Work On Next:
   1. Distill X collected sources (oldest: "<title>" from <date>)
-  2. Decompose X draft artifacts
+  2. Decompose X distilled sources
   3. Evaluate X unevaluated sources
   4. Categorize X uncategorized claims
   5. Tag X untagged claims
@@ -164,7 +163,7 @@ What Should I Work On Next:
 
 **Prioritization order** (highest to lowest):
 1. Sources stuck in `collected` — distill them
-2. Artifacts stuck in `draft` — decompose them
+2. Distilled sources — decompose them
 3. Unevaluated sources — evaluate before distilling
 4. Uncategorized claims — assign topics
 5. Untagged claims — apply at least domain tags

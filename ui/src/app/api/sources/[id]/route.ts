@@ -55,12 +55,12 @@ export async function GET(
         [sourceId]
       );
 
-      // Artifacts linked to this source
-      const [artifacts] = await conn.query<RowDataPacket[]>(
-        `SELECT a.id, a.title, a.status
-         FROM artifacts a
-         JOIN artifact_sources asrc ON asrc.artifact_id = a.id
-         WHERE asrc.source_id = ?`,
+      // Compositions linked to this source
+      const [compositions] = await conn.query<RowDataPacket[]>(
+        `SELECT c.id, c.title, c.status
+         FROM compositions c
+         JOIN composition_sources csrc ON csrc.composition_id = c.id
+         WHERE csrc.source_id = ?`,
         [sourceId]
       );
 
@@ -95,9 +95,9 @@ export async function GET(
         content_has_more: hasMore,
         evaluation_results: evaluationResults,
         contributors,
-        artifacts: {
-          count: artifacts.length,
-          items: artifacts,
+        compositions: {
+          count: compositions.length,
+          items: compositions,
         },
         evidence: {
           byStance: evidenceByStance,

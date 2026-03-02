@@ -17,6 +17,13 @@ html.dark {
   --bg-raised: #27272a;
   --bg-hover: rgba(39, 39, 42, 0.5);
 
+  --sidebar-bg: #1a1025;
+  --sidebar-border: #2d1f3d;
+  --sidebar-hover: rgba(139, 92, 246, 0.15);
+  --sidebar-active: rgba(139, 92, 246, 0.25);
+  --sidebar-text: #c4b5d6;
+  --sidebar-text-active: #e9d5ff;
+
   --border-default: #27272a;
   --border-subtle: #3f3f46;
 
@@ -69,6 +76,13 @@ html.light {
   --bg-surface: #f4f4f5;
   --bg-raised: #e4e4e7;
   --bg-hover: rgba(228, 228, 231, 0.5);
+
+  --sidebar-bg: #e8ddf8;
+  --sidebar-border: #cebde8;
+  --sidebar-hover: rgba(147, 51, 234, 0.15);
+  --sidebar-active: rgba(147, 51, 234, 0.25);
+  --sidebar-text: #4a2d7a;
+  --sidebar-text-active: #2e1160;
 
   --border-default: #e4e4e7;
   --border-subtle: #d4d4d8;

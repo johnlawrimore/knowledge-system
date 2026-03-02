@@ -157,18 +157,18 @@ If status is "error", report and abort.
 **Agent prompt:** `process/agents/distill.md`
 **Model:** sonnet
 **Substitutions:** `{{source_id}}` → from stage 1
-**Extract from result:** `artifact_id`, `title`, `word_count`
+**Extract from result:** `source_id`, `title`, `word_count`
 
 Report to user:
 ```
-[2/7] Distilled: "<title>" (artifact #<id>, <word_count> words) — <duration>s
+[2/7] Distilled: "<title>" (<word_count> words) — <duration>s
 ```
 
 ### Stage 3: Decompose
 
 **Agent prompt:** `process/agents/decompose.md`
 **Model:** sonnet
-**Substitutions:** `{{artifact_id}}` → from stage 2, `{{source_id}}` → from stage 1
+**Substitutions:** `{{source_id}}` → from stage 1
 **Extract from result:** `claim_ids`, `evidence_ids`, `tags_applied`
 
 Report to user:
@@ -201,8 +201,8 @@ Launch BOTH agents simultaneously using parallel Agent tool calls. Capture a sin
 **Stage 6 — Evaluate:**
 - **Agent prompt:** `process/agents/evaluate.md`
 - **Model:** haiku
-- **Substitutions:** `{{source_id}}` → from stage 1, `{{artifact_id}}` → from stage 2, `{{evidence_ids}}` → comma-separated list from stage 3
-- **Extract:** `source_credibility`, `artifact_quality`, `evidence_evaluated`, `avg_evidence_credibility`
+- **Substitutions:** `{{source_id}}` → from stage 1, `{{evidence_ids}}` → comma-separated list from stage 3
+- **Extract:** `source_credibility`, `evidence_evaluated`, `avg_evidence_credibility`
 
 Report both results:
 ```
@@ -237,11 +237,11 @@ URL: <url>
 
 Stage Results:
   ✓ Collected — <source_type>, <word_count> words          <duration>s
-  ✓ Distilled — Artifact #<id>, <word_count> words         <duration>s
+  ✓ Distilled — <word_count> words                          <duration>s
   ✓ Decomposed — <N> claims, <N> evidence records          <duration>s
   ✓ Clustered — <N> clusters, <N> relationships            <duration>s
   ✓ Categorized — <N> topics, <N> themes, <N> tags    ┐
-  ✓ Evaluated — Source credibility: <score>, Avg: <score>  ┘ <duration>s
+  ✓ Evaluated — Source credibility: <score>, Avg evidence: <score>  ┘ <duration>s
   ✓ Status report                                          <duration>s
                                                       ─────────
                                                 Total: <total>s
@@ -288,7 +288,6 @@ If the user says "stop" or "pause":
 ```
 Pipeline paused after Stage <N>.
   Source ID: <id>
-  Artifact ID: <id>
   Remaining: <remaining stages>
 Resume by saying "continue processing source #<id>"
 ```

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     try {
       const [countRows] = await conn.query<RowDataPacket[]>(
-        `SELECT COUNT(*) as total FROM artifacts a ${whereClause}`,
+        `SELECT COUNT(*) as total FROM compositions a ${whereClause}`,
         params
       );
       const total = Number(countRows[0].total);
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
            a.source_strategy,
            a.status,
            a.created_at
-         FROM artifacts a
+         FROM compositions a
          ${whereClause}
          ORDER BY a.created_at DESC
          LIMIT ? OFFSET ?`,
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       );
 
       return NextResponse.json({
-        artifacts: rows,
+        compositions: rows,
         total,
         limit,
         offset,
@@ -62,9 +62,9 @@ export async function GET(request: NextRequest) {
       conn.release();
     }
   } catch (error) {
-    console.error('Artifacts list API error:', error);
+    console.error('Compositions list API error:', error);
     return NextResponse.json(
-      { error: 'Failed to load artifacts' },
+      { error: 'Failed to load compositions' },
       { status: 500 }
     );
   }

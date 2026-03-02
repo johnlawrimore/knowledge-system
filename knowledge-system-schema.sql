@@ -33,6 +33,7 @@ CREATE TABLE sources (
     date_collected TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     evaluation_results JSON             COMMENT 'Flexible evaluation data: credibility, bias, relevance, etc.',
     content_md LONGTEXT NOT NULL        COMMENT 'Full markdown of source material',
+    distillation LONGTEXT               COMMENT 'Distilled content in editorial voice',
     word_count INT GENERATED ALWAYS AS (
         LENGTH(content_md) - LENGTH(REPLACE(content_md, ' ', '')) + 1
     ) STORED,
@@ -44,7 +45,8 @@ CREATE TABLE sources (
 
     INDEX idx_sources_status (status),
     INDEX idx_sources_type (source_type),
-    FULLTEXT INDEX ft_sources_content (content_md)
+    FULLTEXT INDEX ft_sources_content (content_md),
+    FULLTEXT INDEX ft_sources_distillation (distillation)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE source_contributors (
@@ -60,34 +62,34 @@ CREATE TABLE source_contributors (
 
 
 -- ============================================================================
--- STAGE 2: DISTILLATION
+-- STAGE 2: COMPOSITION
 -- ============================================================================
 
-CREATE TABLE artifacts (
+CREATE TABLE compositions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
-    content_md LONGTEXT NOT NULL         COMMENT 'Distilled content in your voice',
+    content_md LONGTEXT NOT NULL         COMMENT 'Composed content from multiple sources',
     word_count INT GENERATED ALWAYS AS (
         LENGTH(content_md) - LENGTH(REPLACE(content_md, ' ', '')) + 1
     ) STORED,
     source_strategy ENUM('single_source', 'multi_source') NOT NULL DEFAULT 'single_source',
     evaluation_results JSON              COMMENT 'Quality scores, coverage assessment, etc.',
-    status ENUM('draft', 'reviewed', 'decomposed') NOT NULL DEFAULT 'draft',
+    status ENUM('draft', 'reviewed', 'published') NOT NULL DEFAULT 'draft',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    INDEX idx_artifacts_status (status),
-    FULLTEXT INDEX ft_artifacts_content (content_md)
+    INDEX idx_compositions_status (status),
+    FULLTEXT INDEX ft_compositions_content (content_md)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE artifact_sources (
-    artifact_id INT NOT NULL,
+CREATE TABLE composition_sources (
+    composition_id INT NOT NULL,
     source_id INT NOT NULL,
     contribution_note TEXT,
 
-    PRIMARY KEY (artifact_id, source_id),
-    FOREIGN KEY (artifact_id) REFERENCES artifacts(id) ON DELETE CASCADE,
+    PRIMARY KEY (composition_id, source_id),
+    FOREIGN KEY (composition_id) REFERENCES compositions(id) ON DELETE CASCADE,
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -198,7 +200,6 @@ CREATE TABLE evidence (
     id INT AUTO_INCREMENT PRIMARY KEY,
     content TEXT NOT NULL,
     source_id INT NOT NULL,
-    artifact_id INT,
     evidence_type ENUM(
         'empirical', 'case_study', 'expert_opinion', 'anecdotal',
         'theoretical', 'statistical', 'other'
@@ -210,7 +211,6 @@ CREATE TABLE evidence (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
-    FOREIGN KEY (artifact_id) REFERENCES artifacts(id) ON DELETE SET NULL,
     FOREIGN KEY (derived_from_evidence_id) REFERENCES evidence(id) ON DELETE SET NULL,
     INDEX idx_evidence_source (source_id),
     INDEX idx_evidence_type (evidence_type),
@@ -404,11 +404,9 @@ GROUP BY th.id, th.name, th.thesis;
 -- Source contributions
 CREATE OR REPLACE VIEW v_source_contributions AS
 SELECT s.id AS source_id, s.title, s.source_type, s.status,
-    COUNT(DISTINCT a.id) AS artifact_count,
+    CASE WHEN s.distillation IS NOT NULL THEN 1 ELSE 0 END AS has_distillation,
     COUNT(DISTINCT e.id) AS evidence_count
 FROM sources s
-LEFT JOIN artifact_sources ars ON s.id = ars.source_id
-LEFT JOIN artifacts a ON ars.artifact_id = a.id
 LEFT JOIN evidence e ON s.id = e.source_id
 GROUP BY s.id, s.title, s.source_type, s.status;
 

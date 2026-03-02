@@ -5,9 +5,9 @@
 A structured knowledge management pipeline for AI-assisted software development research. Processes source material through four stages:
 
 1. **Collection** — Ingest raw sources (URLs, YouTube, uploads) into the `sources` table
-2. **Distillation** — Rewrite sources into uniform-voice artifacts in the `artifacts` table
+2. **Distillation** — Rewrite sources into uniform-voice distillations stored in `sources.distillation`
 3. **Decomposition** — Extract claims and evidence into structured, queryable tables
-4. **Composition** — (Future) Draft thought leadership content from the knowledge base
+4. **Composition** — Draft thought leadership content from selected sources (on-demand, not part of the pipeline)
 
 The database is MySQL 8.0, accessed via the `mysql` MCP tool.
 
@@ -18,8 +18,8 @@ The database is MySQL 8.0, accessed via the `mysql` MCP tool.
 | **process** | "process", "process this URL", "run full pipeline" | End-to-end pipeline: collect → distill → decompose → cluster → categorize → evaluate → status |
 | **collect** | "collect", "ingest", "add source", URL pasted | Ingest raw sources. Delegates YouTube retrieval to video-retriever. Handles all DB storage. |
 | **video-retriever** | "retrieve video", "get transcript", YouTube URL | Extract metadata, transcript, speaker attribution from YouTube (retrieval only — no DB) |
-| **distill** | "distill", "distill source #X", "distill next" | Create artifacts from sources |
-| **decompose** | "decompose", "extract claims", "decompose next" | Extract claims + evidence from artifacts |
+| **distill** | "distill", "distill source #X", "distill next" | Distill sources (writes to `sources.distillation`) |
+| **decompose** | "decompose", "extract claims", "decompose next" | Extract claims + evidence from distillations |
 | **cluster** | "cluster", "find duplicates", "group claims" | Group equivalent claims |
 | **categorize** | "categorize", "assign topics", "tag new claims" | Assign topics, themes, and tags to claims |
 | **evaluate** | "evaluate", "assess", "score", "rate" | Score credibility and quality |
@@ -60,7 +60,7 @@ URL/Upload
 
 The **process** skill runs all stages in sequence. Each stage can also be invoked independently.
 
-All markdown content (sources, artifacts) follows **markdown-formatting** rules.
+All markdown content (sources, distillations, compositions) follows **markdown-formatting** rules.
 
 ## Database
 
@@ -71,8 +71,8 @@ All markdown content (sources, artifacts) follows **markdown-formatting** rules.
 
 ### Tables (19)
 
-**Collection**: `contributors`, `sources`, `source_contributors`
-**Distillation**: `artifacts`, `artifact_sources`
+**Collection**: `contributors`, `sources` (includes `distillation` column), `source_contributors`
+**Composition**: `compositions`, `composition_sources`
 **Decomposition**: `topics`, `themes`, `claim_clusters`, `claims`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
 **Evidence**: `evidence`, `claim_evidence`
 **Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
@@ -107,7 +107,7 @@ Credibility read from `evidence.evaluation_results` JSON via `JSON_EXTRACT(e.eva
 ## Conventions
 
 - Claims are written in the user's voice, not source language
-- Evidence always traces to original `source_id`, even when extracted from artifacts
+- Evidence always traces to original `source_id`, even when extracted from distillations
 - `evaluation_results` is JSON — use `JSON_EXTRACT()` to query
 - Cluster `summary` is NULL until the user writes it
 - Topics organize content (what the book covers); Themes advance arguments (what the book is about)

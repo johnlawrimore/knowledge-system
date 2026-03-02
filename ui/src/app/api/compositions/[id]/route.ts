@@ -8,56 +8,56 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const artifactId = Number(id);
-    if (isNaN(artifactId)) {
-      return NextResponse.json({ error: 'Invalid artifact ID' }, { status: 400 });
+    const compositionId = Number(id);
+    if (isNaN(compositionId)) {
+      return NextResponse.json({ error: 'Invalid composition ID' }, { status: 400 });
     }
 
     const conn = await pool.getConnection();
 
     try {
-      // Artifact detail
-      const [artifactRows] = await conn.query<RowDataPacket[]>(
+      // Composition detail
+      const [compositionRows] = await conn.query<RowDataPacket[]>(
         `SELECT
            a.id, a.title, a.content_md, a.word_count,
            a.source_strategy, a.evaluation_results,
            a.status, a.notes, a.created_at, a.updated_at
-         FROM artifacts a
+         FROM compositions a
          WHERE a.id = ?`,
-        [artifactId]
+        [compositionId]
       );
 
-      if (artifactRows.length === 0) {
-        return NextResponse.json({ error: 'Artifact not found' }, { status: 404 });
+      if (compositionRows.length === 0) {
+        return NextResponse.json({ error: 'Composition not found' }, { status: 404 });
       }
 
-      const artifact = artifactRows[0];
+      const composition = compositionRows[0];
 
-      // Linked sources via artifact_sources
+      // Linked sources via composition_sources
       const [sources] = await conn.query<RowDataPacket[]>(
         `SELECT
            s.id, s.title, s.source_type, s.url,
            s.publication_date, s.word_count, s.status,
-           ars.contribution_note
-         FROM artifact_sources ars
-         JOIN sources s ON ars.source_id = s.id
-         WHERE ars.artifact_id = ?
+           cs.contribution_note
+         FROM composition_sources cs
+         JOIN sources s ON cs.source_id = s.id
+         WHERE cs.composition_id = ?
          ORDER BY s.title`,
-        [artifactId]
+        [compositionId]
       );
 
-      // Claim count: claims linked via evidence from this artifact's sources
+      // Claim count: claims linked via evidence from this composition's sources
       const [claimCountRows] = await conn.query<RowDataPacket[]>(
         `SELECT COUNT(DISTINCT ce.claim_id) AS claim_count
-         FROM artifact_sources ars
-         JOIN evidence e ON ars.source_id = e.source_id
+         FROM composition_sources cs
+         JOIN evidence e ON cs.source_id = e.source_id
          JOIN claim_evidence ce ON e.id = ce.evidence_id
-         WHERE ars.artifact_id = ?`,
-        [artifactId]
+         WHERE cs.composition_id = ?`,
+        [compositionId]
       );
 
       return NextResponse.json({
-        ...artifact,
+        ...composition,
         sources,
         claim_count: Number(claimCountRows[0].claim_count),
       });
@@ -65,9 +65,9 @@ export async function GET(
       conn.release();
     }
   } catch (error) {
-    console.error('Artifact detail API error:', error);
+    console.error('Composition detail API error:', error);
     return NextResponse.json(
-      { error: 'Failed to load artifact' },
+      { error: 'Failed to load composition' },
       { status: 500 }
     );
   }
@@ -79,9 +79,9 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const artifactId = Number(id);
-    if (isNaN(artifactId)) {
-      return NextResponse.json({ error: 'Invalid artifact ID' }, { status: 400 });
+    const compositionId = Number(id);
+    if (isNaN(compositionId)) {
+      return NextResponse.json({ error: 'Invalid composition ID' }, { status: 400 });
     }
 
     const body = await request.json();
@@ -102,18 +102,18 @@ export async function PATCH(
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    values.push(artifactId);
+    values.push(compositionId);
 
     const conn = await pool.getConnection();
 
     try {
       const [result] = await conn.query<ResultSetHeader>(
-        `UPDATE artifacts SET ${updates.join(', ')} WHERE id = ?`,
+        `UPDATE compositions SET ${updates.join(', ')} WHERE id = ?`,
         values
       );
 
       if (result.affectedRows === 0) {
-        return NextResponse.json({ error: 'Artifact not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Composition not found' }, { status: 404 });
       }
 
       return NextResponse.json({ success: true });
@@ -121,9 +121,9 @@ export async function PATCH(
       conn.release();
     }
   } catch (error) {
-    console.error('Artifact update API error:', error);
+    console.error('Composition update API error:', error);
     return NextResponse.json(
-      { error: 'Failed to update artifact' },
+      { error: 'Failed to update composition' },
       { status: 500 }
     );
   }

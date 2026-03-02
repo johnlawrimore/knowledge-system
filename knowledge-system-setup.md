@@ -138,7 +138,7 @@ project-root/
     ├── collect/SKILL.md               # Source ingestion
     ├── video-retriever/SKILL.md       # YouTube transcript + attribution
     ├── markdown-formatting/SKILL.md   # Formatting rules
-    ├── distill/SKILL.md               # Artifact creation
+    ├── distill/SKILL.md               # Source distillation
     ├── decompose/SKILL.md             # Claim + evidence extraction
     ├── cluster/SKILL.md               # Claim grouping
     ├── evaluate/SKILL.md              # Credibility scoring

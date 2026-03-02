@@ -63,7 +63,6 @@ export async function GET(request: NextRequest) {
            e.id,
            e.content,
            e.source_id,
-           e.artifact_id,
            e.evidence_type,
            e.verbatim_quote,
            e.evaluation_results,
@@ -76,7 +75,7 @@ export async function GET(request: NextRequest) {
          JOIN sources s ON e.source_id = s.id
          LEFT JOIN claim_evidence ce ON e.id = ce.evidence_id
          ${whereClause}
-         GROUP BY e.id, e.content, e.source_id, e.artifact_id, e.evidence_type,
+         GROUP BY e.id, e.content, e.source_id, e.evidence_type,
                   e.verbatim_quote, e.evaluation_results, e.derived_from_evidence_id,
                   e.notes, e.created_at, s.title
          ORDER BY e.created_at DESC

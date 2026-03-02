@@ -28,8 +28,9 @@ interface SourceDetail {
   content_preview: string;
   content_md: string;
   content_has_more: boolean;
+  distillation: string | null;
   contributors: { id: number; name: string; affiliation: string; contributor_role: string }[];
-  artifacts: { count: number; items: { id: number; title: string; status: string }[] };
+  compositions: { count: number; items: { id: number; title: string; status: string }[] };
   evidence: { total: number; byStance: Record<string, number> };
 }
 
@@ -40,6 +41,7 @@ export default function SourcesContent() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<SourceDetail | null>(null);
+  const [contentTab, setContentTab] = useState<'distillation' | 'original'>('distillation');
 
   const selectedId = searchParams.get('id');
   const status = searchParams.get('status') || '';
@@ -206,12 +208,12 @@ export default function SourcesContent() {
                   />
                 </div>
 
-                {detail.artifacts.count > 0 && (
+                {detail.compositions.count > 0 && (
                   <div className={s.detailSection}>
-                    <div className={s.detailLabel}>Artifacts ({detail.artifacts.count})</div>
+                    <div className={s.detailLabel}>Compositions ({detail.compositions.count})</div>
                     <div className={s.linkedList}>
-                      {detail.artifacts.items.map((a) => (
-                        <Link key={a.id} href={`/artifacts?id=${a.id}`} className={s.linkedItem}>
+                      {detail.compositions.items.map((a) => (
+                        <Link key={a.id} href={`/compositions?id=${a.id}`} className={s.linkedItem}>
                           {a.title}
                         </Link>
                       ))}
@@ -237,8 +239,29 @@ export default function SourcesContent() {
                 )}
 
                 <div className={s.detailSection}>
-                  <div className={s.detailLabel}>Content</div>
-                  <MarkdownViewer content={detail.content_md} />
+                  <div className={s.contentTabs}>
+                    <button
+                      className={contentTab === 'distillation' ? s.contentTabActive : s.contentTab}
+                      onClick={() => setContentTab('distillation')}
+                    >
+                      Distillation
+                    </button>
+                    <button
+                      className={contentTab === 'original' ? s.contentTabActive : s.contentTab}
+                      onClick={() => setContentTab('original')}
+                    >
+                      Original
+                    </button>
+                  </div>
+                  {contentTab === 'distillation' ? (
+                    detail.distillation ? (
+                      <MarkdownViewer content={detail.distillation} />
+                    ) : (
+                      <div className={s.emptyContent}>No distillation available</div>
+                    )
+                  ) : (
+                    <MarkdownViewer content={detail.content_md} />
+                  )}
                 </div>
               </>
             )}

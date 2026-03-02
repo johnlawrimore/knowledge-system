@@ -19,7 +19,7 @@ export async function GET(
       // Evidence detail with source info
       const [evidenceRows] = await conn.query<RowDataPacket[]>(
         `SELECT
-           e.id, e.content, e.source_id, e.artifact_id,
+           e.id, e.content, e.source_id,
            e.evidence_type, e.verbatim_quote,
            e.evaluation_results, e.derived_from_evidence_id,
            e.notes, e.created_at,

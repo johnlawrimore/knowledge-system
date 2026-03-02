@@ -9,7 +9,6 @@ interface EvidenceListItem {
   id: number;
   content: string;
   source_id: number;
-  artifact_id: number | null;
   evidence_type: string;
   verbatim_quote: string | null;
   evaluation_results: Record<string, unknown> | null;
@@ -40,7 +39,6 @@ interface EvidenceDetail {
   id: number;
   content: string;
   source_id: number;
-  artifact_id: number | null;
   evidence_type: string;
   verbatim_quote: string | null;
   evaluation_results: Record<string, unknown> | null;

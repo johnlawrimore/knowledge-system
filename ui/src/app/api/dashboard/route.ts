@@ -23,7 +23,7 @@ export async function GET() {
       );
 
       const [[readyToDecompose]] = await conn.query<RowDataPacket[]>(
-        "SELECT COUNT(*) as count FROM artifacts WHERE status = 'reviewed'"
+        "SELECT COUNT(*) as count FROM sources WHERE status = 'distilled'"
       );
 
       const [[uncategorized]] = await conn.query<RowDataPacket[]>(
@@ -43,7 +43,7 @@ export async function GET() {
 
       const attention = [
         { label: 'Sources stuck in collected', count: Number(collectedStuck.count) },
-        { label: 'Artifacts ready to decompose', count: Number(readyToDecompose.count) },
+        { label: 'Distilled sources ready to decompose', count: Number(readyToDecompose.count) },
         { label: 'Uncategorized claims', count: Number(uncategorized.count) },
         { label: 'Thin claims', count: Number(thinClaims.count) },
         { label: 'Unsummarized clusters', count: Number(unsummarized.count) },

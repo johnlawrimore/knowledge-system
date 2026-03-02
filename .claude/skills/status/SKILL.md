@@ -31,7 +31,7 @@ SELECT * FROM v_pipeline_status;
 ```sql
 SELECT
     (SELECT COUNT(*) FROM sources) AS total_sources,
-    (SELECT COUNT(*) FROM artifacts) AS total_artifacts,
+    (SELECT COUNT(*) FROM compositions) AS total_compositions,
     (SELECT COUNT(*) FROM claims) AS total_claims,
     (SELECT COUNT(*) FROM claim_clusters) AS total_clusters,
     (SELECT COUNT(*) FROM evidence) AS total_evidence,
@@ -47,7 +47,7 @@ Knowledge Base Status
 ━━━━━━━━━━━━━━━━━━━
 Pipeline:
   Sources: X collected, X distilled, X decomposed
-  Artifacts: X draft, X reviewed, X decomposed
+  Compositions: X draft, X reviewed, X published
 
 Knowledge:
   Claims: X (in Y clusters + Z standalone)
@@ -106,7 +106,6 @@ WHERE ct.topic_id IS NULL ORDER BY c.created_at DESC;
 
 ```sql
 SELECT 'sources' AS entity, COUNT(*) AS count FROM sources WHERE evaluation_results IS NULL
-UNION ALL SELECT 'artifacts', COUNT(*) FROM artifacts WHERE evaluation_results IS NULL
 UNION ALL SELECT 'evidence', COUNT(*) FROM evidence WHERE evaluation_results IS NULL;
 ```
 
@@ -179,7 +178,7 @@ WHERE ct.tag IS NULL ORDER BY c.created_at DESC;
 Prioritize:
 
 1. **Sources stuck in `collected`** — distill them
-2. **Artifacts stuck in `draft`** — decompose them
+2. **Distilled sources** — decompose them
 3. **Unevaluated sources** — evaluate before distilling
 4. **Uncategorized claims** — assign topics
 5. **Untagged claims** — apply at least domain tags
@@ -190,7 +189,7 @@ Prioritize:
 ```
 Recommended next actions:
   1. Distill 12 collected sources (oldest: "Fowler on TDD" from Jan 15)
-  2. Decompose 5 draft artifacts
+  2. Decompose 5 distilled sources
   3. Evaluate 8 unevaluated sources
   4. Categorize 23 uncategorized claims
   5. Strengthen 14 thin claims (< 2 supporting sources)

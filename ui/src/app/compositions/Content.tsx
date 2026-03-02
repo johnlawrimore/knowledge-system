@@ -8,7 +8,7 @@ import MarkdownViewer from '@/components/MarkdownViewer';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
 
-interface ArtifactListItem {
+interface CompositionListItem {
   id: number;
   title: string;
   word_count: number;
@@ -17,7 +17,7 @@ interface ArtifactListItem {
   created_at: string;
 }
 
-interface ArtifactSource {
+interface CompositionSource {
   id: number;
   title: string;
   source_type: string;
@@ -28,7 +28,7 @@ interface ArtifactSource {
   contribution_note: string | null;
 }
 
-interface ArtifactDetail {
+interface CompositionDetail {
   id: number;
   title: string;
   content_md: string;
@@ -39,17 +39,17 @@ interface ArtifactDetail {
   notes: string | null;
   created_at: string;
   updated_at: string;
-  sources: ArtifactSource[];
+  sources: CompositionSource[];
   claim_count: number;
 }
 
-export default function ArtifactsContent() {
+export default function CompositionsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [artifacts, setArtifacts] = useState<ArtifactListItem[]>([]);
+  const [compositions, setCompositions] = useState<CompositionListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [detail, setDetail] = useState<ArtifactDetail | null>(null);
+  const [detail, setDetail] = useState<CompositionDetail | null>(null);
 
   const selectedId = searchParams.get('id');
   const status = searchParams.get('status') || '';
@@ -60,7 +60,7 @@ export default function ArtifactsContent() {
       const params = new URLSearchParams(searchParams.toString());
       if (val) params.set(key, val);
       else params.delete(key);
-      router.push(`/artifacts?${params.toString()}`);
+      router.push(`/compositions?${params.toString()}`);
     },
     [router, searchParams]
   );
@@ -72,10 +72,10 @@ export default function ArtifactsContent() {
     if (search) params.set('search', search);
     params.set('limit', '100');
 
-    fetch(`/api/artifacts?${params}`)
+    fetch(`/api/compositions?${params}`)
       .then((r) => r.json())
       .then((d) => {
-        setArtifacts(d.artifacts || []);
+        setCompositions(d.compositions || []);
         setTotal(d.total || 0);
       })
       .catch(console.error)
@@ -87,27 +87,27 @@ export default function ArtifactsContent() {
       setDetail(null);
       return;
     }
-    fetch(`/api/artifacts/${selectedId}`)
+    fetch(`/api/compositions/${selectedId}`)
       .then((r) => r.json())
       .then(setDetail)
       .catch(console.error);
   }, [selectedId]);
 
-  const patchArtifact = async (field: string, value: string) => {
+  const patchComposition = async (field: string, value: string) => {
     if (!selectedId) return;
-    await fetch(`/api/artifacts/${selectedId}`, {
+    await fetch(`/api/compositions/${selectedId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ [field]: value }),
     });
-    const r = await fetch(`/api/artifacts/${selectedId}`);
+    const r = await fetch(`/api/compositions/${selectedId}`);
     setDetail(await r.json());
   };
 
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Artifacts</h1>
+        <h1 className={s.title}>Compositions</h1>
       </div>
 
       <div className={s.filters}>
@@ -125,21 +125,21 @@ export default function ArtifactsContent() {
         <input
           className={s.searchInput}
           type="text"
-          placeholder="Search artifacts..."
+          placeholder="Search compositions..."
           value={search}
           onChange={(e) => setFilter('search', e.target.value)}
         />
       </div>
 
       {loading ? (
-        <div className={s.loading}>Loading artifacts...</div>
+        <div className={s.loading}>Loading compositions...</div>
       ) : (
         <div className={s.splitLayout}>
           <div className={s.listPanel}>
-            {artifacts.length === 0 ? (
-              <div className={s.empty}>No artifacts found</div>
+            {compositions.length === 0 ? (
+              <div className={s.empty}>No compositions found</div>
             ) : (
-              artifacts.map((a) => (
+              compositions.map((a) => (
                 <div
                   key={a.id}
                   className={
@@ -165,7 +165,7 @@ export default function ArtifactsContent() {
           <div className={s.detailPanel}>
             {!detail ? (
               <div className={s.emptyDetail}>
-                Select an artifact to view details
+                Select a composition to view details
               </div>
             ) : (
               <>
@@ -212,7 +212,7 @@ export default function ArtifactsContent() {
                   <div className={s.detailLabel}>Notes</div>
                   <InlineEdit
                     value={detail.notes}
-                    onSave={(v) => patchArtifact('notes', v)}
+                    onSave={(v) => patchComposition('notes', v)}
                     multiline
                     placeholder="Add notes..."
                   />

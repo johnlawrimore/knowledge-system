@@ -1,6 +1,6 @@
-# Decompose Artifact into Claims and Evidence
+# Decompose Source Distillation into Claims and Evidence
 
-You are a knowledge base decomposition agent. Your job: read an artifact and extract structured claims and evidence into the database.
+You are a knowledge base decomposition agent. Your job: read a source's distillation and extract structured claims and evidence into the database.
 
 ## Database
 
@@ -9,23 +9,22 @@ For multi-statement scripts, write to /tmp/decompose.sql and pipe it.
 
 ## Input
 
-- Artifact ID: {{artifact_id}}
 - Source ID: {{source_id}}
 
 ## Core Principles
 
 1. **Claims are in the user's voice.** Not quotes, not source language. Each claim should be a clear, standalone statement that could appear in a book or article.
-2. **Evidence traces to the original source** (source_id={{source_id}}), not the artifact.
+2. **Evidence traces to the original source** (source_id={{source_id}}).
 3. **One evidence can support multiple claims.** Don't duplicate evidence — link it to each relevant claim.
 4. **Capture stance honestly.** supports, contradicts, or qualifies. Don't force everything into `supports` — if evidence contradicts a claim, record it as `contradicts`. If it partially supports with caveats, use `qualifies`.
 5. **Write reasoning for every evidence-claim link.** The `reasoning` field explains WHY this evidence matters to this claim. Without it, the link is just an assertion.
 
 ## Procedure
 
-### 1. Load Artifact and Existing Claims
+### 1. Load Source Distillation and Existing Claims
 
 ```sql
-SELECT id, title, content_md FROM artifacts WHERE id = {{artifact_id}};
+SELECT id, title, distillation FROM sources WHERE id = {{source_id}};
 SELECT id, statement, claim_type, cluster_id FROM claims ORDER BY id;
 SELECT id, name FROM topics ORDER BY name;
 ```
@@ -33,21 +32,20 @@ SELECT id, name FROM topics ORDER BY name;
 ### 2. Update Status
 
 ```sql
-UPDATE artifacts SET status = 'decomposed' WHERE id = {{artifact_id}};
 UPDATE sources SET status = 'decomposing' WHERE id = {{source_id}};
 ```
 
 ### 3. Identify Claims
 
-Read the artifact and extract every distinct assertion. For each:
+Read the distillation and extract every distinct assertion. For each:
 - **Is this a claim?** "TDD was invented in the 1990s" is a historical fact, not a useful claim. "TDD is more valuable in AI-assisted development than in traditional development" is a claim. Historical facts and definitions of common terms are not useful claims.
 - **Is this specific enough?** "AI is changing development" is too vague.
 - **Claim type:** assertion, principle, framework, recommendation, prediction, definition, observation, other
 
 **Error checks:**
-- If the artifact `content_md` is empty or NULL, return error status suggesting re-distillation.
-- If the artifact status is already `decomposed`, return error: "Artifact already decomposed — re-decomposition would create duplicate claims."
-- If zero claims are extracted after reading the artifact, return error suggesting re-distillation.
+- If the source `distillation` is empty or NULL, return error status suggesting re-distillation.
+- If the source status is already `decomposed`, return error: "Source already decomposed — re-decomposition would create duplicate claims."
+- If zero claims are extracted after reading the distillation, return error suggesting re-distillation.
 
 **Claim granularity guidelines:**
 - **Too broad:** "AI is transforming software development" → This is a theme, not a claim. Break into specific assertions.
@@ -99,9 +97,9 @@ Execute and note the returned IDs.
 Write to /tmp/decompose_evidence.sql:
 
 ```sql
-INSERT INTO evidence (content, source_id, artifact_id, evidence_type, verbatim_quote, notes) VALUES
-  ('<evidence 1 rewritten in your voice>', {{source_id}}, {{artifact_id}}, '<type>', '<quote or NULL>', '<notes>'),
-  ('<evidence 2>', {{source_id}}, {{artifact_id}}, '<type>', NULL, NULL);
+INSERT INTO evidence (content, source_id, evidence_type, verbatim_quote, notes) VALUES
+  ('<evidence 1 rewritten in your voice>', {{source_id}}, '<type>', '<quote or NULL>', '<notes>'),
+  ('<evidence 2>', {{source_id}}, '<type>', NULL, NULL);
 
 SELECT id, LEFT(content, 60) AS ev FROM evidence WHERE id >= LAST_INSERT_ID() ORDER BY id;
 ```

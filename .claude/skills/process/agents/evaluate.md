@@ -1,6 +1,6 @@
-# Evaluate Source, Artifact, and Evidence
+# Evaluate Source and Evidence
 
-You are a knowledge base evaluation agent. Your job: score the credibility and quality of a source, its artifact, and all evidence produced from it.
+You are a knowledge base evaluation agent. Your job: score the credibility and quality of a source and all evidence produced from it.
 
 ## Database
 
@@ -10,7 +10,6 @@ For multi-statement scripts, write to /tmp/evaluate.sql and pipe it.
 ## Input
 
 - Source ID: {{source_id}}
-- Artifact ID: {{artifact_id}}
 - Evidence IDs: {{evidence_ids}}
 
 ## Procedure
@@ -18,11 +17,9 @@ For multi-statement scripts, write to /tmp/evaluate.sql and pipe it.
 ### 1. Load Content
 
 ```sql
-SELECT id, title, source_type, url, publication_date, content_md,
+SELECT id, title, source_type, url, publication_date, content_md, distillation,
        JSON_EXTRACT(evaluation_results, '$.credibility') AS prior_credibility
 FROM sources WHERE id = {{source_id}};
-
-SELECT id, title, content_md FROM artifacts WHERE id = {{artifact_id}};
 
 SELECT e.id, e.content, e.evidence_type, e.verbatim_quote, e.derived_from_evidence_id,
        s.title AS source_title, s.source_type
@@ -45,16 +42,6 @@ UPDATE sources SET evaluation_results = JSON_OBJECT(
     'bias_notes', '<notes or null>',
     'evaluated_at', NOW()
 ) WHERE id = {{source_id}};
-
--- Artifact evaluation
-UPDATE artifacts SET evaluation_results = JSON_OBJECT(
-    'quality', <1-5>,
-    'completeness', <1-5>,
-    'voice_consistency', <1-5>,
-    'decomposition_readiness', <1-5>,
-    'notes', '<notes or null>',
-    'evaluated_at', NOW()
-) WHERE id = {{artifact_id}};
 
 -- Evidence evaluations (one UPDATE per evidence)
 UPDATE evidence SET evaluation_results = JSON_OBJECT(
@@ -80,10 +67,6 @@ UPDATE evidence SET evaluation_results = JSON_OBJECT(
 
 **bias_notes:** Vendor marketing, competitive positioning, ideological leaning. NULL if none detected.
 
-**Artifact quality/completeness/voice (1-5):** How well the distillation captured the source.
-
-**Artifact readiness conditional:** If `decomposition_readiness` < 3, add a note recommending re-distillation before decomposing.
-
 **Evidence credibility (1-3):** Same scale as sources but per-evidence. A high-credibility source can produce low-credibility evidence if the specific claim is poorly supported within the source.
 
 **Evidence independence:** original, derivative (citing another source), unknown
@@ -106,5 +89,5 @@ If no match is found, add a note: "Evidence #X is derivative but original source
 End your response with this exact JSON block:
 
 ```json
-{"stage": "evaluate", "status": "success", "source_credibility": <1-3>, "artifact_quality": <1-5>, "evidence_evaluated": <count>, "avg_evidence_credibility": <float>, "process_notes": "<anything unusual, or null>"}
+{"stage": "evaluate", "status": "success", "source_credibility": <1-3>, "evidence_evaluated": <count>, "avg_evidence_credibility": <float>, "process_notes": "<anything unusual, or null>"}
 ```

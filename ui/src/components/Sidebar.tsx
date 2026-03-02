@@ -13,7 +13,7 @@ const primaryNav = [
 
 const secondaryNav = [
   { href: '/sources', label: 'Sources' },
-  { href: '/artifacts', label: 'Artifacts' },
+  { href: '/compositions', label: 'Compositions' },
   { href: '/evidence', label: 'Evidence' },
   { href: '/topics', label: 'Topics' },
   { href: '/themes', label: 'Themes' },
