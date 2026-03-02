@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
@@ -64,6 +64,7 @@ const stanceStyles: Record<string, { card: string; badge: string }> = {
 };
 
 export default function ClaimDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const id = params.id as string;
   const [claim, setClaim] = useState<ClaimDetail | null>(null);
@@ -108,9 +109,9 @@ export default function ClaimDetailPage() {
 
   return (
     <div className={s.page}>
-      <Link href="/claims" className={s.backLink}>
-        &larr; Back to Claims
-      </Link>
+      <button onClick={() => router.back()} className={s.backLink}>
+        &larr; Back
+      </button>
 
       <div className={s.claimHeader}>
         <span className={s.claimId}>CLAIM #{claim.id}</span>

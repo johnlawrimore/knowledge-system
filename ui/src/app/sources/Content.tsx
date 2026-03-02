@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import MarkdownViewer from '@/components/MarkdownViewer';
+import ClaimsList from '@/components/ClaimsList';
 import { sourceTypeLabel, sourceTypeIcon, SOURCE_TYPES } from '@/lib/sourceTypes';
 import { formatDate } from '@/lib/formatDate';
 import s from './page.module.scss';
@@ -34,6 +35,7 @@ interface SourceDetail {
   contributors: { id: number; name: string; affiliation: string; avatar: string | null; contributor_role: string }[];
   compositions: { count: number; items: { id: number; title: string; status: string }[] };
   evidence: { total: number; byStance: Record<string, number> };
+  claims_count: number;
 }
 
 export default function SourcesContent() {
@@ -43,7 +45,7 @@ export default function SourcesContent() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<SourceDetail | null>(null);
-  const [contentTab, setContentTab] = useState<'distillation' | 'original'>('distillation');
+  const [contentTab, setContentTab] = useState<'about' | 'distillation' | 'original' | 'claims'>('about');
 
   const selectedId = searchParams.get('id');
   const status = searchParams.get('status') || '';
@@ -172,18 +174,8 @@ export default function SourcesContent() {
                   {detail.word_count?.toLocaleString()} words
                 </div>
 
-                {detail.url && (
-                  <div className={s.detailSection}>
-                    <div className={s.detailLabel}>URL</div>
-                    <a href={detail.url} target="_blank" rel="noopener noreferrer" className={s.linkedItem}>
-                      {detail.url}
-                    </a>
-                  </div>
-                )}
-
                 {detail.contributors.length > 0 && (
                   <div className={s.detailSection}>
-                    <div className={s.detailLabel}>Contributors</div>
                     {detail.contributors.map((c) => (
                       <div key={c.id} className={s.contributorRow}>
                         {c.avatar ? (
@@ -199,71 +191,98 @@ export default function SourcesContent() {
                   </div>
                 )}
 
-                <div className={s.detailSection}>
-                  <div className={s.detailLabel}>Notes</div>
-                  <InlineEdit
-                    value={detail.notes}
-                    onSave={(v) => patchSource('notes', v)}
-                    multiline
-                    placeholder="Add notes..."
-                  />
+                <div className={s.contentTabs}>
+                  <button
+                    className={contentTab === 'about' ? s.contentTabActive : s.contentTab}
+                    onClick={() => setContentTab('about')}
+                  >
+                    About
+                  </button>
+                  <button
+                    className={contentTab === 'distillation' ? s.contentTabActive : s.contentTab}
+                    onClick={() => setContentTab('distillation')}
+                  >
+                    Distillation
+                  </button>
+                  <button
+                    className={contentTab === 'original' ? s.contentTabActive : s.contentTab}
+                    onClick={() => setContentTab('original')}
+                  >
+                    Original
+                  </button>
+                  <button
+                    className={contentTab === 'claims' ? s.contentTabActive : s.contentTab}
+                    onClick={() => setContentTab('claims')}
+                  >
+                    Claims
+                    {detail.claims_count > 0 && (
+                      <span className={s.tabBadge}>{detail.claims_count}</span>
+                    )}
+                  </button>
                 </div>
 
-                {detail.compositions.count > 0 && (
-                  <div className={s.detailSection}>
-                    <div className={s.detailLabel}>Compositions ({detail.compositions.count})</div>
-                    <div className={s.linkedList}>
-                      {detail.compositions.items.map((a) => (
-                        <Link key={a.id} href={`/compositions?id=${a.id}`} className={s.linkedItem}>
-                          {a.title}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {contentTab === 'about' ? (
+                  <div className={s.tabContent}>
+                    {detail.url && (
+                      <div className={s.detailSection}>
+                        <div className={s.detailLabel}>Source URL</div>
+                        <a href={detail.url} target="_blank" rel="noopener noreferrer" className={s.linkedItem}>
+                          {detail.url}
+                        </a>
+                      </div>
+                    )}
 
-                {detail.evidence.total > 0 && (
-                  <div className={s.detailSection}>
-                    <div className={s.detailLabel}>Evidence ({detail.evidence.total})</div>
-                    <div className={s.evidenceStats}>
-                      {detail.evidence.byStance.supports && (
-                        <span className={s.evStatSupporting}>{detail.evidence.byStance.supports} supporting</span>
-                      )}
-                      {detail.evidence.byStance.contradicts && (
-                        <span className={s.evStatContradicting}>{detail.evidence.byStance.contradicts} contradicting</span>
-                      )}
-                      {detail.evidence.byStance.qualifies && (
-                        <span className={s.evStatQualifying}>{detail.evidence.byStance.qualifies} qualifying</span>
-                      )}
+                    <div className={s.detailSection}>
+                      <div className={s.detailLabel}>Notes</div>
+                      <InlineEdit
+                        value={detail.notes}
+                        onSave={(v) => patchSource('notes', v)}
+                        multiline
+                        placeholder="Add notes..."
+                      />
                     </div>
-                  </div>
-                )}
 
-                <div className={s.detailSection}>
-                  <div className={s.contentTabs}>
-                    <button
-                      className={contentTab === 'distillation' ? s.contentTabActive : s.contentTab}
-                      onClick={() => setContentTab('distillation')}
-                    >
-                      Distillation
-                    </button>
-                    <button
-                      className={contentTab === 'original' ? s.contentTabActive : s.contentTab}
-                      onClick={() => setContentTab('original')}
-                    >
-                      Original
-                    </button>
+                    {detail.compositions.count > 0 && (
+                      <div className={s.detailSection}>
+                        <div className={s.detailLabel}>Compositions ({detail.compositions.count})</div>
+                        <div className={s.linkedList}>
+                          {detail.compositions.items.map((a) => (
+                            <Link key={a.id} href={`/compositions?id=${a.id}`} className={s.linkedItem}>
+                              {a.title}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {detail.evidence.total > 0 && (
+                      <div className={s.detailSection}>
+                        <div className={s.detailLabel}>Evidence ({detail.evidence.total})</div>
+                        <div className={s.evidenceStats}>
+                          {detail.evidence.byStance.supports && (
+                            <span className={s.evStatSupporting}>{detail.evidence.byStance.supports} supporting</span>
+                          )}
+                          {detail.evidence.byStance.contradicts && (
+                            <span className={s.evStatContradicting}>{detail.evidence.byStance.contradicts} contradicting</span>
+                          )}
+                          {detail.evidence.byStance.qualifies && (
+                            <span className={s.evStatQualifying}>{detail.evidence.byStance.qualifies} qualifying</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {contentTab === 'distillation' ? (
-                    detail.distillation ? (
-                      <MarkdownViewer content={detail.distillation} />
-                    ) : (
-                      <div className={s.emptyContent}>No distillation available</div>
-                    )
+                ) : contentTab === 'distillation' ? (
+                  detail.distillation ? (
+                    <MarkdownViewer content={detail.distillation} />
                   ) : (
-                    <MarkdownViewer content={detail.original} />
-                  )}
-                </div>
+                    <div className={s.emptyContent}>No distillation available</div>
+                  )
+                ) : contentTab === 'original' ? (
+                  <MarkdownViewer content={detail.original} />
+                ) : (
+                  <ClaimsList sourceId={detail.id} showFilters={false} />
+                )}
               </>
             )}
           </div>

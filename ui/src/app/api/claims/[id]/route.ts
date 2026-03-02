@@ -165,23 +165,25 @@ export async function GET(
         : null;
     }
 
-    // Parse evaluation_results JSON strings in evidence
-    const evidence = evidenceRows.map((row) => ({
-      id: row.evidence_id,
-      content: row.content,
-      evidence_type: row.evidence_type,
-      verbatim_quote: row.verbatim_quote,
-      evaluation_results: typeof row.evaluation_results === 'string'
+    const evidence = evidenceRows.map((row) => {
+      const evalResults = typeof row.evaluation_results === 'string'
         ? JSON.parse(row.evaluation_results)
-        : row.evaluation_results,
-      stance: row.stance,
-      strength: row.strength,
-      reasoning: row.reasoning,
-      source_id: row.source_id,
-      source_title: row.source_title,
-      source_type: row.source_type,
-      contributors: row.contributors,
-    }));
+        : row.evaluation_results;
+      return {
+        id: row.evidence_id,
+        content: row.content,
+        evidence_type: row.evidence_type,
+        verbatim_quote: row.verbatim_quote,
+        stance: row.stance,
+        strength: row.strength,
+        reasoning: row.reasoning,
+        source_id: row.source_id,
+        source_title: row.source_title,
+        source_type: row.source_type,
+        credibility: evalResults?.credibility ?? null,
+        contributors: row.contributors,
+      };
+    });
 
     return NextResponse.json({
       id: claim.id,
@@ -192,28 +194,31 @@ export async function GET(
       cluster_id: claim.cluster_id,
       created_at: claim.created_at,
       updated_at: claim.updated_at,
-      score: scoreData ? {
-        computed_confidence: scoreData.computed_confidence,
-        score: scoreData.score,
-        supporting_sources: scoreData.supporting_sources,
-        contradicting_sources: scoreData.contradicting_sources,
-        supporting_evidence: scoreData.supporting_evidence,
-        contradicting_evidence: scoreData.contradicting_evidence,
-        qualifying_evidence: scoreData.qualifying_evidence ?? null,
-      } : null,
+      computed_confidence: scoreData?.computed_confidence ?? 'unsupported',
+      score: scoreData?.score ?? 0,
+      supporting_sources: scoreData?.supporting_sources ?? 0,
+      contradicting_sources: scoreData?.contradicting_sources ?? 0,
+      supporting_evidence: scoreData?.supporting_evidence ?? 0,
+      contradicting_evidence: scoreData?.contradicting_evidence ?? 0,
+      qualifying_evidence: scoreData?.qualifying_evidence ?? 0,
       evidence,
       topics: topicRows,
       themes: themeRows,
       tags: tagRows.map((r) => r.tag),
       relationships: relRows.map((r) => ({
-        relationship_id: r.relationship_id,
+        id: r.relationship_id,
         relationship: r.relationship,
         direction: r.direction,
         notes: r.notes,
         related_claim_id: r.related_claim_id,
-        related_claim_statement: r.related_claim_statement,
+        related_statement: r.related_claim_statement,
       })),
-      cluster,
+      cluster: cluster ? {
+        id: (cluster as Record<string, unknown>).id,
+        summary: (cluster as Record<string, unknown>).summary ?? null,
+        reviewer_notes: (cluster as Record<string, unknown>).reviewer_notes ?? null,
+        siblings: ((cluster as Record<string, unknown>).sibling_claims as Record<string, unknown>[]) || [],
+      } : null,
     });
   } catch (error) {
     console.error('GET /api/claims/[id] error:', error);

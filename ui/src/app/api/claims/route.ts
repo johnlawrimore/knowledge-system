@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const themeId = params.get('theme');
     const tag = params.get('tag');
     const search = params.get('search');
+    const sourceId = params.get('source_id');
     const sort = params.get('sort') || 'score';
     const order = (params.get('order') || 'desc').toUpperCase();
     const limit = Math.min(Math.max(parseInt(params.get('limit') || '50', 10), 1), 200);
@@ -51,6 +52,12 @@ export async function GET(request: NextRequest) {
     if (tag) {
       conditions.push('EXISTS (SELECT 1 FROM claim_tags ctg_f WHERE ctg_f.claim_id = c.id AND ctg_f.tag = ?)');
       values.push(tag);
+    }
+
+    // Source filter via evidence chain
+    if (sourceId) {
+      conditions.push('EXISTS (SELECT 1 FROM claim_evidence ce_f JOIN evidence e_f ON ce_f.evidence_id = e_f.id WHERE ce_f.claim_id = c.id AND e_f.source_id = ?)');
+      values.push(parseInt(sourceId, 10));
     }
 
     // Fulltext search

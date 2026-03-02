@@ -88,6 +88,15 @@ export async function GET(
       );
       evidenceTotal = Math.max(evidenceTotal, Number(totalEvidence.count));
 
+      // Claims count via evidence chain
+      const [[claimsCount]] = await conn.query<RowDataPacket[]>(
+        `SELECT COUNT(DISTINCT ce.claim_id) as count
+         FROM evidence e
+         JOIN claim_evidence ce ON e.id = ce.evidence_id
+         WHERE e.source_id = ?`,
+        [sourceId]
+      );
+
       return NextResponse.json({
         ...source,
         content_preview: contentPreview,
@@ -103,6 +112,7 @@ export async function GET(
           byStance: evidenceByStance,
           total: evidenceTotal,
         },
+        claims_count: Number(claimsCount.count),
       });
     } finally {
       conn.release();
