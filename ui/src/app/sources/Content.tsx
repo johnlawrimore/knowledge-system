@@ -7,7 +7,10 @@ import MarkdownViewer from '@/components/MarkdownViewer';
 import ClaimsList from '@/components/ClaimsList';
 import { sourceTypeLabel, sourceTypeIcon, SOURCE_TYPES } from '@/lib/sourceTypes';
 import { formatDate } from '@/lib/formatDate';
+import { pageIcon } from '@/lib/pageIcons';
 import s from './page.module.scss';
+
+const SourcesIcon = pageIcon('sources');
 
 interface SourceListItem {
   id: number;
@@ -102,7 +105,7 @@ export default function SourcesContent() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Sources</h1>
+        <h1 className={s.title}><SourcesIcon size={32} stroke={2} className={s.pageIcon} />Sources</h1>
       </div>
 
       <div className={s.filters}>

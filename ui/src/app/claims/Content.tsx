@@ -2,7 +2,10 @@
 import { useState } from 'react';
 import ClaimsList from '@/components/ClaimsList';
 import ClustersList from '@/components/ClustersList';
+import { pageIcon } from '@/lib/pageIcons';
 import s from './page.module.scss';
+
+const ClaimsIcon = pageIcon('claims');
 
 export default function ClaimsContent() {
   const [tab, setTab] = useState<'claims' | 'clusters'>('claims');
@@ -10,7 +13,7 @@ export default function ClaimsContent() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Claims</h1>
+        <h1 className={s.title}><ClaimsIcon size={32} stroke={2} className={s.pageIcon} />Claims</h1>
       </div>
 
       <div className={s.tabs}>

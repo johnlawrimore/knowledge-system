@@ -3,7 +3,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
+import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
+
+const TopicsIcon = pageIcon('topics');
 
 interface TopicNode {
   id: number;
@@ -175,7 +178,7 @@ export default function TopicsContent() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Topics</h1>
+        <h1 className={s.title}><TopicsIcon size={32} stroke={2} className={s.pageIcon} />Topics</h1>
       </div>
 
       {loading ? (

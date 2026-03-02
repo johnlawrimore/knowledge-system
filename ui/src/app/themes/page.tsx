@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
+
+const ThemesIcon = pageIcon('themes');
 
 interface Theme {
   id: number;
@@ -37,7 +40,7 @@ export default function ThemesPage() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Themes</h1>
+        <h1 className={s.title}><ThemesIcon size={32} stroke={2} className={s.pageIcon} />Themes</h1>
         <button className={s.createBtn} onClick={() => {}}>
           + Create
         </button>

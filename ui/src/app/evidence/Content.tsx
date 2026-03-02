@@ -2,7 +2,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
+
+const EvidenceIcon = pageIcon('evidence');
 import ps from './page.module.scss';
 
 interface EvidenceListItem {
@@ -142,7 +145,7 @@ export default function EvidenceContent() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Evidence</h1>
+        <h1 className={s.title}><EvidenceIcon size={32} stroke={2} className={s.pageIcon} />Evidence</h1>
       </div>
 
       <div className={s.filters}>

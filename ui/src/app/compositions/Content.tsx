@@ -5,8 +5,11 @@ import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import LinkChip from '@/components/LinkChip';
 import MarkdownViewer from '@/components/MarkdownViewer';
+import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
+
+const CompositionsIcon = pageIcon('compositions');
 
 interface CompositionListItem {
   id: number;
@@ -105,7 +108,7 @@ export default function CompositionsContent() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Compositions</h1>
+        <h1 className={s.title}><CompositionsIcon size={32} stroke={2} className={s.pageIcon} />Compositions</h1>
       </div>
 
       <div className={s.filters}>

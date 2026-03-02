@@ -4,7 +4,10 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import LinkChip from '@/components/LinkChip';
+import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
+
+const ContributorsIcon = pageIcon('contributors');
 import ps from './page.module.scss';
 
 interface ContributorListItem {
@@ -122,7 +125,7 @@ export default function ContributorsContent() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Contributors</h1>
+        <h1 className={s.title}><ContributorsIcon size={32} stroke={2} className={s.pageIcon} />Contributors</h1>
       </div>
 
       <div className={s.filters}>

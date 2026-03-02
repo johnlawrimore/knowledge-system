@@ -3,7 +3,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
+import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
+
+const TagsIcon = pageIcon('tags');
 
 interface TagItem {
   tag: string;
@@ -151,7 +154,7 @@ export default function TagsContent() {
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <h1 className={s.title}>Tags</h1>
+        <h1 className={s.title}><TagsIcon size={32} stroke={2} className={s.pageIcon} />Tags</h1>
       </div>
 
       {loading ? (

@@ -11,7 +11,7 @@ export async function GET() {
         `SELECT tag, COUNT(*) AS claim_count
          FROM claim_tags
          GROUP BY tag
-         ORDER BY claim_count DESC`
+         ORDER BY tag ASC`
       );
 
       return NextResponse.json({ tags: rows });

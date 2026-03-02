@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { pageIcon } from '@/lib/pageIcons';
 import s from './page.module.scss';
+
+const DashboardIcon = pageIcon('dashboard');
 
 interface DashboardData {
   pipeline: Record<string, number>;
@@ -37,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <div className={s.dashboard}>
-      <h1 className={s.title}>Dashboard</h1>
+      <h1 className={s.title}><DashboardIcon size={32} stroke={2} className={s.pageIcon} />Dashboard</h1>
 
       <div className={s.statsRow}>
         <div className={s.statCard}>
