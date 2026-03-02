@@ -103,5 +103,5 @@ Leave `summary` and `reviewer_notes` as NULL — the user writes those when read
 End your response with this exact JSON block:
 
 ```json
-{"stage": "cluster", "status": "success", "clusters_created": <n>, "relationships_created": <n>, "claims_merged": <n>}
+{"stage": "cluster", "status": "success", "clusters_created": <n>, "relationships_created": <n>, "claims_merged": <n>, "process_notes": "<anything unusual, or null>"}
 ```

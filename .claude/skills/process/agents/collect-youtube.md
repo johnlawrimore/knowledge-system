@@ -189,7 +189,7 @@ Contributor roles mapping:
 End your response with this exact JSON block:
 
 ```json
-{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "youtube_video", "word_count": <approx_words>}
+{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "youtube_video", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>"}
 ```
 
 On error:

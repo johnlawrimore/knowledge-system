@@ -104,7 +104,7 @@ SELECT @artifact_id AS artifact_id;
 End your response with this exact JSON block:
 
 ```json
-{"stage": "distill", "status": "success", "artifact_id": <id>, "title": "<artifact_title>", "word_count": <approx_words>}
+{"stage": "distill", "status": "success", "artifact_id": <id>, "title": "<artifact_title>", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>"}
 ```
 
 On error:

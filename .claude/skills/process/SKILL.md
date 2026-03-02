@@ -31,15 +31,90 @@ Each stage is a self-contained agent prompt in `process/agents/`. The orchestrat
 4. Parses the JSON block from the agent's response
 5. Passes extracted IDs to the next stage
 
-## Profiling
+## Logging
 
-Time every stage to identify bottlenecks. Before the pipeline starts, capture a start timestamp:
+Persist pipeline performance data to the `pipeline_runs` and `pipeline_stages` tables so it survives context compression and session boundaries.
+
+### Before pipeline starts
 
 ```bash
 date +%s
 ```
 
-Store this as `pipeline_start`. Before each stage, capture `stage_start` the same way. After each stage completes, capture `stage_end` and compute `duration = stage_end - stage_start`.
+Store as `pipeline_start`. Then create the run row:
+
+```sql
+docker exec -i knowledge-db mysql knowledge -e "
+INSERT INTO pipeline_runs (url, status) VALUES ('<url>', 'running');
+SELECT LAST_INSERT_ID() AS run_id;"
+```
+
+Capture the returned `run_id` — use it for all stage inserts.
+
+### After collect completes
+
+Update the run row with the source_id (not known until collect finishes):
+
+```sql
+docker exec -i knowledge-db mysql knowledge -e "
+UPDATE pipeline_runs SET source_id = <source_id> WHERE id = <run_id>;"
+```
+
+### Before each stage
+
+Capture `stage_start` via `date +%s`, then insert a stage row:
+
+```sql
+docker exec -i knowledge-db mysql knowledge -e "
+INSERT INTO pipeline_stages (run_id, stage, status) VALUES (<run_id>, '<stage_name>', 'running');
+SELECT LAST_INSERT_ID() AS stage_id;"
+```
+
+Capture the returned `stage_id`.
+
+### After each stage
+
+Capture `stage_end` via `date +%s`, compute `duration = stage_end - stage_start`. Parse the agent's JSON result. Then update the stage row:
+
+```sql
+docker exec -i knowledge-db mysql knowledge -e "
+UPDATE pipeline_stages SET
+  status = '<success|error|skipped>',
+  duration_s = <duration>,
+  total_tokens = <from agent metadata>,
+  tool_uses = <from agent metadata>,
+  result_json = '<agent JSON output>',
+  completed_at = NOW()
+WHERE id = <stage_id>;"
+```
+
+For parallel stages (5+6): insert both stage rows before launching, update each when its agent returns.
+
+### After pipeline completes
+
+```sql
+docker exec -i knowledge-db mysql knowledge -e "
+UPDATE pipeline_runs SET
+  status = 'completed',
+  total_duration_s = <now - pipeline_start>,
+  completed_at = NOW()
+WHERE id = <run_id>;"
+```
+
+### On error
+
+```sql
+docker exec -i knowledge-db mysql knowledge -e "
+UPDATE pipeline_stages SET status = 'error', completed_at = NOW() WHERE id = <stage_id>;
+UPDATE pipeline_runs SET status = 'failed', completed_at = NOW() WHERE id = <run_id>;"
+```
+
+### What to log
+
+- **duration_s**: Wall-clock seconds from `date +%s` before/after
+- **total_tokens**: From the Agent tool's result metadata
+- **tool_uses**: From the Agent tool's result metadata
+- **result_json**: The full JSON block the agent returns (includes `process_notes` for anything unusual)
 
 Include timing in each stage report line:
 

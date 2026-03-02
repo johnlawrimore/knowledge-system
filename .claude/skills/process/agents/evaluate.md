@@ -106,5 +106,5 @@ If no match is found, add a note: "Evidence #X is derivative but original source
 End your response with this exact JSON block:
 
 ```json
-{"stage": "evaluate", "status": "success", "source_credibility": <1-3>, "artifact_quality": <1-5>, "evidence_evaluated": <count>, "avg_evidence_credibility": <float>}
+{"stage": "evaluate", "status": "success", "source_credibility": <1-3>, "artifact_quality": <1-5>, "evidence_evaluated": <count>, "avg_evidence_credibility": <float>, "process_notes": "<anything unusual, or null>"}
 ```

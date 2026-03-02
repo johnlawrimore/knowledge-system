@@ -177,5 +177,5 @@ What Should I Work On Next:
 End your response with this exact JSON block:
 
 ```json
-{"stage": "status", "status": "success", "report": "<the formatted report text>"}
+{"stage": "status", "status": "success", "report": "<the formatted report text>", "process_notes": "<anything unusual, or null>"}
 ```

@@ -69,12 +69,13 @@ All markdown content (sources, artifacts) follows **markdown-formatting** rules.
 - **User**: `claude` / `claude2026`
 - **MCP**: `mysql` MCP server with full CRUD access
 
-### Tables (17)
+### Tables (19)
 
 **Collection**: `contributors`, `sources`, `source_contributors`
 **Distillation**: `artifacts`, `artifact_sources`
 **Decomposition**: `topics`, `themes`, `claim_clusters`, `claims`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
 **Evidence**: `evidence`, `claim_evidence`
+**Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
 
 ### Key Views
 

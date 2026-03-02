@@ -179,6 +179,36 @@ Table claim_evidence {
 Ref: claim_evidence.claim_id > claims.id [delete: cascade]
 Ref: claim_evidence.evidence_id > evidence.id [delete: cascade]
 
+// --- PIPELINE LOGGING ---
+
+Table pipeline_runs {
+  id int [pk, increment]
+  source_id int
+  url varchar(1024) [not null]
+  status enum('running','completed','failed','paused') [not null, default: 'running']
+  started_at timestamp
+  completed_at timestamp
+  total_duration_s int
+  notes text
+}
+
+Ref: pipeline_runs.source_id > sources.id
+
+Table pipeline_stages {
+  id int [pk, increment]
+  run_id int [not null]
+  stage enum('collect','distill','decompose','cluster','categorize','evaluate','status') [not null]
+  status enum('running','success','error','skipped') [not null, default: 'running']
+  duration_s int
+  total_tokens int
+  tool_uses int
+  result_json json
+  started_at timestamp
+  completed_at timestamp
+}
+
+Ref: pipeline_stages.run_id > pipeline_runs.id
+
 // --- TABLE GROUPS ---
 
 TableGroup collection {
@@ -206,4 +236,9 @@ TableGroup decomposition {
 TableGroup evidence_layer {
   evidence
   claim_evidence
+}
+
+TableGroup pipeline_logging {
+  pipeline_runs
+  pipeline_stages
 }

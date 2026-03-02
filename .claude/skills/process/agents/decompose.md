@@ -189,7 +189,7 @@ UPDATE sources SET status = 'decomposed' WHERE id = {{source_id}};
 End your response with this exact JSON block:
 
 ```json
-{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>}
+{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>, "process_notes": "<anything unusual, or null>"}
 ```
 
 On error:

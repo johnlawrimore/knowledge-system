@@ -232,6 +232,39 @@ CREATE TABLE claim_evidence (
 
 
 -- ============================================================================
+-- PIPELINE LOGGING
+-- ============================================================================
+
+CREATE TABLE pipeline_runs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    source_id INT,
+    url VARCHAR(1024) NOT NULL,
+    status ENUM('running', 'completed', 'failed', 'paused') NOT NULL DEFAULT 'running',
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    total_duration_s INT,
+    notes TEXT,
+    FOREIGN KEY (source_id) REFERENCES sources(id),
+    INDEX idx_pipeline_runs_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE pipeline_stages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    run_id INT NOT NULL,
+    stage ENUM('collect', 'distill', 'decompose', 'cluster', 'categorize', 'evaluate', 'status') NOT NULL,
+    status ENUM('running', 'success', 'error', 'skipped') NOT NULL DEFAULT 'running',
+    duration_s INT,
+    total_tokens INT,
+    tool_uses INT,
+    result_json JSON,
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    FOREIGN KEY (run_id) REFERENCES pipeline_runs(id),
+    INDEX idx_pipeline_stages_run (run_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================================
 -- VIEWS
 -- ============================================================================
 

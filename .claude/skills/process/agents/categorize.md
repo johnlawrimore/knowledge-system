@@ -93,5 +93,5 @@ INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
 End your response with this exact JSON block:
 
 ```json
-{"stage": "categorize", "status": "success", "topics_assigned": <n>, "themes_assigned": <n>, "tags_applied": <n>, "uncategorized_claims": [<ids_that_fit_no_topic>], "proposed_topics": [{"name": "<name>", "description": "<desc>", "parent": "<parent_topic_or_null>", "claims": [<ids>]}], "proposed_themes": [{"name": "<name>", "thesis": "<thesis_statement>", "claims": [<ids>]}]}
+{"stage": "categorize", "status": "success", "topics_assigned": <n>, "themes_assigned": <n>, "tags_applied": <n>, "uncategorized_claims": [<ids_that_fit_no_topic>], "proposed_topics": [{"name": "<name>", "description": "<desc>", "parent": "<parent_topic_or_null>", "claims": [<ids>]}], "proposed_themes": [{"name": "<name>", "thesis": "<thesis_statement>", "claims": [<ids>]}], "process_notes": "<anything unusual, or null>"}
 ```

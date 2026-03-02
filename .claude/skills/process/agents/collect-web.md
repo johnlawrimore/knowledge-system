@@ -108,7 +108,7 @@ WHERE s.id = @source_id AND c.id = @contrib_id;
 End your response with this exact JSON block:
 
 ```json
-{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "<type>", "word_count": <approx_words>}
+{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "<type>", "word_count": <approx_words>, "fetch_method": "webfetch|curl|web_search", "process_notes": "<anything unusual, or null>"}
 ```
 
 On error:
