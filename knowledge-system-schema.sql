@@ -10,11 +10,12 @@
 CREATE TABLE contributors (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    sort_name VARCHAR(255),
     affiliation VARCHAR(255),
     role VARCHAR(255),
     bio TEXT,
     avatar VARCHAR(512),
-    url VARCHAR(512),
+    website VARCHAR(512),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -25,7 +26,7 @@ CREATE TABLE sources (
     source_type ENUM(
         'youtube_video', 'podcast', 'blog_post', 'website',
         'academic_paper', 'book', 'book_chapter', 'conference_talk',
-        'newsletter', 'social_media', 'report', 'documentation', 'other'
+        'newsletter', 'social_media', 'report', 'research', 'documentation', 'other'
     ) NOT NULL,
     url VARCHAR(1024),
     publication_date DATE,

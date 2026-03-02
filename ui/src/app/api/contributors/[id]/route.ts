@@ -19,7 +19,7 @@ export async function GET(
       // Contributor detail
       const [contributorRows] = await conn.query<RowDataPacket[]>(
         `SELECT
-           p.id, p.name, p.affiliation, p.role, p.bio, p.avatar, p.url, p.notes, p.created_at
+           p.id, p.name, p.sort_name, p.affiliation, p.role, p.bio, p.avatar, p.website, p.notes, p.created_at
          FROM contributors p
          WHERE p.id = ?`,
         [contributorId]
@@ -107,9 +107,15 @@ export async function PATCH(
       values.push(body.avatar);
     }
 
-    if (body.url !== undefined) {
-      updates.push('url = ?');
-      values.push(body.url);
+    if (body.website !== undefined) {
+      const website = typeof body.website === 'string' ? body.website.replace(/\/+$/, '') : body.website;
+      updates.push('website = ?');
+      values.push(website);
+    }
+
+    if (body.sort_name !== undefined) {
+      updates.push('sort_name = ?');
+      values.push(body.sort_name);
     }
 
     if (updates.length === 0) {

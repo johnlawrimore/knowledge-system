@@ -52,7 +52,7 @@ WHERE sc.contributor_id = @contrib_id;
 
 **Search:** `"<Full Name>" <affiliation> <role>` — look for personal website, LinkedIn, GitHub, Twitter/X, company bio page, conference speaker page.
 
-**URL field** — their most authoritative personal page. Priority: personal site > LinkedIn > GitHub > Twitter.
+**Website field** — their most authoritative personal page. Priority: personal site > LinkedIn > GitHub > Twitter. Strip trailing slashes from all URLs before storing.
 
 **Bio** — write a 2-4 sentence summary in third person. Include: current role/org, primary expertise, one notable credential.
 
@@ -75,12 +75,13 @@ If no suitable avatar found, leave NULL.
 - If found info seems to be about a different person with the same name, do NOT update — leave NULL and flag for manual review
 - If an avatar URL returns a 404 or redirect, do not use it
 
-**Only update NULL fields** — do not overwrite existing bio/avatar/url:
+**Only update NULL fields** — do not overwrite existing bio/avatar/website:
 ```sql
 UPDATE contributors
 SET bio = COALESCE(bio, '<bio>'),
     avatar = COALESCE(avatar, '<avatar_url>'),
-    url = COALESCE(url, '<url>')
+    website = COALESCE(website, '<website>'),
+    sort_name = COALESCE(sort_name, '<LastName, FirstName>')
 WHERE id = @contrib_id;
 ```
 

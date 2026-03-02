@@ -15,7 +15,8 @@ export async function GET() {
            p.role,
            p.bio,
            p.avatar,
-           p.url,
+           p.website,
+           p.sort_name,
            p.created_at,
            COUNT(DISTINCT s.id) AS source_count,
            COUNT(DISTINCT ce.claim_id) AS claim_count
@@ -24,8 +25,8 @@ export async function GET() {
          LEFT JOIN sources s ON sc.source_id = s.id
          LEFT JOIN evidence e ON s.id = e.source_id
          LEFT JOIN claim_evidence ce ON e.id = ce.evidence_id
-         GROUP BY p.id, p.name, p.affiliation, p.role, p.bio, p.avatar, p.url, p.created_at
-         ORDER BY claim_count DESC`
+         GROUP BY p.id, p.name, p.affiliation, p.role, p.bio, p.avatar, p.website, p.sort_name, p.created_at
+         ORDER BY p.sort_name ASC, p.name ASC`
       );
 
       return NextResponse.json({ contributors: rows });

@@ -8,9 +8,12 @@
 Table contributors {
   id int [pk, increment]
   name varchar(255) [not null]
+  sort_name varchar(255)
   affiliation varchar(255)
   role varchar(255)
-  url varchar(512)
+  bio text
+  avatar varchar(512)
+  website varchar(512)
   notes text
   created_at timestamp
 }
@@ -18,7 +21,7 @@ Table contributors {
 Table sources {
   id int [pk, increment]
   title varchar(500) [not null]
-  source_type enum('youtube_video','podcast','blog_post','website','academic_paper','book','book_chapter','conference_talk','newsletter','social_media','report','documentation','other') [not null]
+  source_type enum('youtube_video','podcast','blog_post','website','academic_paper','book','book_chapter','conference_talk','newsletter','social_media','report','research','documentation','other') [not null]
   url varchar(1024)
   publication_date date
   date_collected timestamp

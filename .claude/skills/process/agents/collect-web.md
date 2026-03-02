@@ -52,6 +52,7 @@ print(' '.join(e.result))
 | Documentation sites | documentation |
 | News/newsletter | newsletter |
 | PDF link | academic_paper or report |
+| Research papers, preprints, studies | research |
 | Other | website |
 
 ### 3. Extract Metadata
@@ -59,7 +60,7 @@ print(' '.join(e.result))
 From the content and URL, extract:
 - **title**: Article/paper title
 - **publication_date**: YYYY-MM-DD or NULL
-- **contributors**: Author name(s), affiliation, role
+- **contributors**: Author name(s), affiliation, role (capitalize role: "Software Engineer", not "software engineer")
 
 ### 4. Check for Duplicates
 
@@ -81,7 +82,9 @@ Write ALL statements to /tmp/collect.sql and execute as one batch. Do NOT run st
 
 ```sql
 -- Insert contributor (if new)
-INSERT IGNORE INTO contributors (name, affiliation, role) VALUES ('<name>', '<affiliation>', '<role>');
+-- sort_name: "LastName, FirstName" for alphabetical sorting
+-- Strip trailing slashes from all URLs before storing
+INSERT IGNORE INTO contributors (name, sort_name, affiliation, role) VALUES ('<name>', '<LastName, FirstName>', '<affiliation>', '<role>');
 SET @contrib_id = (SELECT id FROM contributors WHERE name = '<name>');
 
 -- Insert source

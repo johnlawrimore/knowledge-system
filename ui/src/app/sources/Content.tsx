@@ -121,6 +121,7 @@ export default function SourcesContent() {
           <option value="report">Report</option>
           <option value="documentation">Documentation</option>
           <option value="newsletter">Newsletter</option>
+          <option value="research">Research</option>
           <option value="website">Website</option>
         </select>
 

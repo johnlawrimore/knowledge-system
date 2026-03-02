@@ -72,7 +72,7 @@ If no captions are available, report it and proceed with metadata only.
 ### 5. Identify Speakers and Attribute Turns
 
 **From the description and title**, identify all speakers:
-- Extract names, roles (host, guest, panelist, speaker), and one-clause identifiers
+- Extract names, roles (host, guest, panelist, speaker — capitalize role: "Software Engineer", not "software engineer"), and one-clause identifiers
 - Produce a speaker roster
 
 **Single-speaker videos:** If only one speaker and the transcript reads as a monologue, label the entire transcript with that speaker.
@@ -145,7 +145,9 @@ Write ALL statements to /tmp/collect_yt.sql and execute as one batch. Do NOT run
 
 ```sql
 -- Insert contributors (one per speaker)
-INSERT IGNORE INTO contributors (name, affiliation, role) VALUES ('<name>', '<affiliation>', '<role>');
+-- sort_name: "LastName, FirstName" for alphabetical sorting
+-- Strip trailing slashes from all URLs before storing
+INSERT IGNORE INTO contributors (name, sort_name, affiliation, role) VALUES ('<name>', '<LastName, FirstName>', '<affiliation>', '<role>');
 -- Repeat for each speaker...
 
 -- Get contributor IDs

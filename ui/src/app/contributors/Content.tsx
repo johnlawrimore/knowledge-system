@@ -34,7 +34,7 @@ interface ContributorDetail {
   role: string | null;
   bio: string | null;
   avatar: string | null;
-  url: string | null;
+  website: string | null;
   notes: string | null;
   created_at: string;
   sources: {
@@ -215,7 +215,7 @@ export default function ContributorsContent() {
                       )}
                       <InlineEdit
                         value={detail.avatar}
-                        onSave={(v) => { patchContributor('avatar', v); setAvatarModalOpen(false); }}
+                        onSave={async (v) => { await patchContributor('avatar', v); setAvatarModalOpen(false); }}
                         placeholder="Paste avatar image URL..."
                       />
                     </div>
@@ -251,16 +251,16 @@ export default function ContributorsContent() {
                   </div>
 
                   <div className={s.detailSection}>
-                    <div className={s.detailLabel}>URL</div>
+                    <div className={s.detailLabel}>Website</div>
                     <div className={ps.urlRow}>
                       <InlineEdit
-                        value={detail.url}
-                        onSave={(v) => patchContributor('url', v)}
-                        placeholder="Add URL..."
+                        value={detail.website}
+                        onSave={(v) => patchContributor('website', v)}
+                        placeholder="Add website..."
                       />
-                      {detail.url && (
+                      {detail.website && (
                         <a
-                          href={detail.url}
+                          href={detail.website}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={ps.launchBtn}
