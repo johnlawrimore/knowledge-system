@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import LinkChip from '@/components/LinkChip';
+import SourceTypeBadge from '@/components/SourceTypeBadge';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
@@ -191,9 +192,7 @@ export default function CompositionsContent() {
                           >
                             {src.title}
                           </Link>
-                          <span className={ps.sourceType}>
-                            {src.source_type}
-                          </span>
+                          <SourceTypeBadge type={src.source_type} size={13} />
                           {src.contribution_note && (
                             <span className={ps.contributionNote}>
                               {src.contribution_note}

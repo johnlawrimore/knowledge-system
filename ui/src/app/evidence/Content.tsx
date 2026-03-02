@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import SourceTypeBadge from '@/components/SourceTypeBadge';
 import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
 
@@ -268,10 +269,10 @@ export default function EvidenceContent() {
                             >
                               {expandedDetail.source_title}
                             </Link>
-                            {expandedDetail.source_url && (
+                            {expandedDetail.source_type && (
                               <span className={ps.strengthLabel}>
                                 {' \u00B7 '}
-                                {expandedDetail.source_type}
+                                <SourceTypeBadge type={expandedDetail.source_type} size={13} />
                               </span>
                             )}
                           </div>

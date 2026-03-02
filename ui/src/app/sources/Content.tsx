@@ -5,7 +5,8 @@ import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import ClaimsList from '@/components/ClaimsList';
-import { sourceTypeLabel, sourceTypeIcon, SOURCE_TYPES } from '@/lib/sourceTypes';
+import SourceTypeBadge from '@/components/SourceTypeBadge';
+import { SOURCE_TYPES } from '@/lib/sourceTypes';
 import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
 import s from './page.module.scss';
@@ -147,8 +148,7 @@ export default function SourcesContent() {
                   >
                     <div className={s.sourceTitle}>{src.title}</div>
                     <div className={s.sourceMeta}>
-                      {(() => { const Icon = sourceTypeIcon(src.source_type); return <Icon size={14} stroke={1.5} className={s.sourceTypeIcon} />; })()}
-                      <span>{sourceTypeLabel(src.source_type)}</span>
+                      <SourceTypeBadge type={src.source_type} size={14} />
                       <span>&middot;</span>
                       <span>{src.word_count?.toLocaleString()} words</span>
                       {!isReady && (
@@ -171,28 +171,10 @@ export default function SourcesContent() {
               <>
                 <div className={s.detailTitle}>{detail.title}</div>
                 <div className={s.detailMeta}>
-                  {(() => { const Icon = sourceTypeIcon(detail.source_type); return <Icon size={16} stroke={1.5} className={s.sourceTypeIcon} />; })()}
-                  {sourceTypeLabel(detail.source_type)} &middot;{' '}
+                  <SourceTypeBadge type={detail.source_type} size={16} /> &middot;{' '}
                   {formatDate(detail.publication_date)} &middot;{' '}
                   {detail.word_count?.toLocaleString()} words
                 </div>
-
-                {detail.contributors.length > 0 && (
-                  <div className={s.detailSection}>
-                    {detail.contributors.map((c) => (
-                      <div key={c.id} className={s.contributorRow}>
-                        {c.avatar ? (
-                          <img src={c.avatar} alt="" className={s.contributorAvatar} />
-                        ) : (
-                          <span className={s.contributorAvatarPlaceholder}>{c.name.charAt(0)}</span>
-                        )}
-                        <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
-                        {c.affiliation && <span>({c.affiliation})</span>}
-                        <span className={s.contributorRole}>{c.contributor_role}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 <div className={s.contentTabs}>
                   <button
@@ -226,6 +208,24 @@ export default function SourcesContent() {
 
                 {contentTab === 'about' ? (
                   <div className={s.tabContent}>
+                    {detail.contributors.length > 0 && (
+                      <div className={s.detailSection}>
+                        <div className={s.detailLabel}>Contributors</div>
+                        {detail.contributors.map((c) => (
+                          <div key={c.id} className={s.contributorRow}>
+                            {c.avatar ? (
+                              <img src={c.avatar} alt="" className={s.contributorAvatar} />
+                            ) : (
+                              <span className={s.contributorAvatarPlaceholder}>{c.name.charAt(0)}</span>
+                            )}
+                            <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
+                            {c.affiliation && <span>({c.affiliation})</span>}
+                            <span className={s.contributorRole}>{c.contributor_role}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {detail.url && (
                       <div className={s.detailSection}>
                         <div className={s.detailLabel}>Source URL</div>
