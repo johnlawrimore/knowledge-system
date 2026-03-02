@@ -218,6 +218,16 @@
   text-transform: capitalize;
 }
 
+.fieldGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.5rem;
+
+  @media (min-width: 40rem) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .linkedList {
   display: flex;
   flex-direction: column;

@@ -222,31 +222,33 @@ export default function SourcesContent() {
 
                 {contentTab === 'about' ? (
                   <div className={s.tabContent}>
-                    {detail.contributors.length > 0 && (
-                      <div className={s.detailSection}>
-                        <div className={s.detailLabel}>Contributors</div>
-                        {detail.contributors.map((c) => (
-                          <div key={c.id} className={s.contributorRow}>
-                            {c.avatar ? (
-                              <img src={c.avatar} alt="" className={s.contributorAvatar} />
-                            ) : (
-                              <span className={s.contributorAvatarPlaceholder}>{c.name.charAt(0)}</span>
-                            )}
-                            <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
-                            {c.affiliation && <span>({c.affiliation})</span>}
-                            <span className={s.contributorRole}>{contributorRoleLabel(c.contributor_role)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <div className={s.fieldGrid}>
+                      {detail.contributors.length > 0 && (
+                        <div className={s.detailSection}>
+                          <div className={s.detailLabel}>Contributors</div>
+                          {detail.contributors.map((c) => (
+                            <div key={c.id} className={s.contributorRow}>
+                              {c.avatar ? (
+                                <img src={c.avatar} alt="" className={s.contributorAvatar} />
+                              ) : (
+                                <span className={s.contributorAvatarPlaceholder}>{c.name.charAt(0)}</span>
+                              )}
+                              <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
+                              {c.affiliation && <span>({c.affiliation})</span>}
+                              <span className={s.contributorRole}>{contributorRoleLabel(c.contributor_role)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-                    <div className={s.detailSection}>
-                      <div className={s.detailLabel}>Publication</div>
-                      <InlineEdit
-                        value={detail.publication}
-                        onSave={(v) => patchSource('publication', v)}
-                        placeholder="Add publication..."
-                      />
+                      <div className={s.detailSection}>
+                        <div className={s.detailLabel}>Publication</div>
+                        <InlineEdit
+                          value={detail.publication}
+                          onSave={(v) => patchSource('publication', v)}
+                          placeholder="Add publication..."
+                        />
+                      </div>
                     </div>
 
                     {detail.url && (
@@ -268,19 +270,6 @@ export default function SourcesContent() {
                       />
                     </div>
 
-                    {detail.compositions.count > 0 && (
-                      <div className={s.detailSection}>
-                        <div className={s.detailLabel}>Compositions ({detail.compositions.count})</div>
-                        <div className={s.linkedList}>
-                          {detail.compositions.items.map((a) => (
-                            <Link key={a.id} href={`/compositions?id=${a.id}`} className={s.linkedItem}>
-                              {a.title}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     {detail.evidence.total > 0 && (
                       <div className={s.detailSection}>
                         <div className={s.detailLabel}>Evidence ({detail.evidence.total})</div>
@@ -297,6 +286,20 @@ export default function SourcesContent() {
                         </div>
                       </div>
                     )}
+
+                    {detail.compositions.count > 0 && (
+                      <div className={s.detailSection}>
+                        <div className={s.detailLabel}>Compositions ({detail.compositions.count})</div>
+                        <div className={s.linkedList}>
+                          {detail.compositions.items.map((a) => (
+                            <Link key={a.id} href={`/compositions?id=${a.id}`} className={s.linkedItem}>
+                              {a.title}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 ) : contentTab === 'distillation' ? (
                   detail.distillation ? (
