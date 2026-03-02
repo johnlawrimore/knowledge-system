@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
+import TierBadge from '@/components/TierBadge';
 import { stanceLabel, strengthLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
@@ -20,6 +21,8 @@ interface ContributorListItem {
   avatar: string | null;
   source_count: number;
   claim_count: number;
+  evidence_count: number;
+  tier: number | null;
 }
 
 interface Position {
@@ -32,6 +35,18 @@ interface Position {
   source_title: string;
 }
 
+interface Contributions {
+  source_count: number;
+  evidence_count: number;
+  claim_count: number;
+  strong_evidence: number;
+  moderate_evidence: number;
+  weak_evidence: number;
+  supporting_count: number;
+  contradicting_count: number;
+  qualifying_count: number;
+}
+
 interface ContributorDetail {
   id: number;
   name: string;
@@ -42,6 +57,14 @@ interface ContributorDetail {
   website: string | null;
   notes: string | null;
   created_at: string;
+  tier: number | null;
+  expertise: number | null;
+  authority: number | null;
+  reach: number | null;
+  reputation: number | null;
+  score_notes: string | null;
+  evaluated_at: string | null;
+  contributions: Contributions | null;
   sources: {
     id: number;
     title: string;
@@ -117,9 +140,9 @@ export default function ContributorsContent() {
 
   const filtered = search
     ? contributors.filter((c) =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        (c.affiliation || '').toLowerCase().includes(search.toLowerCase())
-      )
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      (c.affiliation || '').toLowerCase().includes(search.toLowerCase())
+    )
     : contributors;
 
   const stanceGroups = detail ? groupByStance(detail.positions) : {};
@@ -277,6 +300,31 @@ export default function ContributorsContent() {
                     </div>
                   </div>
                 </div>
+
+                {detail.tier != null && (
+                  <div className={ps.scoreSection}>
+                    <TierBadge tier={detail.tier} />
+                    <div className={ps.dimensionGrid}>
+                      {([
+                        ['Expertise', detail.expertise],
+                        ['Authority', detail.authority],
+                        ['Reach', detail.reach],
+                        ['Reputation', detail.reputation],
+                      ] as [string, number | null][]).map(([label, val]) => (
+                        <div key={label} className={ps.dimensionItem}>
+                          <span className={ps.dimensionValue}>{val ?? '–'}</span>
+                          <span className={ps.dimensionLabel}>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {detail.score_notes && (
+                      <div className={ps.scoreNotes}>{detail.score_notes}</div>
+                    )}
+                    {detail.evaluated_at && (
+                      <div className={ps.evaluatedAt}>Last evaluated {formatDate(detail.evaluated_at)}</div>
+                    )}
+                  </div>
+                )}
 
                 <hr className={s.divider} />
 

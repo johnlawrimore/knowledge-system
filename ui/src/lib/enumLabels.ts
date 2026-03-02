@@ -64,6 +64,13 @@ const SOURCE_STATUS_LABELS: Record<string, string> = {
   decomposed: 'Decomposed',
 };
 
+const TIER_LABELS: Record<string, string> = {
+  '1': 'Leading Voice',
+  '2': 'Established Expert',
+  '3': 'Notable Contributor',
+  '4': 'Emerging Voice',
+};
+
 function labelFrom(map: Record<string, string>) {
   return (value: string): string => map[value] ?? value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, ' ');
 }
@@ -76,3 +83,4 @@ export const confidenceLabel = labelFrom(CONFIDENCE_LABELS);
 export const contributorRoleLabel = labelFrom(CONTRIBUTOR_ROLE_LABELS);
 export const compositionStatusLabel = labelFrom(COMPOSITION_STATUS_LABELS);
 export const sourceStatusLabel = labelFrom(SOURCE_STATUS_LABELS);
+export const tierLabel = labelFrom(TIER_LABELS);

@@ -19,7 +19,7 @@ export async function GET(
       // Contributor detail
       const [contributorRows] = await conn.query<RowDataPacket[]>(
         `SELECT
-           p.id, p.name, p.sort_name, p.affiliation, p.role, p.bio, p.avatar, p.website, p.notes, p.created_at
+           p.id, p.name, p.sort_name, p.affiliation, p.role, p.bio, p.avatar, p.website, p.notes, p.created_at, p.evaluation_results
          FROM contributors p
          WHERE p.id = ?`,
         [contributorId]
@@ -55,8 +55,34 @@ export async function GET(
         [contributorId]
       );
 
+      // Contribution stats from v_contributor_scores
+      const [scoreRows] = await conn.query<RowDataPacket[]>(
+        `SELECT source_count, evidence_count, claim_count,
+                strong_evidence, moderate_evidence, weak_evidence,
+                supporting_count, contradicting_count, qualifying_count
+         FROM v_contributor_scores WHERE contributor_id = ?`,
+        [contributorId]
+      );
+
+      const contributions = scoreRows.length > 0 ? scoreRows[0] : null;
+
+      // Parse evaluation_results for profile scores
+      const evalResults = contributor.evaluation_results
+        ? (typeof contributor.evaluation_results === 'string'
+            ? JSON.parse(contributor.evaluation_results)
+            : contributor.evaluation_results)
+        : null;
+
       return NextResponse.json({
         ...contributor,
+        tier: evalResults?.tier ?? null,
+        expertise: evalResults?.expertise ?? null,
+        authority: evalResults?.authority ?? null,
+        reach: evalResults?.reach ?? null,
+        reputation: evalResults?.reputation ?? null,
+        score_notes: evalResults?.notes ?? null,
+        evaluated_at: evalResults?.evaluated_at ?? null,
+        contributions,
         sources,
         positions,
       });

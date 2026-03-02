@@ -95,3 +95,40 @@ If affiliation or role were NULL and you discovered them, update those too:
 ```sql
 UPDATE contributors SET affiliation = COALESCE(affiliation, '<affiliation>') WHERE id = @contrib_id;
 ```
+
+**Contributor scoring** — Using the same web research, assess four dimensions (1–5 each):
+
+| Dimension | 1 | 3 | 5 |
+|-----------|---|---|---|
+| **Expertise** | Generalist, no domain depth | Experienced practitioner | World-leading domain expert |
+| **Authority** | Unknown in the field | Recognized contributor | Industry-defining leader |
+| **Reach** | Limited/local audience | Moderate following, regular publishing | Massive global audience |
+| **Reputation** | Unestablished track record | Respected, generally trusted | Gold-standard trusted voice |
+
+Compute **tier** from the average of the four scores:
+- Tier 1 "Leading Voice": avg ≥ 4.0
+- Tier 2 "Established Expert": avg ≥ 3.0
+- Tier 3 "Notable Contributor": avg ≥ 2.0
+- Tier 4 "Emerging Voice": avg < 2.0
+
+Store as JSON (only if not already evaluated):
+```sql
+UPDATE contributors
+SET evaluation_results = COALESCE(evaluation_results, JSON_OBJECT(
+    'expertise', <1-5>,
+    'authority', <1-5>,
+    'reach', <1-5>,
+    'reputation', <1-5>,
+    'tier', <1-4>,
+    'notes', '<1-2 sentence reasoning for the tier>',
+    'evaluated_at', NOW()
+))
+WHERE id = @contrib_id;
+```
+
+Scoring guidance:
+- Base scores on evidence found during web research, not assumptions
+- A Stanford professor with 50k citations = Expertise 5, Authority 4-5
+- A senior engineer blogging on their personal site = Expertise 3-4, Reach 2
+- A McKinsey partner publishing via their firm = Authority 4, Reach 3-4
+- If insufficient information to score, leave `evaluation_results` NULL and add a note: "Contributor scoring deferred — insufficient public information"
