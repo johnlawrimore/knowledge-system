@@ -42,7 +42,6 @@ export async function GET(request: NextRequest) {
            a.id,
            a.title,
            a.word_count,
-           a.source_strategy,
            a.status,
            a.created_at
          FROM compositions a

@@ -20,7 +20,7 @@ export async function GET(
       const [compositionRows] = await conn.query<RowDataPacket[]>(
         `SELECT
            a.id, a.title, a.content_md, a.word_count,
-           a.source_strategy, a.evaluation_results,
+           a.evaluation_results,
            a.status, a.notes, a.created_at, a.updated_at
          FROM compositions a
          WHERE a.id = ?`,

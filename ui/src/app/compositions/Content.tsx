@@ -12,7 +12,6 @@ interface CompositionListItem {
   id: number;
   title: string;
   word_count: number;
-  source_strategy: string;
   status: string;
   created_at: string;
 }
@@ -33,7 +32,6 @@ interface CompositionDetail {
   title: string;
   content_md: string;
   word_count: number;
-  source_strategy: string;
   evaluation_results: Record<string, unknown> | null;
   status: string;
   notes: string | null;
@@ -151,11 +149,9 @@ export default function CompositionsContent() {
                 >
                   <div className={s.listItemTitle}>{a.title}</div>
                   <div className={s.listItemMeta}>
-                    <span>{a.source_strategy}</span>
-                    {' \u00B7 '}
                     <span className={ps.statusBadge}>{a.status}</span>
                     {' \u00B7 '}
-                    <span>{a.word_count?.toLocaleString()}w</span>
+                    <span>{a.word_count?.toLocaleString()} words</span>
                   </div>
                 </div>
               ))
@@ -171,8 +167,6 @@ export default function CompositionsContent() {
               <>
                 <div className={s.detailTitle}>{detail.title}</div>
                 <div className={ps.detailMeta}>
-                  {detail.source_strategy}
-                  {' \u00B7 '}
                   {detail.word_count?.toLocaleString()} words
                   {' \u00B7 '}
                   <span className={ps.statusBadge}>{detail.status}</span>

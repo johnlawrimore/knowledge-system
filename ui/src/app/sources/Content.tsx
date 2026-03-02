@@ -4,6 +4,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import MarkdownViewer from '@/components/MarkdownViewer';
+import { sourceTypeLabel, sourceTypeIcon, SOURCE_TYPES } from '@/lib/sourceTypes';
+import { formatDate } from '@/lib/formatDate';
 import s from './page.module.scss';
 
 interface SourceListItem {
@@ -26,10 +28,10 @@ interface SourceDetail {
   notes: string | null;
   evaluation_results: Record<string, unknown> | null;
   content_preview: string;
-  content_md: string;
+  original: string;
   content_has_more: boolean;
   distillation: string | null;
-  contributors: { id: number; name: string; affiliation: string; contributor_role: string }[];
+  contributors: { id: number; name: string; affiliation: string; avatar: string | null; contributor_role: string }[];
   compositions: { count: number; items: { id: number; title: string; status: string }[] };
   evidence: { total: number; byStance: Record<string, number> };
 }
@@ -102,29 +104,11 @@ export default function SourcesContent() {
       </div>
 
       <div className={s.filters}>
-        <select className={s.select} value={status} onChange={(e) => setFilter('status', e.target.value)}>
-          <option value="">All statuses</option>
-          <option value="collected">Collected</option>
-          <option value="distilling">Distilling</option>
-          <option value="distilled">Distilled</option>
-          <option value="decomposing">Decomposing</option>
-          <option value="decomposed">Decomposed</option>
-        </select>
-
         <select className={s.select} value={type} onChange={(e) => setFilter('type', e.target.value)}>
           <option value="">All types</option>
-          <option value="youtube_video">YouTube Video</option>
-          <option value="blog_post">Blog Post</option>
-          <option value="academic_paper">Academic Paper</option>
-          <option value="book">Book</option>
-          <option value="book_chapter">Book Chapter</option>
-          <option value="conference_talk">Conference Talk</option>
-          <option value="podcast">Podcast</option>
-          <option value="report">Report</option>
-          <option value="documentation">Documentation</option>
-          <option value="newsletter">Newsletter</option>
-          <option value="research">Research</option>
-          <option value="website">Website</option>
+          {SOURCE_TYPES.map((t) => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
         </select>
 
         <input
@@ -144,23 +128,35 @@ export default function SourcesContent() {
             {sources.length === 0 ? (
               <div className={s.empty}>No sources found</div>
             ) : (
-              sources.map((src) => (
-                <div
-                  key={src.id}
-                  className={String(src.id) === selectedId ? s.sourceItemActive : s.sourceItem}
-                  onClick={() => setFilter('id', String(src.id))}
-                >
-                  <div className={s.sourceTitle}>{src.title}</div>
-                  <div className={s.sourceMeta}>
-                    <span>{src.source_type}</span>
-                    <span>&middot;</span>
-                    <span className={`${s.statusBadge} status-${src.status}`}>{src.status}</span>
-                    <span>&middot;</span>
-                    <span>{src.word_count?.toLocaleString()}w</span>
+              sources.map((src) => {
+                const isReady = src.status === 'decomposed';
+                return (
+                  <div
+                    key={src.id}
+                    className={
+                      !isReady ? s.sourceItemDisabled
+                        : String(src.id) === selectedId ? s.sourceItemActive
+                        : s.sourceItem
+                    }
+                    onClick={isReady ? () => setFilter('id', String(src.id)) : undefined}
+                  >
+                    <div className={s.sourceTitle}>{src.title}</div>
+                    <div className={s.sourceMeta}>
+                      {(() => { const Icon = sourceTypeIcon(src.source_type); return <Icon size={14} stroke={1.5} className={s.sourceTypeIcon} />; })()}
+                      <span>{sourceTypeLabel(src.source_type)}</span>
+                      <span>&middot;</span>
+                      <span>{src.word_count?.toLocaleString()} words</span>
+                      {!isReady && (
+                        <>
+                          <span>&middot;</span>
+                          <span className={s.processingBadge}>Processing</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
+                );
+              }))
+            }
           </div>
 
           <div className={s.detailPanel}>
@@ -170,10 +166,10 @@ export default function SourcesContent() {
               <>
                 <div className={s.detailTitle}>{detail.title}</div>
                 <div className={s.detailMeta}>
-                  {detail.source_type} &middot;{' '}
-                  {detail.publication_date || 'no date'} &middot;{' '}
-                  {detail.word_count?.toLocaleString()} words &middot;{' '}
-                  <span className={`${s.statusBadge} status-${detail.status}`}>{detail.status}</span>
+                  {(() => { const Icon = sourceTypeIcon(detail.source_type); return <Icon size={16} stroke={1.5} className={s.sourceTypeIcon} />; })()}
+                  {sourceTypeLabel(detail.source_type)} &middot;{' '}
+                  {formatDate(detail.publication_date)} &middot;{' '}
+                  {detail.word_count?.toLocaleString()} words
                 </div>
 
                 {detail.url && (
@@ -190,6 +186,11 @@ export default function SourcesContent() {
                     <div className={s.detailLabel}>Contributors</div>
                     {detail.contributors.map((c) => (
                       <div key={c.id} className={s.contributorRow}>
+                        {c.avatar ? (
+                          <img src={c.avatar} alt="" className={s.contributorAvatar} />
+                        ) : (
+                          <span className={s.contributorAvatarPlaceholder}>{c.name.charAt(0)}</span>
+                        )}
                         <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
                         {c.affiliation && <span>({c.affiliation})</span>}
                         <span className={s.contributorRole}>{c.contributor_role}</span>
@@ -260,7 +261,7 @@ export default function SourcesContent() {
                       <div className={s.emptyContent}>No distillation available</div>
                     )
                   ) : (
-                    <MarkdownViewer content={detail.content_md} />
+                    <MarkdownViewer content={detail.original} />
                   )}
                 </div>
               </>

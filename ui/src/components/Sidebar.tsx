@@ -45,7 +45,7 @@ export default function Sidebar() {
   return (
     <aside className={s.sidebar}>
       <div className={s.header}>
-        <Image src="/logo.png" alt="Logo" width={28} height={28} />
+        <Image src="/logo.png" alt="Logo" width={48} height={48} />
         <h1>KNOWLEDGE BASE</h1>
       </div>
 

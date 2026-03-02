@@ -30,9 +30,9 @@ export async function GET(
       const source = sourceRows[0];
 
       // Split content: preview (first 500 chars) and full content
-      const contentMd = source.content_md || '';
-      const contentPreview = contentMd.substring(0, 500);
-      const hasMore = contentMd.length > 500;
+      const original = source.content_md || '';
+      const contentPreview = original.substring(0, 500);
+      const hasMore = original.length > 500;
 
       // Parse evaluation_results from JSON string if present
       let evaluationResults = null;
@@ -48,7 +48,7 @@ export async function GET(
 
       // Contributors
       const [contributors] = await conn.query<RowDataPacket[]>(
-        `SELECT c.id, c.name, c.role, c.affiliation, sc.role AS contributor_role
+        `SELECT c.id, c.name, c.role, c.affiliation, c.avatar, sc.role AS contributor_role
          FROM contributors c
          JOIN source_contributors sc ON sc.contributor_id = c.id
          WHERE sc.source_id = ?`,
@@ -91,7 +91,7 @@ export async function GET(
       return NextResponse.json({
         ...source,
         content_preview: contentPreview,
-        content_md: source.content_md,
+        original,
         content_has_more: hasMore,
         evaluation_results: evaluationResults,
         contributors,
