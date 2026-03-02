@@ -30,6 +30,13 @@ interface TagGroup {
   tags: TagItem[];
 }
 
+function tagTierClass(count: number): string {
+  if (count >= 11) return s.tagTier4;
+  if (count >= 6) return s.tagTier3;
+  if (count >= 2) return s.tagTier2;
+  return s.tagItem;
+}
+
 function groupTags(tags: TagItem[]): TagGroup[] {
   // Count how many tags share each first segment (split on "-")
   const prefixCounts = new Map<string, TagItem[]>();
@@ -83,6 +90,11 @@ export default function TagsContent() {
     },
     [router]
   );
+
+  const closeModal = useCallback(() => {
+    router.push('/tags');
+    setRenaming(false);
+  }, [router]);
 
   useEffect(() => {
     setLoading(true);
@@ -170,7 +182,7 @@ export default function TagsContent() {
                 {group.tags.map((t) => (
                   <span
                     key={t.tag}
-                    className={t.tag === selectedTag ? s.tagItemActive : s.tagItem}
+                    className={t.tag === selectedTag ? s.tagItemActive : tagTierClass(t.claim_count)}
                     onClick={() => selectTag(t.tag)}
                   >
                     {t.tag}
@@ -182,11 +194,13 @@ export default function TagsContent() {
           ))}
 
           {selectedTag && (
-            <>
-              <hr className={s.divider} />
+            <div className={s.modalOverlay} onClick={closeModal}>
+              <div className={s.modal} onClick={(e) => e.stopPropagation()}>
+                <div className={s.modalHeader}>
+                  <span className={s.modalTitle}>{selectedTag}</span>
+                  <button className={s.modalClose} onClick={closeModal}>&times;</button>
+                </div>
 
-              <div className={s.detailSection}>
-                <div className={s.detailTitle}>{selectedTag}</div>
                 <div className={s.actions}>
                   {renaming ? (
                     <>
@@ -225,30 +239,32 @@ export default function TagsContent() {
                     </>
                   )}
                 </div>
-              </div>
 
-              <div className={s.detailSection}>
-                <div className={s.detailLabel}>
-                  Claims ({claims.length})
-                </div>
-                {claimsLoading ? (
-                  <div className={s.loading}>Loading claims...</div>
-                ) : claims.length === 0 ? (
-                  <div className={s.empty}>No claims with this tag</div>
-                ) : (
-                  <div className={s.claimList}>
-                    {claims.map((c) => (
-                      <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
-                        <span className={s.claimScore}>
-                          <ConfidenceBadge confidence={c.computed_confidence} score={c.score} />
-                        </span>{' '}
-                        <span className={s.claimStatement}>{c.statement}</span>
-                      </Link>
-                    ))}
+                <hr className={s.divider} />
+
+                <div className={s.detailSection}>
+                  <div className={s.detailLabel}>
+                    Claims ({claims.length})
                   </div>
-                )}
+                  {claimsLoading ? (
+                    <div className={s.loading}>Loading claims...</div>
+                  ) : claims.length === 0 ? (
+                    <div className={s.empty}>No claims with this tag</div>
+                  ) : (
+                    <div className={s.claimList}>
+                      {claims.map((c) => (
+                        <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
+                          <span className={s.claimScore}>
+                            <ConfidenceBadge confidence={c.computed_confidence} score={c.score} />
+                          </span>{' '}
+                          <span className={s.claimStatement}>{c.statement}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </>
+            </div>
           )}
         </>
       )}
