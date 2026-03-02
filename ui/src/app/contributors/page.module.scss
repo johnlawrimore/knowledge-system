@@ -64,6 +64,7 @@
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 0.125rem;
+  margin-bottom: 0.25rem;
 }
 
 .listAvatar,
@@ -239,14 +240,25 @@
 .dimensionValue {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--text-primary);
 }
+
+.score5 { color: var(--accent-green); }
+.score4 { color: var(--accent-blue); }
+.score3 { color: var(--text-primary); }
+.score2 { color: var(--accent-orange); }
+.score1 { color: var(--accent-red); }
 
 .dimensionLabel {
   font-size: 0.5625rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.scoreSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .scoreNotes {

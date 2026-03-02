@@ -226,6 +226,7 @@ export default function ContributorsContent() {
                       {detail.affiliation || 'No affiliation'}
                       {detail.role && <> &middot; {detail.role}</>}
                     </div>
+                    <TierBadge tier={detail.tier} />
                   </div>
                 </div>
 
@@ -303,7 +304,12 @@ export default function ContributorsContent() {
 
                 {detail.tier != null && (
                   <div className={ps.scoreSection}>
-                    <TierBadge tier={detail.tier} />
+                    <div className={ps.scoreSectionHeader}>
+                      <div className={s.detailLabel}>Contributor Evaluation</div>
+                      {detail.evaluated_at && (
+                        <div className={ps.evaluatedAt}>{formatDate(detail.evaluated_at)}</div>
+                      )}
+                    </div>
                     <div className={ps.dimensionGrid}>
                       {([
                         ['Expertise', detail.expertise],
@@ -312,16 +318,13 @@ export default function ContributorsContent() {
                         ['Reputation', detail.reputation],
                       ] as [string, number | null][]).map(([label, val]) => (
                         <div key={label} className={ps.dimensionItem}>
-                          <span className={ps.dimensionValue}>{val ?? '–'}</span>
+                          <span className={`${ps.dimensionValue} ${val != null ? ps[`score${val}`] || '' : ''}`}>{val ?? '–'}</span>
                           <span className={ps.dimensionLabel}>{label}</span>
                         </div>
                       ))}
                     </div>
                     {detail.score_notes && (
                       <div className={ps.scoreNotes}>{detail.score_notes}</div>
-                    )}
-                    {detail.evaluated_at && (
-                      <div className={ps.evaluatedAt}>Last evaluated {formatDate(detail.evaluated_at)}</div>
                     )}
                   </div>
                 )}
