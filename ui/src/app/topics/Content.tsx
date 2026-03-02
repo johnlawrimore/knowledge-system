@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import { pageIcon } from '@/lib/pageIcons';
+import TopicFlow from './TopicFlow';
 import s from '../shared.module.scss';
 
 const TopicsIcon = pageIcon('topics');
@@ -135,21 +136,30 @@ export default function TopicsContent() {
   const selectedId = searchParams.get('id');
 
   const selectTopic = useCallback(
-    (id: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('id', String(id));
-      router.push(`/topics?${params.toString()}`);
+    (id: number | null) => {
+      if (id === null) {
+        router.push('/topics');
+      } else {
+        router.push(`/topics?id=${id}`);
+      }
     },
-    [router, searchParams]
+    [router]
   );
 
   useEffect(() => {
     setLoading(true);
     fetch('/api/topics')
       .then((r) => r.json())
-      .then((d) => setTopics(d.topics || []))
+      .then((d) => {
+        const list = d.topics || [];
+        setTopics(list);
+        if (!selectedId && list.length > 0) {
+          router.replace(`/topics?id=${list[0].id}`);
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -193,14 +203,16 @@ export default function TopicsContent() {
           </div>
 
           <div className={s.detailPanel}>
+            <TopicFlow
+              topics={topics}
+              selectedId={selectedId}
+              onSelect={selectTopic}
+            />
+
             {detailLoading ? (
               <div className={s.loading}>Loading topic...</div>
-            ) : !detail ? (
-              <div className={s.emptyDetail}>Select a topic to view details</div>
-            ) : (
+            ) : detail ? (
               <>
-                <div className={s.detailTitle}>{detail.name}</div>
-
                 {detail.description && (
                   <div className={s.detailSection}>
                     <div className={s.detailValue}>{detail.description}</div>
@@ -242,7 +254,7 @@ export default function TopicsContent() {
                   </>
                 )}
               </>
-            )}
+            ) : null}
           </div>
         </div>
       )}

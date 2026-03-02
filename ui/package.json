@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "@tabler/icons-react": "^3.38.0",
+    "@xyflow/react": "^12.10.1",
     "highlight.js": "^11.11.1",
     "mysql2": "^3.18.2",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
+    "react-tagcloud": "^2.3.3",
     "rehype-highlight": "^7.0.2",
     "sass": "^1.97.3"
   },

@@ -239,6 +239,17 @@
 }
 
 // ── Tag cloud ───────────────────────────────────────────────────
+.tagCloud {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+
+  span:hover {
+    opacity: 0.75;
+  }
+}
+
 .tagGroup {
   margin-bottom: 1.25rem;
 }

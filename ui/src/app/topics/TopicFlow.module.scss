@@ -1,0 +1,98 @@
+// ── Topic Flow drilldown ────────────────────────────────────────
+
+.flowContainer {
+  height: 20rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.crumb {
+  color: var(--accent-blue);
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+}
+
+.crumbGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.crumbSep {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  position: relative;
+  top: -0.0625rem;
+}
+
+.crumbCurrent {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+// ── Flow nodes ──────────────────────────────────────────────────
+
+.node {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  width: 11rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: var(--accent-blue);
+    background: var(--bg-hover);
+  }
+}
+
+.nodeSelected {
+  @extend .node;
+  border-color: var(--accent-purple);
+  background: var(--bg-purple);
+  cursor: default;
+
+  &:hover {
+    border-color: var(--accent-purple);
+    background: var(--bg-purple);
+  }
+}
+
+.nodeName {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nodeMeta {
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.nodeExpand {
+  font-size: 0.5625rem;
+  color: var(--accent-blue);
+  margin-top: 0.25rem;
+}
+
+.handle {
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+}

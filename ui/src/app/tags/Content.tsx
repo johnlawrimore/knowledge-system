@@ -2,6 +2,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+// @ts-expect-error -- react-tagcloud has no type declarations
+import { TagCloud } from 'react-tagcloud';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import { pageIcon } from '@/lib/pageIcons';
 import s from '../shared.module.scss';
@@ -175,6 +177,17 @@ export default function TagsContent() {
         <div className={s.empty}>No tags found</div>
       ) : (
         <>
+          <div className={s.tagCloud}>
+            <TagCloud
+              minSize={14}
+              maxSize={40}
+              tags={tags.map((t) => ({ value: t.tag, count: t.claim_count, key: t.tag }))}
+              colorOptions={{ luminosity: 'light', hue: 'blue' }}
+              shuffle={false}
+              onClick={(tag: { value: string }) => selectTag(tag.value)}
+            />
+          </div>
+
           {groups.map((group) => (
             <div key={group.prefix} className={s.tagGroup}>
               <div className={s.tagGroupTitle}>{group.prefix}</div>
