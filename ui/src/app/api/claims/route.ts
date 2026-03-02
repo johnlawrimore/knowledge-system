@@ -36,10 +36,16 @@ export async function GET(request: NextRequest) {
       values.push(claimType);
     }
 
-    // Topic filter via EXISTS subquery
+    // Topic filter via EXISTS subquery (supports comma-separated IDs)
     if (topicId) {
-      conditions.push('EXISTS (SELECT 1 FROM claim_topics ct_f WHERE ct_f.claim_id = c.id AND ct_f.topic_id = ?)');
-      values.push(parseInt(topicId, 10));
+      const ids = topicId.split(',').map(id => parseInt(id, 10)).filter(n => !isNaN(n));
+      if (ids.length === 1) {
+        conditions.push('EXISTS (SELECT 1 FROM claim_topics ct_f WHERE ct_f.claim_id = c.id AND ct_f.topic_id = ?)');
+        values.push(ids[0]);
+      } else if (ids.length > 1) {
+        conditions.push(`EXISTS (SELECT 1 FROM claim_topics ct_f WHERE ct_f.claim_id = c.id AND ct_f.topic_id IN (${ids.map(() => '?').join(',')}))`);
+        values.push(...ids);
+      }
     }
 
     // Theme filter via EXISTS subquery

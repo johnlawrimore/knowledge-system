@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
+import MultiSelectDropdown, { FlatOption } from '@/components/MultiSelectDropdown';
 import { claimTypeLabel } from '@/lib/enumLabels';
 import s from './ClaimsList.module.scss';
 
@@ -22,6 +23,23 @@ interface Claim {
   themes: string[];
   tags: string[];
   cluster_summary: string | null;
+}
+
+interface TopicNode {
+  id: number;
+  name: string;
+  parent_topic_id: number | null;
+  children: TopicNode[];
+}
+
+function flattenTree(nodes: TopicNode[], depth = 0, parentId: number | null = null): FlatOption[] {
+  const result: FlatOption[] = [];
+  for (const node of nodes) {
+    const childIds = node.children.map((c) => c.id);
+    result.push({ id: node.id, name: node.name, depth, parentId, childIds });
+    result.push(...flattenTree(node.children, depth + 1, node.id));
+  }
+  return result;
 }
 
 const SORTS = [
@@ -48,6 +66,17 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('score');
   const [page, setPage] = useState(1);
+  const [topicOptions, setTopicOptions] = useState<FlatOption[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (showFilters) {
+      fetch('/api/topics')
+        .then((r) => r.json())
+        .then((d) => setTopicOptions(flattenTree(d.topics || [])))
+        .catch(console.error);
+    }
+  }, [showFilters]);
 
   useEffect(() => {
     setLoading(true);
@@ -55,6 +84,7 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
     if (sourceId) params.set('source_id', String(sourceId));
     if (confidence) params.set('confidence', confidence);
     if (type) params.set('type', type);
+    if (selectedTopics.size > 0) params.set('topic', [...selectedTopics].join(','));
     if (search) params.set('search', search);
     params.set('sort', sort);
     params.set('limit', String(PAGE_SIZE));
@@ -68,7 +98,7 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [sourceId, confidence, type, search, sort, page]);
+  }, [sourceId, confidence, type, selectedTopics, search, sort, page]);
 
   // Reset page when filters change
   const updateFilter = (setter: (v: string) => void, val: string) => {
@@ -107,6 +137,13 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
               <option value="definition">Definition</option>
               <option value="observation">Observation</option>
             </select>
+
+            <MultiSelectDropdown
+              label="Topics"
+              options={topicOptions}
+              selected={selectedTopics}
+              onChange={(sel) => { setSelectedTopics(sel); setPage(1); }}
+            />
 
             <input
               className={s.searchInput}
