@@ -40,6 +40,8 @@ interface TopicDetail {
   claims: ClaimRow[];
   strongest: ClaimRow[];
   weakest: ClaimRow[];
+  source_count: number;
+  avg_claim_score: number | null;
 }
 
 function countAllClaims(node: TopicNode): number {
@@ -163,18 +165,6 @@ export default function TopicsContent() {
       .finally(() => setDetailLoading(false));
   }, [selectedId]);
 
-  // Compute aggregate stats from the flat topic list for the selected topic
-  function findNode(nodes: TopicNode[], id: number): TopicNode | null {
-    for (const n of nodes) {
-      if (n.id === id) return n;
-      const found = findNode(n.children, id);
-      if (found) return found;
-    }
-    return null;
-  }
-
-  const selectedNode = selectedId ? findNode(topics, Number(selectedId)) : null;
-
   return (
     <div className={s.page}>
       <div className={s.header}>
@@ -221,9 +211,9 @@ export default function TopicsContent() {
                   <div className={s.detailLabel}>Statistics</div>
                   <div className={s.detailValue}>
                     {detail.claims.length} claims
-                    {selectedNode && <> &middot; {selectedNode.source_count} sources</>}
-                    {selectedNode?.avg_claim_score != null && (
-                      <> &middot; avg score: {Number(selectedNode.avg_claim_score).toFixed(1)}</>
+                    {detail.source_count > 0 && <> &middot; {detail.source_count} sources</>}
+                    {detail.avg_claim_score != null && (
+                      <> &middot; avg score: {Number(detail.avg_claim_score).toFixed(1)}</>
                     )}
                   </div>
                 </div>

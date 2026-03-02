@@ -27,7 +27,7 @@ For multi-statement scripts, write to /tmp/decompose.sql and pipe it.
 ```sql
 SELECT id, title, distillation FROM sources WHERE id = {{source_id}};
 SELECT id, statement, claim_type, cluster_id FROM claims ORDER BY id;
-SELECT id, name FROM topics ORDER BY name;
+SELECT id, name, parent_topic_id FROM topics ORDER BY name;
 ```
 
 ### 2. Update Status
@@ -152,7 +152,12 @@ INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
 
 ### 9. Assign Topics
 
-Match claims to existing topics from the query in step 1. If no topic fits, note it in the claim's `notes`: "May need new topic: '<suggested name>'". Do NOT create topics during decomposition — that's a curation decision.
+Topics form a hierarchy via `parent_topic_id` (loaded in Step 1). When assigning:
+
+- **Assign to the most specific level that fits.** If a child topic matches, use it — not the parent. Only assign a parent topic if the claim spans the full breadth of the parent and doesn't fit any single child.
+- **Do not assign both parent and child** unless the claim truly belongs at both levels independently.
+- If no topic fits, note it in the claim's `notes` with a hierarchy-aware suggestion: "May need new topic: '<suggested name>' (child of '<parent_topic>' or top-level)".
+- Do NOT create topics during decomposition — that's a curation decision.
 
 ```sql
 INSERT IGNORE INTO claim_topics (claim_id, topic_id) VALUES (<claim_id>, <topic_id>);

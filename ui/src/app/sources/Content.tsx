@@ -193,10 +193,10 @@ export default function SourcesContent() {
                   {detail.publication && (
                     <> &middot; {detail.publication}</>
                   )}
-                  {' '}&middot; {formatDate(detail.publication_date)} &middot;{' '}
+                  {' '}&middot; <strong>{formatDate(detail.publication_date)}</strong> &middot;{' '}
                   {detail.word_count?.toLocaleString()} words
                   {detail.contributors.length > 0 && (
-                    <> &middot; {detail.contributors[0].name}</>
+                    <> &middot; <strong>{detail.contributors[0].name}</strong></>
                   )}
                 </div>
 

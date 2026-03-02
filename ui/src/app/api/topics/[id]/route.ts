@@ -32,17 +32,37 @@ export async function GET(
 
       const topic = topicRows[0];
 
-      // Claims for this topic with scores
+      // Claims for this topic and all descendant topics
       const [claims] = await conn.query<RowDataPacket[]>(
-        `SELECT
+        `WITH RECURSIVE topic_tree AS (
+           SELECT id FROM topics WHERE id = ?
+           UNION ALL
+           SELECT t.id FROM topics t JOIN topic_tree tt ON t.parent_topic_id = tt.id
+         )
+         SELECT DISTINCT
            sc.claim_id AS id, sc.statement, sc.claim_type,
            sc.computed_confidence, sc.score,
            sc.supporting_sources, sc.contradicting_sources,
            sc.supporting_evidence, sc.contradicting_evidence
          FROM claim_topics ct
+         JOIN topic_tree tt ON ct.topic_id = tt.id
          JOIN v_standalone_claim_scores sc ON ct.claim_id = sc.claim_id
-         WHERE ct.topic_id = ?
          ORDER BY sc.score DESC`,
+        [topicId]
+      );
+
+      // Recursive source count
+      const [sourceRows] = await conn.query<RowDataPacket[]>(
+        `WITH RECURSIVE topic_tree AS (
+           SELECT id FROM topics WHERE id = ?
+           UNION ALL
+           SELECT t.id FROM topics t JOIN topic_tree tt ON t.parent_topic_id = tt.id
+         )
+         SELECT COUNT(DISTINCT e.source_id) AS source_count
+         FROM claim_topics ct
+         JOIN topic_tree tt ON ct.topic_id = tt.id
+         JOIN claim_evidence ce ON ct.claim_id = ce.claim_id
+         JOIN evidence e ON ce.evidence_id = e.id`,
         [topicId]
       );
 
@@ -50,11 +70,19 @@ export async function GET(
       const strongest = claims.slice(0, 5);
       const weakest = [...claims].sort((a, b) => Number(a.score) - Number(b.score)).slice(0, 5);
 
+      // Compute avg score from claims
+      const scores = claims.map((c: RowDataPacket) => Number(c.score)).filter((n: number) => !isNaN(n));
+      const avgScore = scores.length > 0
+        ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length
+        : null;
+
       return NextResponse.json({
         ...topic,
         claims,
         strongest,
         weakest,
+        source_count: sourceRows[0]?.source_count ?? 0,
+        avg_claim_score: avgScore,
       });
     } finally {
       conn.release();

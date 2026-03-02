@@ -37,7 +37,11 @@ SELECT tag, COUNT(*) AS ct FROM claim_tags GROUP BY tag ORDER BY ct DESC LIMIT 3
 
 ### 2. Assign Topics
 
-For each claim, determine which topic(s) it belongs to.
+Topics form a hierarchy via `parent_topic_id`. When assigning:
+
+- **Assign to the most specific level that fits.** If "Productivity Measurement" (child of "AI-Assisted Development") fits, assign to "Productivity Measurement" — not the parent. Only assign the parent if the claim genuinely spans the full breadth of the parent topic and doesn't fit any single child.
+- **Do not assign both parent and child** unless the claim truly belongs at both levels independently.
+- **When proposing new topics**, specify where they belong in the hierarchy. A proposed topic about "Code Review Automation" might be a child of "AI-Assisted Development". Set `parent` to the parent topic name (or null for a new top-level topic).
 
 ### 3. Assign Themes
 
