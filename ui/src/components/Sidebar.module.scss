@@ -12,6 +12,9 @@
 .header {
   padding: 1rem;
   border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 
   h1 {
     font-size: 0.75rem;
@@ -63,33 +66,6 @@
 .navIconSecondary {
   @extend .navIcon;
   opacity: 0.5;
-}
-
-.pipelineFooter {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--border-default);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.pipelineLabel {
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 0.25rem;
-}
-
-.pipelineCounts {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.countCollected { color: var(--accent-yellow); }
-.countDistilled { color: var(--accent-blue); }
-.countDecomposed { color: var(--accent-green); }
-
-.pipelineLegend {
-  font-size: 0.625rem;
-  margin-top: 0.125rem;
 }
 
 .themeToggle {

@@ -1,15 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import s from './Sidebar.module.scss';
-
-interface PipelineStats {
-  collected: number;
-  distilled: number;
-  decomposed: number;
-}
 
 const primaryNav = [
   { href: '/', label: 'Dashboard', icon: '◆' },
@@ -29,7 +24,6 @@ const secondaryNav = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [stats, setStats] = useState<PipelineStats | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
@@ -45,19 +39,13 @@ export default function Sidebar() {
     setTheme(next);
   };
 
-  useEffect(() => {
-    fetch('/api/dashboard')
-      .then((r) => r.json())
-      .then((d) => setStats(d.pipeline))
-      .catch(() => {});
-  }, [pathname]);
-
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
     <aside className={s.sidebar}>
       <div className={s.header}>
+        <Image src="/logo.png" alt="Logo" width={28} height={28} />
         <h1>KNOWLEDGE BASE</h1>
       </div>
 
@@ -86,18 +74,6 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
-
-      {stats && (
-        <div className={s.pipelineFooter}>
-          <div className={s.pipelineLabel}>Pipeline</div>
-          <div className={s.pipelineCounts}>
-            <span className={s.countCollected}>{stats.collected}</span>/
-            <span className={s.countDistilled}>{stats.distilled}</span>/
-            <span className={s.countDecomposed}>{stats.decomposed}</span>
-          </div>
-          <div className={s.pipelineLegend}>collected / distilled / decomposed</div>
-        </div>
-      )}
 
       <button className={s.themeToggle} onClick={toggleTheme}>
         <span>{theme === 'dark' ? '\u263E' : '\u2600'}</span>
