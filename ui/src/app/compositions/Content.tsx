@@ -26,7 +26,7 @@ interface CompositionSource {
   title: string;
   source_type: string;
   url: string | null;
-  publication_date: string | null;
+  published_date: string | null;
   word_count: number;
   status: string;
   contribution_note: string | null;
@@ -35,11 +35,10 @@ interface CompositionSource {
 interface CompositionDetail {
   id: number;
   title: string;
-  content_md: string;
+  content: string;
   word_count: number;
   evaluation_results: Record<string, unknown> | null;
   status: string;
-  notes: string | null;
   created_at: string;
   updated_at: string;
   sources: CompositionSource[];
@@ -205,16 +204,6 @@ export default function CompositionsContent() {
                   </div>
                 )}
 
-                <div className={s.detailSection}>
-                  <div className={s.detailLabel}>Notes</div>
-                  <InlineEdit
-                    value={detail.notes}
-                    onSave={(v) => patchComposition('notes', v)}
-                    multiline
-                    placeholder="Add notes..."
-                  />
-                </div>
-
                 {detail.evaluation_results && (
                   <div className={s.detailSection}>
                     <div className={s.detailLabel}>Evaluation Results</div>
@@ -226,7 +215,7 @@ export default function CompositionsContent() {
 
                 <div className={s.detailSection}>
                   <div className={s.detailLabel}>Content</div>
-                  <MarkdownViewer content={detail.content_md} />
+                  <MarkdownViewer content={detail.content} />
                 </div>
               </>
             )}

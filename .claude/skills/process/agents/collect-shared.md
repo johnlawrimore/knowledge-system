@@ -2,7 +2,7 @@
 
 ## markdown_rules
 
-**Markdown rules (mandatory for all content_md output):**
+**Markdown rules (mandatory for all content output):**
 
 Headings:
 - Exactly one H1 (the title), always first

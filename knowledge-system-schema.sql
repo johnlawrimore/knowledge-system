@@ -42,23 +42,23 @@ CREATE TABLE sources (
     ) NOT NULL,
     url VARCHAR(1024),
     publication_id INT                    COMMENT 'FK to publications table',
-    publication_date DATE,
+    published_date DATE,
     date_collected TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     evaluation_results JSON             COMMENT 'Flexible evaluation data: credibility, bias, relevance, etc.',
-    content_md LONGTEXT NOT NULL        COMMENT 'Full markdown of source material',
+    content LONGTEXT NOT NULL             COMMENT 'Full markdown of source material',
     distillation LONGTEXT               COMMENT 'Distilled content in editorial voice',
     word_count INT GENERATED ALWAYS AS (
-        LENGTH(content_md) - LENGTH(REPLACE(content_md, ' ', '')) + 1
+        LENGTH(content) - LENGTH(REPLACE(content, ' ', '')) + 1
     ) STORED,
     status ENUM('collected', 'distilling', 'distilled', 'decomposing', 'decomposed')
         NOT NULL DEFAULT 'collected',
-    notes TEXT,
+    description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     INDEX idx_sources_status (status),
     INDEX idx_sources_type (source_type),
-    FULLTEXT INDEX ft_sources_content (content_md),
+    FULLTEXT INDEX ft_sources_content (content),
     FULLTEXT INDEX ft_sources_distillation (distillation),
     FOREIGN KEY (publication_id) REFERENCES publications(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -82,19 +82,17 @@ CREATE TABLE source_contributors (
 CREATE TABLE compositions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
-    content_md LONGTEXT NOT NULL         COMMENT 'Composed content from multiple sources',
+    content LONGTEXT NOT NULL              COMMENT 'Composed content from multiple sources',
     word_count INT GENERATED ALWAYS AS (
-        LENGTH(content_md) - LENGTH(REPLACE(content_md, ' ', '')) + 1
+        LENGTH(content) - LENGTH(REPLACE(content, ' ', '')) + 1
     ) STORED,
-    source_strategy ENUM('single_source', 'multi_source') NOT NULL DEFAULT 'single_source',
     evaluation_results JSON              COMMENT 'Quality scores, coverage assessment, etc.',
     status ENUM('draft', 'reviewed', 'published') NOT NULL DEFAULT 'draft',
-    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     INDEX idx_compositions_status (status),
-    FULLTEXT INDEX ft_compositions_content (content_md)
+    FULLTEXT INDEX ft_compositions_content (content)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE composition_sources (
@@ -229,7 +227,7 @@ CREATE TABLE devices (
     INDEX idx_devices_source (source_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE device_claims (
+CREATE TABLE claim_devices (
     device_id INT NOT NULL,
     claim_id INT NOT NULL,
 
@@ -250,7 +248,7 @@ CREATE TABLE contexts (
     INDEX idx_contexts_source (source_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE context_claims (
+CREATE TABLE claim_contexts (
     context_id INT NOT NULL,
     claim_id INT NOT NULL,
 
@@ -271,7 +269,7 @@ CREATE TABLE methods (
     INDEX idx_methods_source (source_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE method_claims (
+CREATE TABLE claim_methods (
     method_id INT NOT NULL,
     claim_id INT NOT NULL,
 
@@ -284,21 +282,18 @@ CREATE TABLE reasonings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     content TEXT NOT NULL,
     source_id INT NOT NULL,
+    evidence_id INT NOT NULL,
+    claim_id INT NOT NULL,
     reasoning_type ENUM('deductive', 'inductive', 'analogical', 'causal', 'abductive'),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
-    INDEX idx_reasonings_source (source_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE reasoning_claims (
-    reasoning_id INT NOT NULL,
-    claim_id INT NOT NULL,
-
-    PRIMARY KEY (reasoning_id, claim_id),
-    FOREIGN KEY (reasoning_id) REFERENCES reasonings(id) ON DELETE CASCADE,
-    FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE
+    FOREIGN KEY (evidence_id) REFERENCES evidence(id) ON DELETE CASCADE,
+    FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,
+    INDEX idx_reasonings_source (source_id),
+    INDEX idx_reasonings_evidence (evidence_id),
+    INDEX idx_reasonings_claim (claim_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -332,7 +327,6 @@ CREATE TABLE claim_evidence (
     evidence_id INT NOT NULL,
     stance ENUM('supports', 'contradicts', 'qualifies') NOT NULL DEFAULT 'supports',
     strength ENUM('strong', 'moderate', 'weak') NOT NULL DEFAULT 'moderate',
-    reasoning TEXT,
     notes TEXT,
 
     PRIMARY KEY (claim_id, evidence_id),
@@ -397,7 +391,7 @@ SELECT
     SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'strong' THEN 1 ELSE 0 END) AS strong_support_count,
     SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'moderate' THEN 1 ELSE 0 END) AS moderate_support_count,
     SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'weak' THEN 1 ELSE 0 END) AS weak_support_count,
-    SUM(CASE WHEN ce.reasoning IS NOT NULL AND ce.reasoning != '' THEN 1 ELSE 0 END) AS reasoning_count,
+    (SELECT COUNT(*) FROM reasonings r2 WHERE r2.claim_id = c.id) AS reasoning_count,
     COUNT(DISTINCT CASE WHEN e.derived_from_evidence_id IS NOT NULL THEN e.id END) AS derived_evidence_count
 FROM claims c
 LEFT JOIN claim_evidence ce ON c.id = ce.claim_id
@@ -487,8 +481,8 @@ GROUP BY s.id, s.title, s.source_type, s.status;
 CREATE OR REPLACE VIEW v_claim_evidence AS
 SELECT c.id AS claim_id, c.statement,
     c.reviewer_notes,
-    ce.stance, ce.strength, ce.reasoning,
-    e.content AS evidence_content, e.evidence_type, e.verbatim_quote,
+    ce.stance, ce.strength,
+    e.id AS evidence_id, e.content AS evidence_content, e.evidence_type, e.verbatim_quote,
     e.evaluation_results AS evidence_evaluation, e.derived_from_evidence_id,
     s.title AS source_title, s.source_type, s.evaluation_results AS source_evaluation,
     GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ') AS contributors
@@ -499,7 +493,7 @@ JOIN sources s ON e.source_id = s.id
 LEFT JOIN source_contributors sc ON s.id = sc.source_id
 LEFT JOIN contributors p ON sc.contributor_id = p.id
 GROUP BY c.id, c.statement,
-         ce.stance, ce.strength, ce.reasoning,
+         ce.stance, ce.strength,
          e.id, e.content, e.evidence_type,
          e.verbatim_quote, e.evaluation_results, e.derived_from_evidence_id,
          s.title, s.source_type, s.evaluation_results;

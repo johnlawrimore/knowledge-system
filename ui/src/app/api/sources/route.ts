@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
            s.source_type,
            s.url,
            pub.name AS publication,
-           s.publication_date,
+           s.published_date,
            s.word_count,
            s.status,
            s.date_collected,

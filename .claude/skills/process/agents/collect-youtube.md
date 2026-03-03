@@ -161,7 +161,7 @@ INSERT IGNORE INTO publications (name) VALUES ('<channel_name>');
 SET @pub_id = (SELECT id FROM publications WHERE name = '<channel_name>');
 
 -- Insert source
-INSERT INTO sources (title, source_type, url, publication_id, publication_date, content_md, status, notes)
+INSERT INTO sources (title, source_type, url, publication_id, published_date, content, status, description)
 VALUES ('<title>', 'youtube_video', '{{url}}', @pub_id, '<date>', '<full_markdown>', 'collected', '<caption_type, attribution_notes>');
 SET @source_id = LAST_INSERT_ID();
 

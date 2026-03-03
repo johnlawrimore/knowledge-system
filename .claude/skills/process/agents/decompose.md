@@ -207,7 +207,7 @@ SELECT id FROM devices WHERE id >= LAST_INSERT_ID() ORDER BY id;
 Link each device to the claim(s) it illustrates:
 
 ```sql
-INSERT IGNORE INTO device_claims (device_id, claim_id) VALUES
+INSERT IGNORE INTO claim_devices (device_id, claim_id) VALUES
   (<device_id>, <claim_id>);
 ```
 
@@ -229,7 +229,7 @@ SELECT id FROM contexts WHERE id >= LAST_INSERT_ID() ORDER BY id;
 Link each context to the claim(s) it qualifies:
 
 ```sql
-INSERT IGNORE INTO context_claims (context_id, claim_id) VALUES
+INSERT IGNORE INTO claim_contexts (context_id, claim_id) VALUES
   (<context_id>, <claim_id>);
 ```
 
@@ -251,7 +251,7 @@ SELECT id FROM methods WHERE id >= LAST_INSERT_ID() ORDER BY id;
 Link each method to the claim(s) it operationalizes:
 
 ```sql
-INSERT IGNORE INTO method_claims (method_id, claim_id) VALUES
+INSERT IGNORE INTO claim_methods (method_id, claim_id) VALUES
   (<method_id>, <claim_id>);
 ```
 
@@ -261,25 +261,16 @@ Skip this step if the source has no notable methods.
 
 ### 14. Extract Reasonings
 
-Identify standalone logical connections that explain why evidence or context supports a claim. Note: inline reasoning tied to a specific evidence-claim link belongs in `claim_evidence.reasoning`. The `reasonings` table is for standalone arguments that may connect to multiple claims independently.
+Identify logical connections that explain why a specific piece of evidence supports a specific claim. A reasoning record is always tied to both an evidence record and a claim record — it explains the "why" behind the evidence-claim link. Multiple reasoning records can exist for the same evidence-claim pair (different logical arguments).
 
 ```sql
-INSERT INTO reasonings (content, source_id, reasoning_type, notes) VALUES
-  ('<reasoning content>', {{source_id}}, '<type>', NULL);
-
-SELECT id FROM reasonings WHERE id >= LAST_INSERT_ID() ORDER BY id;
-```
-
-Link each reasoning to the claim(s) it supports:
-
-```sql
-INSERT IGNORE INTO reasoning_claims (reasoning_id, claim_id) VALUES
-  (<reasoning_id>, <claim_id>);
+INSERT INTO reasonings (content, source_id, evidence_id, claim_id, reasoning_type, notes) VALUES
+  ('<reasoning content>', {{source_id}}, <evidence_id>, <claim_id>, '<type>', NULL);
 ```
 
 **reasoning_type:** `deductive`, `inductive`, `analogical`, `causal`, `abductive`
 
-Skip this step if the source has no notable standalone reasonings.
+Skip this step if the source has no notable reasonings.
 
 ### 15. Check for Derived Evidence
 

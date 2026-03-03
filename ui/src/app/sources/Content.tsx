@@ -42,10 +42,10 @@ interface SourceDetail {
   source_type: string;
   url: string | null;
   publication: string | null;
-  publication_date: string | null;
+  published_date: string | null;
   word_count: number;
   status: string;
-  notes: string | null;
+  description: string | null;
   evaluation_results: SourceEvaluation | null;
   content_preview: string;
   original: string;
@@ -203,7 +203,7 @@ export default function SourcesContent() {
                   {detail.publication && (
                     <> &middot; {detail.publication}</>
                   )}
-                  {' '}&middot; <strong>{formatDate(detail.publication_date)}</strong> &middot;{' '}
+                  {' '}&middot; <strong>{formatDate(detail.published_date)}</strong> &middot;{' '}
                   {detail.word_count?.toLocaleString()} words
                   {detail.contributors.length > 0 && (
                     <> &middot; <strong>{detail.contributors[0].name}</strong></>
@@ -282,12 +282,12 @@ export default function SourcesContent() {
                     )}
 
                     <div className={s.detailSection}>
-                      <div className={s.detailLabel}>Notes</div>
+                      <div className={s.detailLabel}>Description</div>
                       <InlineEdit
-                        value={detail.notes}
-                        onSave={(v) => patchSource('notes', v)}
+                        value={detail.description}
+                        onSave={(v) => patchSource('description', v)}
                         multiline
-                        placeholder="Add notes..."
+                        placeholder="Add description..."
                       />
                     </div>
 

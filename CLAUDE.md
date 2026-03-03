@@ -65,13 +65,13 @@ All markdown content (sources, distillations, compositions) follows **markdown-f
 - **User**: `claude` / `claude2026`
 - **MCP**: `mysql` MCP server with full CRUD access
 
-### Tables (28)
+### Tables (25)
 
 **Collection**: `contributors`, `publications`, `sources` (includes `distillation` column), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
 **Decomposition**: `topics`, `themes`, `claims`, `claim_sources`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
-**Decomposition Entities**: `devices`, `device_claims`, `contexts`, `context_claims`, `methods`, `method_claims`, `reasonings`, `reasoning_claims`
-**Evidence**: `evidence`, `claim_evidence`
+**Decomposition Entities**: `devices`, `claim_devices`, `contexts`, `claim_contexts`, `methods`, `claim_methods`
+**Evidence & Reasoning**: `evidence`, `claim_evidence`, `reasonings`
 **Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
 
 ### Claim Sources
@@ -108,16 +108,21 @@ Scoring: parent and child claims each score independently. The parent's score do
 
 ### Decomposition Entity Types
 
-Four entity types are extracted during decomposition alongside claims and evidence:
+Three entity types are extracted during decomposition alongside claims and evidence:
 
 | Entity | Table | Junction | Purpose |
 |--------|-------|----------|---------|
-| **Devices** | `devices` | `device_claims` | Rhetorical devices — analogies, metaphors, narratives, examples, thought experiments, visuals |
-| **Contexts** | `contexts` | `context_claims` | Boundary conditions — historical, industry, technical, organizational, regulatory, cultural, scope |
-| **Methods** | `methods` | `method_claims` | Application methods — processes, frameworks, techniques, tools, practices, metrics |
-| **Reasonings** | `reasonings` | `reasoning_claims` | Logical connections — deductive, inductive, analogical, causal, abductive |
+| **Devices** | `devices` | `claim_devices` | Rhetorical devices — analogies, metaphors, narratives, examples, thought experiments, visuals |
+| **Contexts** | `contexts` | `claim_contexts` | Boundary conditions — historical, industry, technical, organizational, regulatory, cultural, scope |
+| **Methods** | `methods` | `claim_methods` | Application methods — processes, frameworks, techniques, tools, practices, metrics |
 
 Each entity has a `source_id` tracing to the originating source and links to one or more claims through its junction table. These entities do not affect claim scoring — scoring remains based on evidence strength, source independence, and contradiction analysis.
+
+### Reasonings
+
+Reasonings explain why a specific piece of evidence supports a specific claim. They live in the `reasonings` table with direct `evidence_id` and `claim_id` foreign keys (no junction table). A single evidence-claim link can have multiple reasoning records — different logical arguments for the same connection.
+
+`reasoning_type` enum: `deductive`, `inductive`, `analogical`, `causal`, `abductive`
 
 ### Key Views
 

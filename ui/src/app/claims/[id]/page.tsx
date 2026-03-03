@@ -17,7 +17,6 @@ interface Evidence {
   verbatim_quote: string | null;
   stance: string;
   strength: string;
-  reasoning: string | null;
   source_id: number;
   source_title: string;
   source_type: string;
@@ -68,6 +67,8 @@ interface Reasoning {
   id: number;
   content: string;
   reasoning_type: string;
+  evidence_id: number;
+  claim_id: number;
   source_id: number;
   source_title: string;
 }
@@ -114,7 +115,7 @@ interface ClaimDetail {
   relationships: Relationship[];
 }
 
-type Tab = 'about' | 'connections' | 'evidence' | 'devices' | 'contexts' | 'methods' | 'reasonings';
+type Tab = 'about' | 'connections' | 'evidence' | 'devices' | 'contexts' | 'methods';
 
 const stanceStyles: Record<string, { card: string; badge: string }> = {
   supports: { card: s.evidenceSupports, badge: s.stanceSupports },
@@ -167,17 +168,23 @@ export default function ClaimDetailPage() {
   if (loading) return <div className={s.loading}>Loading claim...</div>;
   if (!claim) return <div className={s.empty}>Claim not found</div>;
 
+  // Group reasonings by evidence_id for nesting under evidence cards
+  const reasoningsByEvidence = claim.reasonings.reduce<Record<number, Reasoning[]>>((acc, r) => {
+    if (!acc[r.evidence_id]) acc[r.evidence_id] = [];
+    acc[r.evidence_id].push(r);
+    return acc;
+  }, {});
+
   const connectionsCount =
     (claim.parent_claim ? 1 : 0) + claim.children.length + claim.relationships.length;
 
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: 'about', label: 'About', count: 0 },
-    { key: 'connections', label: 'Connections', count: connectionsCount },
-    { key: 'evidence', label: 'Evidence', count: claim.evidence.length },
-    { key: 'devices', label: 'Devices', count: claim.devices.length },
+    { key: 'connections', label: 'Connected Claims', count: connectionsCount },
+    { key: 'evidence', label: 'Supporting Evidence', count: claim.evidence.length },
+    { key: 'devices', label: 'Rhetorical Devices', count: claim.devices.length },
     { key: 'contexts', label: 'Contexts', count: claim.contexts.length },
-    { key: 'methods', label: 'Methods', count: claim.methods.length },
-    { key: 'reasonings', label: 'Reasonings', count: claim.reasonings.length },
+    { key: 'methods', label: 'Application', count: claim.methods.length },
   ];
 
   return (
@@ -393,8 +400,16 @@ export default function ClaimDetailPage() {
                         )}
                       </div>
                       <div className={s.cardContent}>{ev.content}</div>
-                      {ev.reasoning && (
-                        <div className={s.cardNote}>Reasoning: {ev.reasoning}</div>
+                      {reasoningsByEvidence[ev.id] && reasoningsByEvidence[ev.id].length > 0 && (
+                        <>
+                          <div className={s.reasoningHeader}>Reasoning</div>
+                          {reasoningsByEvidence[ev.id].map((r) => (
+                            <div key={r.id} className={s.cardNote}>
+                              <span className={s.reasoningType}>{reasoningTypeLabel(r.reasoning_type)}</span>
+                              {r.content}
+                            </div>
+                          ))}
+                        </>
                       )}
                       <div className={s.cardSource}>
                         Source: <Link href={`/sources?id=${ev.source_id}`}>{ev.source_title}</Link>
@@ -477,27 +492,6 @@ export default function ClaimDetailPage() {
           </>
         )}
 
-        {tab === 'reasonings' && (
-          <>
-            {claim.reasonings.length === 0 ? (
-              <div className={s.emptyTab}>No reasonings linked to this claim</div>
-            ) : (
-              <div className={s.cardList}>
-                {claim.reasonings.map((r) => (
-                  <div key={r.id} className={s.entityCard}>
-                    <div className={s.entityCardHeader}>
-                      <span className={s.entityTypeBadge}>{reasoningTypeLabel(r.reasoning_type)}</span>
-                    </div>
-                    <div className={s.cardContent}>{r.content}</div>
-                    <div className={s.cardSource}>
-                      Source: <Link href={`/sources?id=${r.source_id}`}>{r.source_title}</Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
       </div>
     </div>
   );

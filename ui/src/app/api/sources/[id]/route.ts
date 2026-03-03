@@ -33,7 +33,7 @@ export async function GET(
       const source = sourceRows[0];
 
       // Split content: preview (first 500 chars) and full content
-      const original = source.content_md || '';
+      const original = source.content || '';
       const contentPreview = original.substring(0, 500);
       const hasMore = original.length > 500;
 
@@ -139,11 +139,11 @@ export async function PATCH(
 
   try {
     const body = await request.json();
-    const { notes, evaluation_results, publication } = body;
+    const { description, evaluation_results, publication } = body;
 
-    if (notes === undefined && evaluation_results === undefined && publication === undefined) {
+    if (description === undefined && evaluation_results === undefined && publication === undefined) {
       return NextResponse.json(
-        { error: 'Request must include notes, evaluation_results, and/or publication' },
+        { error: 'Request must include description, evaluation_results, and/or publication' },
         { status: 400 }
       );
     }
@@ -151,9 +151,9 @@ export async function PATCH(
     const updates: string[] = [];
     const values: (string | null)[] = [];
 
-    if (notes !== undefined) {
-      updates.push('notes = ?');
-      values.push(notes);
+    if (description !== undefined) {
+      updates.push('description = ?');
+      values.push(description);
     }
 
     if (evaluation_results !== undefined) {
@@ -211,7 +211,7 @@ export async function PATCH(
 
       // Return the updated source
       const [updatedRows] = await conn.query<RowDataPacket[]>(
-        `SELECT s.id, s.notes, s.evaluation_results, pub.name AS publication
+        `SELECT s.id, s.description, s.evaluation_results, pub.name AS publication
          FROM sources s
          LEFT JOIN publications pub ON s.publication_id = pub.id
          WHERE s.id = ?`,
@@ -232,7 +232,7 @@ export async function PATCH(
 
       return NextResponse.json({
         id: updated.id,
-        notes: updated.notes,
+        description: updated.description,
         evaluation_results: parsedEval,
         publication: updated.publication,
       });

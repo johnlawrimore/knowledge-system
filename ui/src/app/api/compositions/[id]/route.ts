@@ -19,9 +19,9 @@ export async function GET(
       // Composition detail
       const [compositionRows] = await conn.query<RowDataPacket[]>(
         `SELECT
-           a.id, a.title, a.content_md, a.word_count,
+           a.id, a.title, a.content, a.word_count,
            a.evaluation_results,
-           a.status, a.notes, a.created_at, a.updated_at
+           a.status, a.created_at, a.updated_at
          FROM compositions a
          WHERE a.id = ?`,
         [compositionId]
@@ -37,7 +37,7 @@ export async function GET(
       const [sources] = await conn.query<RowDataPacket[]>(
         `SELECT
            s.id, s.title, s.source_type, s.url,
-           s.publication_date, s.word_count, s.status,
+           s.published_date, s.word_count, s.status,
            cs.contribution_note
          FROM composition_sources cs
          JOIN sources s ON cs.source_id = s.id
@@ -87,11 +87,6 @@ export async function PATCH(
     const body = await request.json();
     const updates: string[] = [];
     const values: (string | number)[] = [];
-
-    if (body.notes !== undefined) {
-      updates.push('notes = ?');
-      values.push(body.notes);
-    }
 
     if (body.evaluation_results !== undefined) {
       updates.push('evaluation_results = ?');

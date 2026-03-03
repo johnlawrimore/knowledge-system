@@ -148,10 +148,10 @@ export async function GET(request: NextRequest) {
           FROM claim_tags ctg
           WHERE ctg.claim_id = c.id
         ) AS tags,
-        (SELECT COUNT(*) FROM device_claims dc WHERE dc.claim_id = c.id) AS device_count,
-        (SELECT COUNT(*) FROM context_claims cc WHERE cc.claim_id = c.id) AS context_count,
-        (SELECT COUNT(*) FROM method_claims mc WHERE mc.claim_id = c.id) AS method_count,
-        (SELECT COUNT(*) FROM reasoning_claims rc WHERE rc.claim_id = c.id) AS reasoning_count,
+        (SELECT COUNT(*) FROM claim_devices dc WHERE dc.claim_id = c.id) AS device_count,
+        (SELECT COUNT(*) FROM claim_contexts cc WHERE cc.claim_id = c.id) AS context_count,
+        (SELECT COUNT(*) FROM claim_methods mc WHERE mc.claim_id = c.id) AS method_count,
+        (SELECT COUNT(*) FROM reasonings r WHERE r.claim_id = c.id) AS reasoning_count,
         (SELECT COUNT(*) FROM claims ch WHERE ch.parent_claim_id = c.id) AS child_count
       FROM claims c
       LEFT JOIN v_standalone_claim_scores scs ON c.id = scs.claim_id

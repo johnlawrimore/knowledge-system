@@ -71,7 +71,7 @@ interface ContributorDetail {
     title: string;
     source_type: string;
     url: string | null;
-    publication_date: string | null;
+    published_date: string | null;
     status: string;
     contributor_role: string;
   }[];
@@ -340,8 +340,8 @@ export default function ContributorsContent() {
                           <div className={ps.sourceTitle}>{src.title}</div>
                           <div className={ps.sourceMeta}>
                             <SourceTypeBadge type={src.source_type} size={13} />
-                            {src.publication_date && (
-                              <><span>&middot;</span><span>{formatDate(src.publication_date)}</span></>
+                            {src.published_date && (
+                              <><span>&middot;</span><span>{formatDate(src.published_date)}</span></>
                             )}
                           </div>
                         </Link>

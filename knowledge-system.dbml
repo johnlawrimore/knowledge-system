@@ -34,14 +34,14 @@ Table sources {
   source_type enum('youtube_video','podcast','blog_post','website','academic_paper','book','book_chapter','conference_talk','newsletter','social_media','report','research','documentation','other') [not null]
   url varchar(1024)
   publication_id int
-  publication_date date
+  published_date date
   date_collected timestamp
   evaluation_results json
-  content_md longtext [not null]
+  content longtext [not null]
   distillation longtext
   word_count int
   status enum('collected','distilling','distilled','decomposing','decomposed') [not null, default: 'collected']
-  notes text
+  description text
   created_at timestamp
   updated_at timestamp
 }
@@ -62,12 +62,10 @@ Ref: source_contributors.contributor_id > contributors.id [delete: restrict]
 Table compositions {
   id int [pk, increment]
   title varchar(500) [not null]
-  content_md longtext [not null]
+  content longtext [not null]
   word_count int
-  source_strategy enum('single_source','multi_source') [not null, default: 'single_source']
   evaluation_results json
   status enum('draft','reviewed','published') [not null, default: 'draft']
-  notes text
   created_at timestamp
   updated_at timestamp
 }
@@ -178,15 +176,15 @@ Table devices {
   created_at timestamp
 }
 
-Table device_claims {
+Table claim_devices {
   device_id int [not null]
   claim_id int [not null]
   indexes { (device_id, claim_id) [pk] }
 }
 
 Ref: devices.source_id > sources.id [delete: restrict]
-Ref: device_claims.device_id > devices.id [delete: cascade]
-Ref: device_claims.claim_id > claims.id [delete: cascade]
+Ref: claim_devices.device_id > devices.id [delete: cascade]
+Ref: claim_devices.claim_id > claims.id [delete: cascade]
 
 Table contexts {
   id int [pk, increment]
@@ -197,15 +195,15 @@ Table contexts {
   created_at timestamp
 }
 
-Table context_claims {
+Table claim_contexts {
   context_id int [not null]
   claim_id int [not null]
   indexes { (context_id, claim_id) [pk] }
 }
 
 Ref: contexts.source_id > sources.id [delete: restrict]
-Ref: context_claims.context_id > contexts.id [delete: cascade]
-Ref: context_claims.claim_id > claims.id [delete: cascade]
+Ref: claim_contexts.context_id > contexts.id [delete: cascade]
+Ref: claim_contexts.claim_id > claims.id [delete: cascade]
 
 Table methods {
   id int [pk, increment]
@@ -216,34 +214,30 @@ Table methods {
   created_at timestamp
 }
 
-Table method_claims {
+Table claim_methods {
   method_id int [not null]
   claim_id int [not null]
   indexes { (method_id, claim_id) [pk] }
 }
 
 Ref: methods.source_id > sources.id [delete: restrict]
-Ref: method_claims.method_id > methods.id [delete: cascade]
-Ref: method_claims.claim_id > claims.id [delete: cascade]
+Ref: claim_methods.method_id > methods.id [delete: cascade]
+Ref: claim_methods.claim_id > claims.id [delete: cascade]
 
 Table reasonings {
   id int [pk, increment]
   content text [not null]
   source_id int [not null]
+  evidence_id int [not null]
+  claim_id int [not null]
   reasoning_type enum('deductive','inductive','analogical','causal','abductive')
   notes text
   created_at timestamp
 }
 
-Table reasoning_claims {
-  reasoning_id int [not null]
-  claim_id int [not null]
-  indexes { (reasoning_id, claim_id) [pk] }
-}
-
 Ref: reasonings.source_id > sources.id [delete: restrict]
-Ref: reasoning_claims.reasoning_id > reasonings.id [delete: cascade]
-Ref: reasoning_claims.claim_id > claims.id [delete: cascade]
+Ref: reasonings.evidence_id > evidence.id [delete: cascade]
+Ref: reasonings.claim_id > claims.id [delete: cascade]
 
 // --- EVIDENCE ---
 
@@ -267,7 +261,6 @@ Table claim_evidence {
   evidence_id int [not null]
   stance enum('supports','contradicts','qualifies') [not null, default: 'supports']
   strength enum('strong','moderate','weak') [not null, default: 'moderate']
-  reasoning text
   notes text
   indexes { (claim_id, evidence_id) [pk] }
 }
@@ -332,13 +325,12 @@ TableGroup decomposition {
 
 TableGroup decomposition_entities {
   devices
-  device_claims
+  claim_devices
   contexts
-  context_claims
+  claim_contexts
   methods
-  method_claims
+  claim_methods
   reasonings
-  reasoning_claims
 }
 
 TableGroup evidence_layer {

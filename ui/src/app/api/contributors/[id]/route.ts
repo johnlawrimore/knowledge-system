@@ -35,7 +35,7 @@ export async function GET(
       const [sources] = await conn.query<RowDataPacket[]>(
         `SELECT
            s.id, s.title, s.source_type, s.url,
-           s.publication_date, s.status,
+           s.published_date, s.status,
            sc.role AS contributor_role
          FROM source_contributors sc
          JOIN sources s ON sc.source_id = s.id

@@ -18,7 +18,7 @@ For multi-statement scripts, write to /tmp/evaluate.sql and pipe it.
 ### 1. Load Content
 
 ```sql
-SELECT id, title, source_type, url, publication_date, content_md, distillation
+SELECT id, title, source_type, url, published_date, content, distillation
 FROM sources WHERE id = {{source_id}};
 
 SELECT id, statement, claim_type
@@ -31,7 +31,7 @@ JOIN sources s ON e.source_id = s.id
 WHERE e.id IN ({{evidence_ids}});
 ```
 
-Read the source distillation (or content_md if no distillation) carefully before scoring.
+Read the source distillation (or content if no distillation) carefully before scoring.
 
 ### 2. Score the Source (8 dimensions)
 

@@ -16,11 +16,11 @@ For multi-statement scripts, write to /tmp/distill.sql and pipe it.
 ### 1. Load the Source
 
 ```sql
-SELECT id, title, source_type, content_md, status FROM sources WHERE id = {{source_id}};
+SELECT id, title, source_type, content, status FROM sources WHERE id = {{source_id}};
 ```
 
 **Error checks:**
-- If `content_md` is empty or NULL, return error: "Source has no content"
+- If `content` is empty or NULL, return error: "Source has no content"
 - If `status` is not `collected`, return error: "Source status is '<status>', expected 'collected'"
 
 ### 2. Update Status

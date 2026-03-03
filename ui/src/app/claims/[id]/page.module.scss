@@ -244,6 +244,27 @@
   color: var(--text-secondary);
   line-height: 1.4;
   margin-bottom: 0.375rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.625rem;
+}
+
+.reasoningHeader {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.reasoningType {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  margin-right: 0.375rem;
+  text-transform: uppercase;
 }
 
 .cardSource {

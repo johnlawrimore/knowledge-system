@@ -57,7 +57,6 @@ export async function GET(
          e.evaluation_results,
          ce.stance,
          ce.strength,
-         ce.reasoning,
          s.id AS source_id,
          s.title AS source_title,
          s.source_type,
@@ -115,7 +114,7 @@ export async function GET(
     const [deviceRows] = await pool.query<RowDataPacket[]>(
       `SELECT d.id, d.content, d.device_type, d.effectiveness_note,
               s.id AS source_id, s.title AS source_title
-       FROM device_claims dc
+       FROM claim_devices dc
        JOIN devices d ON dc.device_id = d.id
        JOIN sources s ON d.source_id = s.id
        WHERE dc.claim_id = ?
@@ -127,7 +126,7 @@ export async function GET(
     const [contextRows] = await pool.query<RowDataPacket[]>(
       `SELECT ctx.id, ctx.content, ctx.context_type,
               s.id AS source_id, s.title AS source_title
-       FROM context_claims cc
+       FROM claim_contexts cc
        JOIN contexts ctx ON cc.context_id = ctx.id
        JOIN sources s ON ctx.source_id = s.id
        WHERE cc.claim_id = ?
@@ -139,7 +138,7 @@ export async function GET(
     const [methodRows] = await pool.query<RowDataPacket[]>(
       `SELECT m.id, m.content, m.method_type,
               s.id AS source_id, s.title AS source_title
-       FROM method_claims mc
+       FROM claim_methods mc
        JOIN methods m ON mc.method_id = m.id
        JOIN sources s ON m.source_id = s.id
        WHERE mc.claim_id = ?
@@ -147,15 +146,15 @@ export async function GET(
       [id],
     );
 
-    // ---- Reasonings ----
+    // ---- Reasonings (nested under evidence) ----
     const [reasoningRows] = await pool.query<RowDataPacket[]>(
       `SELECT r.id, r.content, r.reasoning_type,
+              r.evidence_id, r.claim_id,
               s.id AS source_id, s.title AS source_title
-       FROM reasoning_claims rc
-       JOIN reasonings r ON rc.reasoning_id = r.id
+       FROM reasonings r
        JOIN sources s ON r.source_id = s.id
-       WHERE rc.claim_id = ?
-       ORDER BY r.id`,
+       WHERE r.claim_id = ?
+       ORDER BY r.evidence_id, r.id`,
       [id],
     );
 
@@ -230,7 +229,6 @@ export async function GET(
         verbatim_quote: row.verbatim_quote,
         stance: row.stance,
         strength: row.strength,
-        reasoning: row.reasoning,
         source_id: row.source_id,
         source_title: row.source_title,
         source_type: row.source_type,
