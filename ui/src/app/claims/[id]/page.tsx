@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
+import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import { claimTypeLabel, stanceLabel, strengthLabel, evidenceTypeLabel } from '@/lib/enumLabels';
 import s from './page.module.scss';
 
@@ -32,6 +33,12 @@ interface Relationship {
   direction: string;
 }
 
+interface ClaimEvaluation {
+  validity?: Record<string, number>;
+  substance?: Record<string, number>;
+  evaluated_at?: string;
+}
+
 interface ClaimDetail {
   id: number;
   statement: string;
@@ -39,6 +46,7 @@ interface ClaimDetail {
   reviewer_notes: string | null;
   notes: string | null;
   cluster_id: number | null;
+  evaluation_results: ClaimEvaluation | null;
   created_at: string;
   updated_at: string;
   computed_confidence: string;
@@ -128,6 +136,17 @@ export default function ClaimDetailPage() {
           placeholder="Claim statement..."
         />
       </div>
+
+      {claim.evaluation_results && (claim.evaluation_results.validity || claim.evaluation_results.substance) && (
+        <EvalSection label="Claim Evaluation" evaluatedAt={claim.evaluation_results.evaluated_at}>
+          {claim.evaluation_results.validity && (
+            <DimensionGrid label="Validity" dimensions={claim.evaluation_results.validity} columns={3} />
+          )}
+          {claim.evaluation_results.substance && (
+            <DimensionGrid label="Substance" dimensions={claim.evaluation_results.substance} columns={3} />
+          )}
+        </EvalSection>
+      )}
 
       <div className={s.notesSection}>
         <div className={s.metaLabel}>Reviewer Notes</div>

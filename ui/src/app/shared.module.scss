@@ -211,6 +211,9 @@
   cursor: pointer;
   color: var(--text-secondary);
   transition: color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover { color: var(--text-primary); }
 }
@@ -229,7 +232,7 @@
 }
 
 .treeChildren {
-  padding-left: 1rem;
+  padding-left: 0.75rem;
 }
 
 .treeCount {

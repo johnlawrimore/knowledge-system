@@ -71,6 +71,14 @@ const TIER_LABELS: Record<string, string> = {
   '4': 'Emerging Voice',
 };
 
+const GRADE_LABELS: Record<string, string> = {
+  A: 'Exceptional',
+  B: 'Strong',
+  C: 'Adequate',
+  D: 'Weak',
+  F: 'Unreliable',
+};
+
 function labelFrom(map: Record<string, string>) {
   return (value: string): string => map[value] ?? value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, ' ');
 }
@@ -84,3 +92,4 @@ export const contributorRoleLabel = labelFrom(CONTRIBUTOR_ROLE_LABELS);
 export const compositionStatusLabel = labelFrom(COMPOSITION_STATUS_LABELS);
 export const sourceStatusLabel = labelFrom(SOURCE_STATUS_LABELS);
 export const tierLabel = labelFrom(TIER_LABELS);
+export const gradeLabel = labelFrom(GRADE_LABELS);

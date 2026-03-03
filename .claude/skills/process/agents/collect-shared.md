@@ -96,14 +96,20 @@ If affiliation or role were NULL and you discovered them, update those too:
 UPDATE contributors SET affiliation = COALESCE(affiliation, '<affiliation>') WHERE id = @contrib_id;
 ```
 
-**Contributor scoring** — Using the same web research, assess four dimensions (1–5 each):
+**Contributor scoring** — Using the same web research, assess four dimensions (1–5 each). Score conservatively: **3 is normal**, 5 requires specific evidence of excellence. Use the decision questions to resolve ambiguity between adjacent scores.
 
-| Dimension | 1 | 3 | 5 |
-|-----------|---|---|---|
-| **Expertise** | Generalist, no domain depth | Experienced practitioner | World-leading domain expert |
-| **Authority** | Unknown in the field | Recognized contributor | Industry-defining leader |
-| **Reach** | Limited/local audience | Moderate following, regular publishing | Massive global audience |
-| **Reputation** | Unestablished track record | Respected, generally trusted | Gold-standard trusted voice |
+| Dimension | 1 | 2 | 3 | 4 | 5 |
+|-----------|---|---|---|---|---|
+| **Expertise** | Generalist; no evidence of domain depth | Working knowledge but no evidence of deep specialization | Experienced practitioner; multiple years in domain | Deep specialist with demonstrated mastery (published, spoke at conferences, built notable systems) | World-leading domain expert; created frameworks or methodologies adopted by others |
+| **Authority** | Unknown in the field; no public presence | Known within their organization; no external recognition | Recognized contributor (conference talks, notable blog, community presence) | Sought-after expert (keynotes, published books, consulted by industry) | Industry-defining leader; their name is synonymous with the topic |
+| **Reach** | No public audience; internal only | Small but engaged following (personal blog, niche community) | Moderate following; publishes regularly to an established audience | Large audience (popular blog, significant social following, conference circuit) | Massive global audience; household name in the industry |
+| **Reputation** | Unestablished; no track record to evaluate | Respected within their team/org but limited external validation | Respected and generally trusted in their community | Widely trusted; track record of being right over time | Gold-standard trusted voice; peers defer to their judgment |
+
+Decision questions:
+- **Expertise**: Have they created frameworks, methodologies, or tools in the domain? No → ≤ 3, minor → 3-4, major/adopted by others → 5. Do other experts cite their work? No → ≤ 3, occasionally → 4, frequently → 5.
+- **Authority**: Do they speak at major conferences? No → ≤ 2, regional/niche → 3, major conferences → 4, keynotes → 5. Have they published books or foundational papers? No → ≤ 3, one → 4, multiple influential → 5.
+- **Reach**: What's their publishing frequency? Never/rarely → 1, occasionally → 2, regularly → 3, prolifically → ≥ 4. What platform? Personal blog only → ≤ 3, industry publications → 4, bestselling books → 5. Social following (combined)? < 1k → 1, 1-5k → 2, 5-25k → 3, 25-100k → 4, > 100k → 5.
+- **Reputation**: How long have they been publicly sharing expertise? < 2y → ≤ 2, 2-5y → 3, 5-10y → 4, 10+ with consistent record → 5. Are past recommendations vindicated? Unknown → ≤ 3, mostly → 4, consistently → 5.
 
 Compute **tier** from the average of the four scores:
 - Tier 1 "Leading Voice": avg ≥ 4.0

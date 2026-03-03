@@ -62,13 +62,26 @@ Apply the same topic/theme assignments for consistency. Flag any mismatches in t
 
 ### 5. Apply Tags
 
-Apply domain tags and editorial flags. Follow conventions:
+Tags describe **what a claim is about** — its subject matter domain. They are not for editorial assessment, writing quality, or pipeline status.
+
+**Valid tags** — subject matter and composition targeting:
 
 | Prefix | Purpose | Examples |
 |---|---|---|
-| `book-ch-<n>` | Composition targeting | `book-ch-1` |
-| (no prefix) | Domain labels | `tdd`, `code-review`, `ai-agents`, `context-engineering` |
-| (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |
+| `book-ch-<n>` | Composition targeting | `book-ch-1`, `book-ch-3` |
+| (no prefix) | Subject matter domain | `tdd`, `code-review`, `ai-agents`, `context-engineering`, `technical-debt`, `pair-programming` |
+
+**Not valid as tags** — these belong elsewhere:
+
+| Bad tag | Why | Where it belongs |
+|---|---|---|
+| `strong-opener` | Editorial assessment of writing quality | `reviewer_notes` |
+| `quotable` | Editorial assessment | `reviewer_notes` |
+| `needs-evidence` | Pipeline status | Computed by `v_thin_claims` view |
+| `controversial` | Editorial opinion | `reviewer_notes` |
+| `well-supported` | Evaluation result | Computed by scoring views |
+
+**Tag quality test:** Ask "Does this tag describe the *subject* of the claim, or something *about* the claim?" Only subject descriptions are valid tags. A tag should make sense as a category you'd browse or filter by to find claims about that topic.
 
 Prefer reusing existing tags over creating near-duplicates. Check the tag list from Step 1 first.
 

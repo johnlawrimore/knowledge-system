@@ -200,14 +200,14 @@ Launch BOTH agents simultaneously using parallel Agent tool calls. Capture a sin
 
 **Stage 6 — Evaluate:**
 - **Agent prompt:** `process/agents/evaluate.md`
-- **Model:** haiku
-- **Substitutions:** `{{source_id}}` → from stage 1, `{{evidence_ids}}` → comma-separated list from stage 3
-- **Extract:** `source_credibility`, `evidence_evaluated`, `avg_evidence_credibility`
+- **Model:** sonnet
+- **Substitutions:** `{{source_id}}` → from stage 1, `{{claim_ids}}` → comma-separated list from stage 3, `{{evidence_ids}}` → comma-separated list from stage 3
+- **Extract:** `source_grade`, `claims_evaluated`, `evidence_evaluated`, `avg_evidence_credibility`
 
 Report both results:
 ```
 [5/7] Categorized: <N> topics, <N> themes, <N> tags ┐
-[6/7] Evaluated: source credibility <N>, avg evidence credibility <N> ┘ — <duration>s (parallel)
+[6/7] Evaluated: grade <A-F>, <N> claims, avg evidence credibility <N> ┘ — <duration>s (parallel)
 ```
 
 ### Stage 7: Status
@@ -241,7 +241,7 @@ Stage Results:
   ✓ Decomposed — <N> claims, <N> evidence records          <duration>s
   ✓ Clustered — <N> clusters, <N> relationships            <duration>s
   ✓ Categorized — <N> topics, <N> themes, <N> tags    ┐
-  ✓ Evaluated — Source credibility: <score>, Avg evidence: <score>  ┘ <duration>s
+  ✓ Evaluated — Grade: <A-F>, <N> claims, Avg evidence: <score>  ┘ <duration>s
   ✓ Status report                                          <duration>s
                                                       ─────────
                                                 Total: <total>s

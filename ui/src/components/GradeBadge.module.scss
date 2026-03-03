@@ -1,0 +1,47 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.gradeA {
+  @extend .badge;
+  background: var(--bg-green);
+  color: var(--accent-green);
+  border-color: var(--border-green);
+}
+
+.gradeB {
+  @extend .badge;
+  background: var(--bg-blue);
+  color: var(--accent-blue);
+  border-color: var(--border-blue);
+}
+
+.gradeC {
+  @extend .badge;
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+}
+
+.gradeD {
+  @extend .badge;
+  background: var(--bg-orange);
+  color: var(--accent-orange);
+  border-color: var(--border-orange);
+}
+
+.gradeF {
+  @extend .badge;
+  background: var(--bg-red);
+  color: var(--accent-red);
+  border-color: var(--border-red);
+}

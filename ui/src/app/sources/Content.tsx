@@ -7,6 +7,8 @@ import InlineComboBox from '@/components/InlineComboBox';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import ClaimsList from '@/components/ClaimsList';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
+import GradeBadge from '@/components/GradeBadge';
+import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import { SOURCE_TYPES } from '@/lib/sourceTypes';
 import { contributorRoleLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
@@ -26,6 +28,14 @@ interface SourceListItem {
   main_contributor: string | null;
 }
 
+interface SourceEvaluation {
+  quality?: Record<string, number>;
+  rigor?: Record<string, number>;
+  grade?: string;
+  bias_notes?: string;
+  evaluated_at?: string;
+}
+
 interface SourceDetail {
   id: number;
   title: string;
@@ -36,7 +46,7 @@ interface SourceDetail {
   word_count: number;
   status: string;
   notes: string | null;
-  evaluation_results: Record<string, unknown> | null;
+  evaluation_results: SourceEvaluation | null;
   content_preview: string;
   original: string;
   content_has_more: boolean;
@@ -280,6 +290,22 @@ export default function SourcesContent() {
                         placeholder="Add notes..."
                       />
                     </div>
+
+                    {detail.evaluation_results?.grade && (
+                      <EvalSection
+                        label="Source Evaluation"
+                        evaluatedAt={detail.evaluation_results.evaluated_at}
+                        headerRight={<GradeBadge grade={detail.evaluation_results.grade} />}
+                        notes={detail.evaluation_results.bias_notes}
+                      >
+                        {detail.evaluation_results.quality && (
+                          <DimensionGrid label="Quality" dimensions={detail.evaluation_results.quality} columns={4} />
+                        )}
+                        {detail.evaluation_results.rigor && (
+                          <DimensionGrid label="Rigor" dimensions={detail.evaluation_results.rigor} columns={4} />
+                        )}
+                      </EvalSection>
+                    )}
 
                     {detail.evidence.total > 0 && (
                       <div className={s.detailSection}>

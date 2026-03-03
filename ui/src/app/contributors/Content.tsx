@@ -5,6 +5,7 @@ import Link from 'next/link';
 import InlineEdit from '@/components/InlineEdit';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
 import TierBadge from '@/components/TierBadge';
+import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import { stanceLabel, strengthLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
@@ -88,6 +89,12 @@ function groupByStance(positions: Position[]): Record<string, Position[]> {
 }
 
 const STANCE_ORDER = ['supports', 'contradicts', 'qualifies', 'other'];
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.charAt(0).toUpperCase();
+}
 
 export default function ContributorsContent() {
   const router = useRouter();
@@ -182,7 +189,7 @@ export default function ContributorsContent() {
                       <img src={c.avatar} alt="" className={ps.listAvatar} />
                     ) : (
                       <span className={ps.listAvatarPlaceholder}>
-                        {c.name.charAt(0)}
+                        {getInitials(c.name)}
                       </span>
                     )}
                     <div className={ps.listItemContent}>
@@ -216,7 +223,7 @@ export default function ContributorsContent() {
                       <img src={detail.avatar} alt="" className={ps.avatar} />
                     ) : (
                       <span className={ps.avatarPlaceholder}>
-                        {detail.name.charAt(0)}
+                        {getInitials(detail.name)}
                       </span>
                     )}
                   </button>
@@ -303,30 +310,21 @@ export default function ContributorsContent() {
                 </div>
 
                 {detail.tier != null && (
-                  <div className={ps.scoreSection}>
-                    <div className={ps.scoreSectionHeader}>
-                      <div className={s.detailLabel}>Contributor Evaluation</div>
-                      {detail.evaluated_at && (
-                        <div className={ps.evaluatedAt}>{formatDate(detail.evaluated_at)}</div>
-                      )}
-                    </div>
-                    <div className={ps.dimensionGrid}>
-                      {([
-                        ['Expertise', detail.expertise],
-                        ['Authority', detail.authority],
-                        ['Reach', detail.reach],
-                        ['Reputation', detail.reputation],
-                      ] as [string, number | null][]).map(([label, val]) => (
-                        <div key={label} className={ps.dimensionItem}>
-                          <span className={`${ps.dimensionValue} ${val != null ? ps[`score${val}`] || '' : ''}`}>{val ?? '–'}</span>
-                          <span className={ps.dimensionLabel}>{label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {detail.score_notes && (
-                      <div className={ps.scoreNotes}>{detail.score_notes}</div>
-                    )}
-                  </div>
+                  <EvalSection
+                    label="Contributor Evaluation"
+                    evaluatedAt={detail.evaluated_at}
+                    notes={detail.score_notes}
+                  >
+                    <DimensionGrid
+                      dimensions={{
+                        Expertise: detail.expertise,
+                        Authority: detail.authority,
+                        Reach: detail.reach,
+                        Reputation: detail.reputation,
+                      }}
+                      columns={4}
+                    />
+                  </EvalSection>
                 )}
 
                 <hr className={s.divider} />

@@ -21,7 +21,7 @@ export async function GET(
     const [claimRows] = await pool.query<RowDataPacket[]>(
       `SELECT
          c.id, c.statement, c.claim_type, c.reviewer_notes, c.notes,
-         c.cluster_id, c.created_at, c.updated_at
+         c.cluster_id, c.evaluation_results, c.created_at, c.updated_at
        FROM claims c
        WHERE c.id = ?`,
       [id],
@@ -185,6 +185,18 @@ export async function GET(
       };
     });
 
+    // Parse claim evaluation_results
+    let claimEvalResults = null;
+    if (claim.evaluation_results) {
+      try {
+        claimEvalResults = typeof claim.evaluation_results === 'string'
+          ? JSON.parse(claim.evaluation_results)
+          : claim.evaluation_results;
+      } catch {
+        claimEvalResults = claim.evaluation_results;
+      }
+    }
+
     return NextResponse.json({
       id: claim.id,
       statement: claim.statement,
@@ -192,6 +204,7 @@ export async function GET(
       reviewer_notes: claim.reviewer_notes,
       notes: claim.notes,
       cluster_id: claim.cluster_id,
+      evaluation_results: claimEvalResults,
       created_at: claim.created_at,
       updated_at: claim.updated_at,
       computed_confidence: scoreData?.computed_confidence ?? 'unsupported',
