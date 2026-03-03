@@ -78,10 +78,21 @@ interface ClaimEvaluation {
   evaluated_at?: string;
 }
 
+interface ChildClaim {
+  id: number;
+  statement: string;
+  claim_type: string;
+  computed_confidence: string;
+  score: number;
+}
+
 interface ClaimDetail {
   id: number;
   statement: string;
   claim_type: string;
+  parent_claim_id: number | null;
+  parent_claim: ChildClaim | null;
+  children: ChildClaim[];
   reviewer_notes: string | null;
   notes: string | null;
   evaluation_results: ClaimEvaluation | null;
@@ -173,6 +184,34 @@ export default function ClaimDetailPage() {
           placeholder="Claim statement..."
         />
       </div>
+
+      {claim.parent_claim && (
+        <div className={s.parentSection}>
+          <div className={s.metaLabel}>Parent Claim</div>
+          <Link href={`/claims/${claim.parent_claim.id}`} className={s.parentLink}>
+            <span className={s.claimId}>#{claim.parent_claim.id}</span>
+            <span className={s.claimType}>{claimTypeLabel(claim.parent_claim.claim_type)}</span>
+            <ConfidenceBadge confidence={claim.parent_claim.computed_confidence} score={claim.parent_claim.score} />
+            <span className={s.parentStatement}>{claim.parent_claim.statement}</span>
+          </Link>
+        </div>
+      )}
+
+      {claim.children.length > 0 && (
+        <div className={s.childrenSection}>
+          <div className={s.metaLabel}>Child Claims ({claim.children.length})</div>
+          <div className={s.childList}>
+            {claim.children.map((child) => (
+              <Link key={child.id} href={`/claims/${child.id}`} className={s.childItem}>
+                <span className={s.claimId}>#{child.id}</span>
+                <span className={s.claimType}>{claimTypeLabel(child.claim_type)}</span>
+                <ConfidenceBadge confidence={child.computed_confidence} score={child.score} />
+                <span className={s.childStatement}>{child.statement}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {claim.evaluation_results && (claim.evaluation_results.validity || claim.evaluation_results.substance) && (
         <EvalSection label="Claim Evaluation" row>

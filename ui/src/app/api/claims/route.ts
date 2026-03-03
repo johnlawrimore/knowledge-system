@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const tag = params.get('tag');
     const search = params.get('search');
     const sourceId = params.get('source_id');
+    const parentId = params.get('parent_id');
     const sort = params.get('sort') || 'score';
     const order = (params.get('order') || 'desc').toUpperCase();
     const limit = Math.min(Math.max(parseInt(params.get('limit') || '50', 10), 1), 200);
@@ -23,6 +24,17 @@ export async function GET(request: NextRequest) {
 
     const conditions: string[] = [];
     const values: (string | number)[] = [];
+
+    // Parent/child filtering
+    if (parentId) {
+      // Fetch children of a specific parent
+      conditions.push('c.parent_claim_id = ?');
+      values.push(parseInt(parentId, 10));
+    } else if (!search && !confidence && !claimType && !topicId && !themeId && !tag && !sourceId) {
+      // Default: only show top-level claims (no parent)
+      conditions.push('c.parent_claim_id IS NULL');
+    }
+    // When filters/search are active, show all matching claims (parent and child)
 
     // Confidence filter
     if (confidence) {
@@ -110,6 +122,7 @@ export async function GET(request: NextRequest) {
         c.id,
         c.statement,
         c.claim_type,
+        c.parent_claim_id,
         c.created_at,
         scs.computed_confidence,
         scs.score,
@@ -138,7 +151,8 @@ export async function GET(request: NextRequest) {
         (SELECT COUNT(*) FROM device_claims dc WHERE dc.claim_id = c.id) AS device_count,
         (SELECT COUNT(*) FROM context_claims cc WHERE cc.claim_id = c.id) AS context_count,
         (SELECT COUNT(*) FROM method_claims mc WHERE mc.claim_id = c.id) AS method_count,
-        (SELECT COUNT(*) FROM reasoning_claims rc WHERE rc.claim_id = c.id) AS reasoning_count
+        (SELECT COUNT(*) FROM reasoning_claims rc WHERE rc.claim_id = c.id) AS reasoning_count,
+        (SELECT COUNT(*) FROM claims ch WHERE ch.parent_claim_id = c.id) AS child_count
       FROM claims c
       LEFT JOIN v_standalone_claim_scores scs ON c.id = scs.claim_id
       ${whereClause}
@@ -152,6 +166,7 @@ export async function GET(request: NextRequest) {
       id: row.id,
       statement: row.statement,
       claim_type: row.claim_type,
+      parent_claim_id: row.parent_claim_id ?? null,
       created_at: row.created_at,
       computed_confidence: row.computed_confidence ?? 'unsupported',
       score: row.score ?? 0,
@@ -167,6 +182,7 @@ export async function GET(request: NextRequest) {
       context_count: Number(row.context_count),
       method_count: Number(row.method_count),
       reasoning_count: Number(row.reasoning_count),
+      child_count: Number(row.child_count),
     }));
 
     return NextResponse.json({

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
@@ -11,6 +11,7 @@ interface Claim {
   id: number;
   statement: string;
   claim_type: string;
+  parent_claim_id: number | null;
   computed_confidence: string;
   score: number;
   supporting_sources: number;
@@ -25,6 +26,7 @@ interface Claim {
   context_count: number;
   method_count: number;
   reasoning_count: number;
+  child_count: number;
 }
 
 interface TopicNode {
@@ -58,6 +60,105 @@ interface ClaimsListProps {
   showFilters?: boolean;
 }
 
+// Recursive component to render a claim and its children
+function ClaimNode({
+  claim,
+  depth,
+}: {
+  claim: Claim;
+  depth: number;
+}) {
+  const [expanded, setExpanded] = useState(true);
+  const [children, setChildren] = useState<Claim[] | null>(null);
+  const [loadingChildren, setLoadingChildren] = useState(false);
+
+  const hasChildren = claim.child_count > 0;
+
+  const loadChildren = useCallback(() => {
+    if (children !== null) return;
+    setLoadingChildren(true);
+    fetch(`/api/claims?parent_id=${claim.id}&sort=score&limit=100`)
+      .then((r) => r.json())
+      .then((d) => setChildren(d.data || []))
+      .catch(console.error)
+      .finally(() => setLoadingChildren(false));
+  }, [claim.id, children]);
+
+  const toggleExpanded = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!expanded) {
+      loadChildren();
+    }
+    setExpanded(!expanded);
+  };
+
+  // Auto-load children on mount if has children
+  useEffect(() => {
+    if (hasChildren && children === null) {
+      loadChildren();
+    }
+  }, [hasChildren, children, loadChildren]);
+
+  return (
+    <div className={depth > 0 ? s.childGroup : undefined}>
+      <div className={s.claimRow}>
+        <Link href={`/claims/${claim.id}`} className={s.claimLink}>
+          <div className={s.claimHeader}>
+            <span className={s.claimId}>#{claim.id}</span>
+            <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
+            <ConfidenceBadge confidence={claim.computed_confidence} score={claim.score} />
+            {hasChildren && (
+              <button
+                className={s.expandBtn}
+                onClick={toggleExpanded}
+                title={expanded ? 'Collapse children' : 'Expand children'}
+              >
+                {expanded ? '\u25BC' : '\u25B6'} {claim.child_count} child{claim.child_count !== 1 ? 'ren' : ''}
+              </button>
+            )}
+          </div>
+          <div className={s.claimStatement}>{claim.statement}</div>
+          <div className={s.claimMeta}>
+            <span className={s.evidenceSummary}>
+              {claim.supporting_sources} sources &middot; {claim.supporting_evidence + claim.contradicting_evidence + claim.qualifying_evidence} evidence
+              {claim.device_count > 0 && ` · ${claim.device_count} device${claim.device_count !== 1 ? 's' : ''}`}
+              {claim.context_count > 0 && ` · ${claim.context_count} context${claim.context_count !== 1 ? 's' : ''}`}
+              {claim.method_count > 0 && ` · ${claim.method_count} method${claim.method_count !== 1 ? 's' : ''}`}
+              {claim.reasoning_count > 0 && ` · ${claim.reasoning_count} reasoning${claim.reasoning_count !== 1 ? 's' : ''}`}
+              {claim.contradicting_sources > 0 && ` · ${claim.contradicting_sources} contradictions`}
+            </span>
+          </div>
+          {(claim.topics?.length > 0 || claim.tags?.length > 0) && (
+            <div className={s.chipRow}>
+              {claim.topics?.map((t) => (
+                <LinkChip key={`t-${t}`} label={t} kind="topic" />
+              ))}
+              {claim.tags?.map((t) => (
+                <LinkChip key={`tag-${t}`} label={t} kind="tag" />
+              ))}
+            </div>
+          )}
+          {claim.contradicting_sources >= 2 && (
+            <div className={s.contestedAlert}>
+              ! {claim.contradicting_sources} contradicting sources — review needed
+            </div>
+          )}
+        </Link>
+      </div>
+
+      {hasChildren && expanded && (
+        <div className={s.childrenContainer}>
+          {loadingChildren && <div className={s.loadingChildren}>Loading...</div>}
+          {children?.map((child) => (
+            <ClaimNode key={child.id} claim={child} depth={depth + 1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListProps) {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [total, setTotal] = useState(0);
@@ -70,6 +171,8 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
   const [page, setPage] = useState(1);
   const [topicOptions, setTopicOptions] = useState<FlatOption[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<Set<number>>(new Set());
+
+  const hasActiveFilters = !!(confidence || type || search || selectedTopics.size > 0);
 
   useEffect(() => {
     if (showFilters) {
@@ -110,6 +213,41 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  // When filters are active, claims come flat (parents + children mixed).
+  // Group them into trees: top-level first, children nested under parents.
+  const organizedClaims = (() => {
+    if (!hasActiveFilters) {
+      // No filters — API already returns only top-level claims
+      return claims;
+    }
+
+    // With filters, claims may include both parents and children.
+    // Build a map and organize into trees.
+    const byId = new Map<number, Claim>();
+    claims.forEach((c) => byId.set(c.id, c));
+
+    // Find root-level claims for display (no parent, or parent not in result set)
+    const roots: Claim[] = [];
+    const childrenOf = new Map<number, Claim[]>();
+
+    for (const c of claims) {
+      if (c.parent_claim_id && byId.has(c.parent_claim_id)) {
+        const siblings = childrenOf.get(c.parent_claim_id) || [];
+        siblings.push(c);
+        childrenOf.set(c.parent_claim_id, siblings);
+      } else {
+        roots.push(c);
+      }
+    }
+
+    // For roots that have children in the result set, set child_count so they render expandable
+    // The children are already loaded inline, so we override them
+    return roots.map((r) => ({
+      ...r,
+      _inlineChildren: childrenOf.get(r.id) || undefined,
+    }));
+  })();
+
   if (loading) return <div className={s.loading}>Loading claims...</div>;
   if (claims.length === 0 && !confidence && !type && !search) {
     return <div className={s.empty}>No claims found</div>;
@@ -139,12 +277,12 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
             <select className={s.select} value={type} onChange={(e) => updateFilter(setType, e.target.value)}>
               <option value="">All types</option>
               <option value="assertion">Assertion</option>
-              <option value="principle">Principle</option>
-              <option value="framework">Framework</option>
               <option value="recommendation">Recommendation</option>
               <option value="prediction">Prediction</option>
               <option value="definition">Definition</option>
               <option value="observation">Observation</option>
+              <option value="mechanism">Mechanism</option>
+              <option value="distinction">Distinction</option>
             </select>
 
             <input
@@ -176,40 +314,8 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
       ) : (
         <>
           <div className={s.list}>
-            {claims.map((c) => (
-              <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
-                <div className={s.claimHeader}>
-                  <span className={s.claimId}>#{c.id}</span>
-                  <span className={s.claimType}>{claimTypeLabel(c.claim_type)}</span>
-                  <ConfidenceBadge confidence={c.computed_confidence} score={c.score} />
-                </div>
-                <div className={s.claimStatement}>{c.statement}</div>
-                <div className={s.claimMeta}>
-                  <span className={s.evidenceSummary}>
-                    {c.supporting_sources} sources &middot; {c.supporting_evidence + c.contradicting_evidence + c.qualifying_evidence} evidence
-                    {c.device_count > 0 && ` · ${c.device_count} device${c.device_count !== 1 ? 's' : ''}`}
-                    {c.context_count > 0 && ` · ${c.context_count} context${c.context_count !== 1 ? 's' : ''}`}
-                    {c.method_count > 0 && ` · ${c.method_count} method${c.method_count !== 1 ? 's' : ''}`}
-                    {c.reasoning_count > 0 && ` · ${c.reasoning_count} reasoning${c.reasoning_count !== 1 ? 's' : ''}`}
-                    {c.contradicting_sources > 0 && ` · ${c.contradicting_sources} contradictions`}
-                  </span>
-                </div>
-                {(c.topics?.length > 0 || c.tags?.length > 0) && (
-                  <div className={s.chipRow}>
-                    {c.topics?.map((t) => (
-                      <LinkChip key={`t-${t}`} label={t} kind="topic" />
-                    ))}
-                    {c.tags?.map((t) => (
-                      <LinkChip key={`tag-${t}`} label={t} kind="tag" />
-                    ))}
-                  </div>
-                )}
-                {c.contradicting_sources >= 2 && (
-                  <div className={s.contestedAlert}>
-                    ! {c.contradicting_sources} contradicting sources — review needed
-                  </div>
-                )}
-              </Link>
+            {organizedClaims.map((c) => (
+              <ClaimNode key={c.id} claim={c} depth={0} />
             ))}
           </div>
 

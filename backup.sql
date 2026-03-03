@@ -197,7 +197,7 @@ DROP TABLE IF EXISTS `claims`;
 CREATE TABLE `claims` (
   `id` int NOT NULL AUTO_INCREMENT,
   `statement` text NOT NULL COMMENT 'The claim in your voice',
-  `claim_type` enum('assertion','principle','framework','recommendation','prediction','definition','observation','other') NOT NULL DEFAULT 'assertion',
+  `claim_type` enum('assertion','recommendation','prediction','definition','observation','mechanism','distinction','other') NOT NULL DEFAULT 'assertion',
   `cluster_id` int DEFAULT NULL COMMENT 'NULL = standalone claim. Set = grouped with equivalent claims.',
   `reviewer_notes` text COMMENT 'Your editorial notes on this claim. For clustered claims, prefer notes on the cluster.',
   `notes` text,

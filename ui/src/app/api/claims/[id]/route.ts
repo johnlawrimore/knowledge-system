@@ -20,7 +20,8 @@ export async function GET(
     // ---- Claim base fields ----
     const [claimRows] = await pool.query<RowDataPacket[]>(
       `SELECT
-         c.id, c.statement, c.claim_type, c.reviewer_notes, c.notes,
+         c.id, c.statement, c.claim_type, c.parent_claim_id,
+         c.reviewer_notes, c.notes,
          c.evaluation_results, c.created_at, c.updated_at
        FROM claims c
        WHERE c.id = ?`,
@@ -158,6 +159,39 @@ export async function GET(
       [id],
     );
 
+    // ---- Parent claim ----
+    let parentClaim = null;
+    if (claim.parent_claim_id) {
+      const [parentRows] = await pool.query<RowDataPacket[]>(
+        `SELECT c.id, c.statement, c.claim_type,
+                scs.computed_confidence, scs.score
+         FROM claims c
+         LEFT JOIN v_standalone_claim_scores scs ON c.id = scs.claim_id
+         WHERE c.id = ?`,
+        [claim.parent_claim_id],
+      );
+      if (parentRows.length > 0) {
+        parentClaim = {
+          id: parentRows[0].id,
+          statement: parentRows[0].statement,
+          claim_type: parentRows[0].claim_type,
+          computed_confidence: parentRows[0].computed_confidence ?? 'unsupported',
+          score: parentRows[0].score ?? 0,
+        };
+      }
+    }
+
+    // ---- Child claims ----
+    const [childRows] = await pool.query<RowDataPacket[]>(
+      `SELECT c.id, c.statement, c.claim_type,
+              scs.computed_confidence, scs.score
+       FROM claims c
+       LEFT JOIN v_standalone_claim_scores scs ON c.id = scs.claim_id
+       WHERE c.parent_claim_id = ?
+       ORDER BY COALESCE(scs.score, 0) DESC`,
+      [id],
+    );
+
     // ---- Relationships (both directions) ----
     const [relRows] = await pool.query<RowDataPacket[]>(
       `SELECT
@@ -221,6 +255,15 @@ export async function GET(
       id: claim.id,
       statement: claim.statement,
       claim_type: claim.claim_type,
+      parent_claim_id: claim.parent_claim_id ?? null,
+      parent_claim: parentClaim,
+      children: childRows.map((r) => ({
+        id: r.id,
+        statement: r.statement,
+        claim_type: r.claim_type,
+        computed_confidence: r.computed_confidence ?? 'unsupported',
+        score: r.score ?? 0,
+      })),
       reviewer_notes: claim.reviewer_notes,
       notes: claim.notes,
       evaluation_results: claimEvalResults,

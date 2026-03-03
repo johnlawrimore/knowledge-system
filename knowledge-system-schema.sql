@@ -138,16 +138,19 @@ CREATE TABLE claims (
     id INT AUTO_INCREMENT PRIMARY KEY,
     statement TEXT NOT NULL,
     claim_type ENUM(
-        'assertion', 'principle', 'framework', 'recommendation',
-        'prediction', 'definition', 'observation', 'other'
+        'assertion', 'recommendation', 'prediction', 'definition',
+        'observation', 'mechanism', 'distinction', 'other'
     ) NOT NULL DEFAULT 'assertion',
+    parent_claim_id INT NULL,
     reviewer_notes TEXT,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     INDEX idx_claims_type (claim_type),
-    FULLTEXT INDEX ft_claims (statement)
+    INDEX idx_claims_parent (parent_claim_id),
+    FULLTEXT INDEX ft_claims (statement),
+    FOREIGN KEY (parent_claim_id) REFERENCES claims(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE claim_relationships (

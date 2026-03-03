@@ -1,11 +1,11 @@
 const CLAIM_TYPE_LABELS: Record<string, string> = {
   assertion: 'Assertion',
-  principle: 'Principle',
-  framework: 'Framework',
   recommendation: 'Recommendation',
   prediction: 'Prediction',
   definition: 'Definition',
   observation: 'Observation',
+  mechanism: 'Mechanism',
+  distinction: 'Distinction',
   other: 'Other',
 };
 

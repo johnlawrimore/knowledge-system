@@ -41,7 +41,7 @@ UPDATE sources SET status = 'decomposing' WHERE id = {{source_id}};
 Read the distillation and extract every distinct assertion. For each:
 - **Is this a claim?** "TDD was invented in the 1990s" is a historical fact, not a useful claim. "TDD is more valuable in AI-assisted development than in traditional development" is a claim. Historical facts and definitions of common terms are not useful claims.
 - **Is this specific enough?** "AI is changing development" is too vague.
-- **Claim type:** assertion, principle, framework, recommendation, prediction, definition, observation, other
+- **Claim type:** assertion, recommendation, prediction, definition, observation, mechanism, distinction, other
 
 **Error checks:**
 - If the source `distillation` is empty or NULL, return error status suggesting re-distillation.
@@ -76,20 +76,40 @@ FROM claims WHERE statement LIKE '%<key_phrase>%' LIMIT 10;
 **If a partial match exists:** Create the new claim, but note the similar claim ID in `notes`: "Related to claim #X"
 **If no match:** Create a new standalone claim.
 
-### 5. Batch Insert All Claims and Link to Source
+### 5. Identify Parent-Child Relationships
+
+Before inserting, determine if any claims form compound arguments — multiple claims that depend on each other to make a point. Indicators:
+- A claim that establishes "what" (assertion/observation) + "why" (mechanism) + "so what" (recommendation) — the overarching point is the parent
+- A claim that defines a model, followed by claims that describe its parts — the model claim is parent, parts are children
+- A set of claims where removing any one breaks the logic
+- A distinction claim paired with claims that only make sense in light of that distinction
+
+Do NOT create parent-child for: claims that simply share a topic, loosely related claims (use `claim_relationships`), or claims from different sources supporting the same theme.
+
+A claim can only have one parent. Nesting can go multiple levels deep.
+
+### 6. Batch Insert All Claims and Link to Source
+
+Insert parent claims first (without `parent_claim_id`), then insert child claims with `parent_claim_id` set to the parent's ID.
 
 Write to /tmp/decompose_claims.sql:
 
 ```sql
+-- Parent claims first
 INSERT INTO claims (statement, claim_type, notes) VALUES
-  ('<claim 1>', '<type>', '<notes>'),
-  ('<claim 2>', '<type>', '<notes>'),
-  ('<claim 3>', '<type>', '<notes>');
+  ('<parent claim 1>', '<type>', '<notes>'),
+  ('<standalone claim 2>', '<type>', '<notes>');
+
+SELECT id, LEFT(statement, 60) AS stmt FROM claims WHERE id >= LAST_INSERT_ID() ORDER BY id;
+
+-- Child claims (after noting parent IDs)
+INSERT INTO claims (statement, claim_type, parent_claim_id, notes) VALUES
+  ('<child claim>', '<type>', <parent_id>, '<notes>');
 
 SELECT id, LEFT(statement, 60) AS stmt FROM claims WHERE id >= LAST_INSERT_ID() ORDER BY id;
 ```
 
-Execute and note the returned IDs.
+Execute and note the returned IDs. If there are no parent-child relationships, insert all claims in a single batch without `parent_claim_id`.
 
 **Link ALL claims (new and existing) to this source:**
 
@@ -101,7 +121,7 @@ INSERT IGNORE INTO claim_sources (claim_id, source_id) VALUES
 
 Every claim that this source asserts — whether newly created or an existing claim matched in step 4 — gets a `claim_sources` entry.
 
-### 6. Batch Insert All Evidence
+### 7. Batch Insert All Evidence
 
 **What counts as evidence:** A data point, a quote, a case study, an expert assertion, a statistical finding, or a logical derivation from established principles. Each evidence record is a discrete piece of support (or contradiction) for one or more claims.
 
@@ -126,7 +146,7 @@ SELECT id, LEFT(content, 60) AS ev FROM evidence WHERE id >= LAST_INSERT_ID() OR
 
 **verbatim_quote:** Only when exact words matter (expert attribution). NULL otherwise.
 
-### 7. Batch Link Evidence to Claims
+### 8. Batch Link Evidence to Claims
 
 Write to /tmp/decompose_links.sql:
 
@@ -145,7 +165,7 @@ INSERT INTO claim_evidence (claim_id, evidence_id, stance, strength, reasoning) 
 - Expert opinion: "Fowler's 20+ years of consulting on refactoring practices gives this assertion significant weight, though it remains one expert's view."
 - Case study: "Google's specific implementation validates the claim at scale, but may not generalize to smaller organizations with different constraints."
 
-### 8. Batch Insert Tags
+### 9. Batch Insert Tags
 
 ```sql
 INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
@@ -160,7 +180,7 @@ INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
 | (no prefix) | Domain labels | `tdd`, `code-review`, `ai-agents`, `context-engineering` |
 | (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |
 
-### 9. Assign Topics
+### 10. Assign Topics
 
 Topics form a hierarchy via `parent_topic_id` (loaded in Step 1). When assigning:
 
@@ -173,7 +193,7 @@ Topics form a hierarchy via `parent_topic_id` (loaded in Step 1). When assigning
 INSERT IGNORE INTO claim_topics (claim_id, topic_id) VALUES (<claim_id>, <topic_id>);
 ```
 
-### 10. Extract Devices
+### 11. Extract Devices
 
 Identify rhetorical devices in the distillation — analogies, metaphors, narratives, examples, thought experiments, visuals that make claims memorable or communicable.
 
@@ -195,7 +215,7 @@ INSERT IGNORE INTO device_claims (device_id, claim_id) VALUES
 
 Skip this step if the source has no notable devices.
 
-### 11. Extract Contexts
+### 12. Extract Contexts
 
 Identify boundary conditions, scope limitations, and caveats that qualify when and where claims apply.
 
@@ -217,7 +237,7 @@ INSERT IGNORE INTO context_claims (context_id, claim_id) VALUES
 
 Skip this step if the source has no notable contexts.
 
-### 12. Extract Methods
+### 13. Extract Methods
 
 Identify processes, frameworks, techniques, tools, practices, or metrics for applying or validating claims.
 
@@ -239,7 +259,7 @@ INSERT IGNORE INTO method_claims (method_id, claim_id) VALUES
 
 Skip this step if the source has no notable methods.
 
-### 13. Extract Reasonings
+### 14. Extract Reasonings
 
 Identify standalone logical connections that explain why evidence or context supports a claim. Note: inline reasoning tied to a specific evidence-claim link belongs in `claim_evidence.reasoning`. The `reasonings` table is for standalone arguments that may connect to multiple claims independently.
 
@@ -261,7 +281,7 @@ INSERT IGNORE INTO reasoning_claims (reasoning_id, claim_id) VALUES
 
 Skip this step if the source has no notable standalone reasonings.
 
-### 14. Check for Derived Evidence
+### 15. Check for Derived Evidence
 
 If the source cites another source already in the knowledge base (e.g., "As Fowler wrote..."):
 
@@ -276,7 +296,7 @@ If found, link the new evidence to the original:
 UPDATE evidence SET derived_from_evidence_id = <original_evidence_id> WHERE id = <new_evidence_id>;
 ```
 
-### 15. Update Source Status
+### 16. Update Source Status
 
 ```sql
 UPDATE sources SET status = 'decomposed' WHERE id = {{source_id}};
@@ -287,7 +307,7 @@ UPDATE sources SET status = 'decomposed' WHERE id = {{source_id}};
 End your response with this exact JSON block:
 
 ```json
-{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>, "device_ids": [<ids>], "context_ids": [<ids>], "method_ids": [<ids>], "reasoning_ids": [<ids>], "process_notes": "<anything unusual, or null>"}
+{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "parent_child_groups": <count>, "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>, "device_ids": [<ids>], "context_ids": [<ids>], "method_ids": [<ids>], "reasoning_ids": [<ids>], "process_notes": "<anything unusual, or null>"}
 ```
 
 On error:

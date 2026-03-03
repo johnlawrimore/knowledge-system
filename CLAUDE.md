@@ -78,6 +78,34 @@ All markdown content (sources, distillations, compositions) follows **markdown-f
 
 `claim_sources` provides a direct link between claims and the sources that assert them. This is distinct from the evidence chain (`claim_evidence` → `evidence` → `sources`): a source can assert a claim directly and separately provide evidence for it.
 
+### Claim Types
+
+`claim_type` enum: `assertion`, `recommendation`, `prediction`, `definition`, `observation`, `mechanism`, `distinction`, `other`
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| assertion | declarative: "X is true" | "AI code generation fundamentally changes what developers do" |
+| recommendation | prescriptive: "teams should do X" | "Teams should restructure around evaluation skills" |
+| prediction | forward-looking: "X will happen" | "AI pair programming will replace solo coding within 5 years" |
+| definition | conceptual: "X means Y" | "Context engineering is the practice of shaping the information AI uses" |
+| observation | descriptive: "we see X happening" | "Most teams adopt AI tools before restructuring workflows" |
+| mechanism | causal: "X works by doing Y" | "The shift happens because generation is cheap but verification remains expensive" |
+| distinction | comparative: "X and Y differ because..." | "AI-assisted productivity gains are real but mismeasured" |
+| other | does not fit the above | — |
+
+### Parent-Child Claims
+
+Claims support hierarchical grouping via `parent_claim_id` (nullable self-referencing FK, ON DELETE SET NULL). A parent claim is the thesis; children are the supporting pieces that together make the parent's point. Both parent and child claims are real claims — evaluated, scored, tagged, themed, and linked to sources and evidence independently. A claim can only have one parent. Nesting can go multiple levels deep.
+
+When to create parent-child relationships during decomposition:
+- A compound argument — "what" (assertion/observation) + "why" (mechanism) + "so what" (recommendation) — the overarching point is the parent
+- A model claim followed by claims describing its parts — model is parent, parts are children
+- A set of claims where removing any one breaks the logic
+
+Do NOT use parent-child for claims that simply share a topic (use topics), are loosely related (use `claim_relationships`), or happen to support the same theme from different sources (use themes).
+
+Scoring: parent and child claims each score independently. The parent's score does not aggregate from its children.
+
 ### Decomposition Entity Types
 
 Four entity types are extracted during decomposition alongside claims and evidence:

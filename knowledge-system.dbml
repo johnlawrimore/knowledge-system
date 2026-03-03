@@ -106,13 +106,16 @@ Table themes {
 Table claims {
   id int [pk, increment]
   statement text [not null]
-  claim_type enum('assertion','principle','framework','recommendation','prediction','definition','observation','other') [not null, default: 'assertion']
+  claim_type enum('assertion','recommendation','prediction','definition','observation','mechanism','distinction','other') [not null, default: 'assertion']
+  parent_claim_id int
   evaluation_results json
   reviewer_notes text
   notes text
   created_at timestamp
   updated_at timestamp
 }
+
+Ref: claims.parent_claim_id > claims.id [delete: set null]
 
 Table claim_relationships {
   id int [pk, increment]
