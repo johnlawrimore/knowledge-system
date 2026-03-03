@@ -21,7 +21,7 @@ For multi-statement scripts, write to /tmp/evaluate.sql and pipe it.
 SELECT id, title, source_type, url, publication_date, content_md, distillation
 FROM sources WHERE id = {{source_id}};
 
-SELECT id, statement, claim_type, cluster_id
+SELECT id, statement, claim_type
 FROM claims WHERE id IN ({{claim_ids}});
 
 SELECT e.id, e.content, e.evidence_type, e.verbatim_quote, e.derived_from_evidence_id,
@@ -80,7 +80,7 @@ Note any **bias** detected: vendor marketing, competitive positioning, ideologic
 
 ### 3. Score Each Claim (6 dimensions)
 
-For each claim, score on 1–5. These assess the **idea itself**, not how the source expressed it. Since claims can be clustered (same idea from different sources), focus on the truth and worth of the idea, not the presentation.
+For each claim, score on 1–5. These assess the **idea itself**, not how the source expressed it. Focus on the truth and worth of the idea, not the presentation.
 
 **Validity** — is the idea trustworthy?
 
@@ -109,8 +109,6 @@ Decision questions for Substance:
 - Does the claim introduce new terminology, frameworks, or distinctions? No → Originality ≤ 3, reframes existing → 3-4, yes → ≥ 4
 - Could a team act on this claim tomorrow? No → Practicality ≤ 2, with significant effort → 3, with reasonable effort → ≥ 4
 - If true and adopted, what changes? Nothing notable → Impact ≤ 2, some improvement → 3, significant shift → ≥ 4
-
-Skip claims with a non-NULL `cluster_id` — they will inherit scores from the cluster representative.
 
 ### 4. Score Each Evidence Record
 
@@ -151,7 +149,7 @@ UPDATE sources SET evaluation_results = JSON_OBJECT(
     'evaluated_at', NOW()
 ) WHERE id = {{source_id}};
 
--- Claims (one per claim, skip clustered)
+-- Claims (one per claim)
 UPDATE claims SET evaluation_results = JSON_OBJECT(
     'validity', JSON_OBJECT('factuality', <1-5>, 'soundness', <1-5>, 'consensus', <1-5>),
     'substance', JSON_OBJECT('originality', <1-5>, 'practicality', <1-5>, 'impact', <1-5>),

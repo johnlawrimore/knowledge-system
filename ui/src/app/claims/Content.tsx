@@ -1,37 +1,17 @@
 'use client';
-import { useState } from 'react';
 import ClaimsList from '@/components/ClaimsList';
-import ClustersList from '@/components/ClustersList';
 import { pageIcon } from '@/lib/pageIcons';
 import s from './page.module.scss';
 
 const ClaimsIcon = pageIcon('claims');
 
 export default function ClaimsContent() {
-  const [tab, setTab] = useState<'claims' | 'clusters'>('claims');
-
   return (
     <div className={s.page}>
       <div className={s.header}>
         <h1 className={s.title}><ClaimsIcon size={32} stroke={2} className={s.pageIcon} />Claims</h1>
       </div>
-
-      <div className={s.tabs}>
-        <button
-          className={tab === 'claims' ? s.tabActive : s.tab}
-          onClick={() => setTab('claims')}
-        >
-          Claims
-        </button>
-        <button
-          className={tab === 'clusters' ? s.tabActive : s.tab}
-          onClick={() => setTab('clusters')}
-        >
-          Clusters
-        </button>
-      </div>
-
-      {tab === 'claims' ? <ClaimsList /> : <ClustersList />}
+      <ClaimsList />
     </div>
   );
 }

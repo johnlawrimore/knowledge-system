@@ -53,12 +53,6 @@
       "y": 739.2783301586813
     },
     {
-      "name": "claim_clusters",
-      "schemaName": "public",
-      "x": 1591.590001723761,
-      "y": 1441.0634470751233
-    },
-    {
       "name": "claims",
       "schemaName": "public",
       "x": 1097.384199161193,

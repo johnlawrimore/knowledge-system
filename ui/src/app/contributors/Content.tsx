@@ -30,7 +30,6 @@ interface ContributorListItem {
 interface Position {
   claim_id: number;
   statement: string;
-  cluster_id: number | null;
   stance: string;
   strength: string;
   evidence_content: string;

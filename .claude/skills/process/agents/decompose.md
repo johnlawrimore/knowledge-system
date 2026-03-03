@@ -26,7 +26,7 @@ For multi-statement scripts, write to /tmp/decompose.sql and pipe it.
 
 ```sql
 SELECT id, title, distillation FROM sources WHERE id = {{source_id}};
-SELECT id, statement, claim_type, cluster_id FROM claims ORDER BY id;
+SELECT id, statement, claim_type FROM claims ORDER BY id;
 SELECT id, name, parent_topic_id FROM topics ORDER BY name;
 ```
 
@@ -55,12 +55,12 @@ Read the distillation and extract every distinct assertion. For each:
 
 ### 4. Check for Duplicates
 
-**This step is critical for preventing duplicates and building cluster candidates.**
+**This step is critical for preventing duplicates.**
 
 For each claim, search for similar existing claims:
 
 ```sql
-SELECT id, statement, claim_type, cluster_id
+SELECT id, statement, claim_type
 FROM claims
 WHERE MATCH(statement) AGAINST('<key phrases from your claim>' IN NATURAL LANGUAGE MODE)
 LIMIT 10;
@@ -68,12 +68,12 @@ LIMIT 10;
 
 If fulltext doesn't find good matches, try keyword search:
 ```sql
-SELECT id, statement, claim_type, cluster_id
+SELECT id, statement, claim_type
 FROM claims WHERE statement LIKE '%<key_phrase>%' LIMIT 10;
 ```
 
 **If a strong match exists:** Do NOT create a duplicate. Create evidence and link it to the EXISTING claim.
-**If a partial match exists:** Create the new claim, but note the similar claim ID in `notes`: "Related to claim #X — candidate for clustering"
+**If a partial match exists:** Create the new claim, but note the similar claim ID in `notes`: "Related to claim #X"
 **If no match:** Create a new standalone claim.
 
 ### 5. Batch Insert All Claims and Link to Source

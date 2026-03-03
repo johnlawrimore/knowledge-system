@@ -84,7 +84,6 @@ interface ClaimDetail {
   claim_type: string;
   reviewer_notes: string | null;
   notes: string | null;
-  cluster_id: number | null;
   evaluation_results: ClaimEvaluation | null;
   created_at: string;
   updated_at: string;
@@ -102,12 +101,6 @@ interface ClaimDetail {
   methods: Method[];
   reasonings: Reasoning[];
   relationships: Relationship[];
-  cluster: {
-    id: number;
-    summary: string | null;
-    reviewer_notes: string | null;
-    siblings: { id: number; statement: string }[];
-  } | null;
 }
 
 const stanceStyles: Record<string, { card: string; badge: string }> = {
@@ -400,31 +393,6 @@ export default function ClaimDetailPage() {
         </>
       )}
 
-      {claim.cluster && (
-        <>
-          <hr className={s.divider} />
-          <div className={s.sectionTitle}>Cluster</div>
-          <div className={s.clusterBox}>
-            <div className={s.clusterTitle}>
-              Cluster #{claim.cluster.id}
-              {claim.cluster.summary && `: ${claim.cluster.summary}`}
-            </div>
-            {!claim.cluster.summary && (
-              <div className={s.clusterMeta}>Summary not yet written</div>
-            )}
-            {claim.cluster.siblings.length > 0 && (
-              <div className={s.siblingList}>
-                <div className={s.metaLabel}>Also in this cluster</div>
-                {claim.cluster.siblings.map((sib) => (
-                  <Link key={sib.id} href={`/claims/${sib.id}`} className={s.siblingItem}>
-                    <div>#{sib.id}: {sib.statement}</div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      )}
     </div>
   );
 }

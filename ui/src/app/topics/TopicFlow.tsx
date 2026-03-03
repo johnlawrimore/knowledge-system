@@ -106,64 +106,101 @@ export default function TopicFlow({
 
   const { nodes, edges } = useMemo(() => {
     const selected = selectedId ? findInTree(topics, Number(selectedId)) : null;
-    const children = selected ? selected.children : topics;
 
     const flowNodes: Node[] = [];
     const flowEdges: Edge[] = [];
 
-    const cols = Math.min(children.length || 1, MAX_COLS);
-    const rowWidth = cols * NODE_W + (cols - 1) * GAP_X;
+    // Collect tiers: each tier is an array of { node, parentId }
+    type TierEntry = { node: TopicTree; parentId: number | null };
+    const tiers: TierEntry[][] = [];
 
     if (selected) {
-      flowNodes.push({
-        id: `t-${selected.id}`,
-        type: 'topic',
-        position: { x: Math.max(rowWidth - NODE_W, 0) / 2, y: 0 },
-        data: {
-          label: selected.name,
-          claimCount: countClaims(selected),
-          hasChildren: selected.children.length > 0,
-          childCount: selected.children.length,
-          isSelected: true,
-          onSelect: () => {},
-        },
-        draggable: false,
-      });
+      tiers.push([{ node: selected, parentId: null }]);
+      let current = selected.children;
+      let parentIds = [selected.id];
+      while (current.length > 0) {
+        const tier: TierEntry[] = current.map((c) => ({
+          node: c,
+          parentId: parentIds.find((pid) => {
+            const p = findInTree(topics, pid);
+            return p?.children.some((ch) => ch.id === c.id);
+          }) ?? null,
+        }));
+        tiers.push(tier);
+        const nextParentIds: number[] = [];
+        const next: TopicTree[] = [];
+        for (const c of current) {
+          if (c.children.length > 0) {
+            nextParentIds.push(c.id);
+            next.push(...c.children);
+          }
+        }
+        current = next;
+        parentIds = nextParentIds;
+      }
+    } else {
+      // No selection — show roots and their children
+      tiers.push(topics.map((t) => ({ node: t, parentId: null })));
+      const tier2: TierEntry[] = [];
+      for (const t of topics) {
+        for (const c of t.children) {
+          tier2.push({ node: c, parentId: t.id });
+        }
+      }
+      if (tier2.length > 0) tiers.push(tier2);
     }
 
-    const baseY = selected ? NODE_H + GAP_Y : 0;
+    // Layout each tier, wrapping into rows of MAX_COLS
+    let cursorY = 0;
 
-    children.forEach((child, i) => {
-      const col = i % MAX_COLS;
-      const row = Math.floor(i / MAX_COLS);
+    // First pass: compute each tier's visual width (with wrapping) for centering
+    const tierLayouts = tiers.map((tier) => {
+      const cols = Math.min(tier.length, MAX_COLS);
+      const rows = Math.ceil(tier.length / MAX_COLS);
+      const width = cols * NODE_W + (cols - 1) * GAP_X;
+      return { cols, rows, width };
+    });
+    const maxWidth = Math.max(...tierLayouts.map((l) => l.width));
 
-      flowNodes.push({
-        id: `t-${child.id}`,
-        type: 'topic',
-        position: {
-          x: col * (NODE_W + GAP_X),
-          y: baseY + row * (NODE_H + GAP_Y),
-        },
-        data: {
-          label: child.name,
-          claimCount: countClaims(child),
-          hasChildren: child.children.length > 0,
-          childCount: child.children.length,
-          isSelected: false,
-          onSelect: () => onSelect(child.id),
-        },
-        draggable: false,
+    tiers.forEach((tier, tierIdx) => {
+      const layout = tierLayouts[tierIdx];
+      const offsetX = (maxWidth - layout.width) / 2;
+
+      tier.forEach((entry, i) => {
+        const { node, parentId } = entry;
+        const col = i % MAX_COLS;
+        const row = Math.floor(i / MAX_COLS);
+        const x = offsetX + col * (NODE_W + GAP_X);
+        const y = cursorY + row * (NODE_H + GAP_Y);
+        const isSelectedNode = selected?.id === node.id;
+
+        flowNodes.push({
+          id: `t-${node.id}`,
+          type: 'topic',
+          position: { x, y },
+          data: {
+            label: node.name,
+            claimCount: countClaims(node),
+            hasChildren: node.children.length > 0,
+            childCount: node.children.length,
+            isSelected: isSelectedNode,
+            onSelect: isSelectedNode ? () => {} : () => onSelect(node.id),
+          },
+          draggable: false,
+        });
+
+        if (parentId != null) {
+          flowEdges.push({
+            id: `e-${parentId}-${node.id}`,
+            source: `t-${parentId}`,
+            target: `t-${node.id}`,
+            type: 'smoothstep',
+            style: { stroke: 'var(--text-muted)', strokeWidth: 1.5 },
+          });
+        }
       });
 
-      if (selected) {
-        flowEdges.push({
-          id: `e-${selected.id}-${child.id}`,
-          source: `t-${selected.id}`,
-          target: `t-${child.id}`,
-          type: 'smoothstep',
-          style: { stroke: 'var(--text-muted)', strokeWidth: 1.5 },
-        });
-      }
+      cursorY += layout.rows * (NODE_H + GAP_Y);
     });
 
     return { nodes: flowNodes, edges: flowEdges };

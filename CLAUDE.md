@@ -15,12 +15,11 @@ The database is MySQL 8.0, accessed via the `mysql` MCP tool.
 
 | Skill | Trigger Phrases | Purpose |
 |-------|----------------|---------|
-| **process** | "process", "process this URL", "run full pipeline" | End-to-end pipeline: collect → distill → decompose → cluster → categorize → evaluate → status |
+| **process** | "process", "process this URL", "run full pipeline" | End-to-end pipeline: collect → distill → decompose → categorize → evaluate → status |
 | **collect** | "collect", "ingest", "add source", URL pasted | Ingest raw sources. Delegates YouTube retrieval to video-retriever. Handles all DB storage. |
 | **video-retriever** | "retrieve video", "get transcript", YouTube URL | Extract metadata, transcript, speaker attribution from YouTube (retrieval only — no DB) |
 | **distill** | "distill", "distill source #X", "distill next" | Distill sources (writes to `sources.distillation`) |
 | **decompose** | "decompose", "extract claims", "decompose next" | Extract claims, evidence, devices, contexts, methods, and reasonings from distillations |
-| **cluster** | "cluster", "find duplicates", "group claims" | Group equivalent claims |
 | **categorize** | "categorize", "assign topics", "tag new claims" | Assign topics, themes, and tags to claims |
 | **evaluate** | "evaluate", "assess", "score", "rate" | Score credibility and quality |
 | **manage** | "create topic", "add theme", "tag", "organize" | CRUD for topics, themes, tags, editorial |
@@ -42,9 +41,6 @@ URL/Upload
                     │
                     ▼
                 decompose
-                    │
-                    ▼
-                 cluster
                     │
                     ▼
                categorize
@@ -69,11 +65,11 @@ All markdown content (sources, distillations, compositions) follows **markdown-f
 - **User**: `claude` / `claude2026`
 - **MCP**: `mysql` MCP server with full CRUD access
 
-### Tables (29)
+### Tables (28)
 
 **Collection**: `contributors`, `publications`, `sources` (includes `distillation` column), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
-**Decomposition**: `topics`, `themes`, `claim_clusters`, `claims`, `claim_sources`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
+**Decomposition**: `topics`, `themes`, `claims`, `claim_sources`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
 **Decomposition Entities**: `devices`, `device_claims`, `contexts`, `context_claims`, `methods`, `method_claims`, `reasonings`, `reasoning_claims`
 **Evidence**: `evidence`, `claim_evidence`
 **Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
@@ -100,7 +96,7 @@ Each entity has a `source_id` tracing to the originating source and links to one
 | View | Purpose |
 |------|---------|
 | `v_pipeline_status` | Pipeline dashboard |
-| `v_all_scored` | All claims/clusters with dynamic confidence scores |
+| `v_all_scored` | All claims with dynamic confidence scores |
 | `v_claim_evidence` | Full evidence chain for composition |
 | `v_thin_claims` | Claims needing more evidence |
 | `v_topic_coverage` | Topic depth |
@@ -128,7 +124,6 @@ Credibility read from `evidence.evaluation_results` JSON via `JSON_EXTRACT(e.eva
 - Evidence always traces to original `source_id`, even when extracted from distillations
 - `claim_sources` records which sources assert which claims; populated during decomposition alongside evidence
 - `evaluation_results` is JSON — use `JSON_EXTRACT()` to query
-- Cluster `summary` is NULL until the user writes it
 - Topics organize content (what the book covers); Themes advance arguments (what the book is about)
 - Tags are freeform strings on claims — no tag registry, just `claim_tags(claim_id, tag)`
 - All type enums include `other` as an escape valve

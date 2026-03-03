@@ -69,13 +69,6 @@
   border-color: var(--border-green);
 }
 
-.cluster {
-  @extend .chip;
-  background: var(--bg-pink);
-  color: var(--accent-pink);
-  border-color: var(--border-pink);
-}
-
 .default {
   @extend .chip;
   background: var(--bg-raised);

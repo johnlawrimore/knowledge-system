@@ -134,15 +134,6 @@ CREATE TABLE themes (
     UNIQUE INDEX idx_themes_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE claim_clusters (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    summary TEXT,
-    reviewer_notes TEXT,
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE claims (
     id INT AUTO_INCREMENT PRIMARY KEY,
     statement TEXT NOT NULL,
@@ -150,15 +141,12 @@ CREATE TABLE claims (
         'assertion', 'principle', 'framework', 'recommendation',
         'prediction', 'definition', 'observation', 'other'
     ) NOT NULL DEFAULT 'assertion',
-    cluster_id INT,
     reviewer_notes TEXT,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (cluster_id) REFERENCES claim_clusters(id) ON DELETE SET NULL,
     INDEX idx_claims_type (claim_type),
-    INDEX idx_claims_cluster (cluster_id),
     FULLTEXT INDEX ft_claims (statement)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -371,7 +359,7 @@ CREATE TABLE pipeline_runs (
 CREATE TABLE pipeline_stages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     run_id INT NOT NULL,
-    stage ENUM('collect', 'distill', 'decompose', 'cluster', 'categorize', 'evaluate', 'status') NOT NULL,
+    stage ENUM('collect', 'distill', 'decompose', 'categorize', 'evaluate', 'status') NOT NULL,
     status ENUM('running', 'success', 'error', 'skipped') NOT NULL DEFAULT 'running',
     duration_s INT,
     total_tokens INT,
@@ -395,7 +383,7 @@ FROM sources GROUP BY status;
 -- Per-claim scoring inputs
 CREATE OR REPLACE VIEW v_claim_scoring_inputs AS
 SELECT
-    c.id AS claim_id, c.statement, c.claim_type, c.cluster_id,
+    c.id AS claim_id, c.statement, c.claim_type,
     COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN ce.evidence_id END) AS supporting_evidence,
     COUNT(DISTINCT CASE WHEN ce.stance = 'contradicts' THEN ce.evidence_id END) AS contradicting_evidence,
     COUNT(DISTINCT CASE WHEN ce.stance = 'qualifies' THEN ce.evidence_id END) AS qualifying_evidence,
@@ -411,9 +399,9 @@ SELECT
 FROM claims c
 LEFT JOIN claim_evidence ce ON c.id = ce.claim_id
 LEFT JOIN evidence e ON ce.evidence_id = e.id
-GROUP BY c.id, c.statement, c.claim_type, c.cluster_id;
+GROUP BY c.id, c.statement, c.claim_type;
 
--- Standalone claim scores
+-- Claim scores
 CREATE OR REPLACE VIEW v_standalone_claim_scores AS
 SELECT
     claim_id, statement, claim_type,
@@ -432,62 +420,15 @@ SELECT
         + (weak_support_count * 0.25) - (derived_evidence_count * 0.5)
         + (LEAST(reasoning_count, 3) * 0.5) - (contradicting_sources * 2.0)
     , 2) AS score
-FROM v_claim_scoring_inputs WHERE cluster_id IS NULL;
-
--- Cluster scores
-CREATE OR REPLACE VIEW v_cluster_scores AS
-SELECT
-    cc.id AS cluster_id, cc.summary, cc.reviewer_notes,
-    COUNT(DISTINCT csi.claim_id) AS claim_count,
-    SUM(csi.supporting_evidence) AS total_supporting_evidence,
-    SUM(csi.contradicting_evidence) AS total_contradicting_evidence,
-    SUM(csi.qualifying_evidence) AS total_qualifying_evidence,
-    COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) AS supporting_sources,
-    COUNT(DISTINCT CASE WHEN ce.stance = 'contradicts' THEN e.source_id END) AS contradicting_sources,
-    MIN(CASE WHEN ce.stance = 'supports'
-        THEN COALESCE(JSON_EXTRACT(e.evaluation_results, '$.credibility'), 2) END) AS best_support_credibility,
-    SUM(csi.reasoning_count) AS total_reasoning_count,
-    CASE
-        WHEN COUNT(DISTINCT CASE WHEN ce.stance = 'contradicts' THEN e.source_id END) >= 2
-             AND COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) >= 2 THEN 'contested'
-        WHEN COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) >= 3
-             AND MIN(CASE WHEN ce.stance = 'supports'
-                 THEN COALESCE(JSON_EXTRACT(e.evaluation_results, '$.credibility'), 2) END) = 1 THEN 'strong'
-        WHEN COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) >= 3 THEN 'strong'
-        WHEN COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) >= 2 THEN 'moderate'
-        WHEN COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) >= 1 THEN 'developing'
-        ELSE 'unsupported'
-    END AS computed_confidence,
-    ROUND(
-        (COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) * 3.0)
-        + (SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'strong' THEN 1 ELSE 0 END) * 1.0)
-        + (SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'moderate' THEN 1 ELSE 0 END) * 0.5)
-        + (SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'weak' THEN 1 ELSE 0 END) * 0.25)
-        - (SUM(csi.derived_evidence_count) * 0.5)
-        + (LEAST(SUM(csi.reasoning_count), 5) * 0.5)
-        - (COUNT(DISTINCT CASE WHEN ce.stance = 'contradicts' THEN e.source_id END) * 2.0)
-    , 2) AS score
-FROM claim_clusters cc
-JOIN v_claim_scoring_inputs csi ON cc.id = csi.cluster_id
-LEFT JOIN claim_evidence ce ON csi.claim_id = ce.claim_id
-LEFT JOIN evidence e ON ce.evidence_id = e.id
-GROUP BY cc.id, cc.summary, cc.reviewer_notes;
+FROM v_claim_scoring_inputs;
 
 -- Unified scored view
 CREATE OR REPLACE VIEW v_all_scored AS
 SELECT CONCAT('claim:', claim_id) AS ref_id, 'standalone' AS ref_type,
-    claim_id, NULL AS cluster_id, statement AS display_text, NULL AS reviewer_notes,
+    claim_id, statement AS display_text, NULL AS reviewer_notes,
     claim_type, computed_confidence, score,
     supporting_sources, contradicting_sources, supporting_evidence, contradicting_evidence
-FROM v_standalone_claim_scores
-UNION ALL
-SELECT CONCAT('cluster:', cluster_id) AS ref_id, 'cluster' AS ref_type,
-    NULL AS claim_id, cluster_id,
-    COALESCE(summary, '(cluster not yet summarized)') AS display_text, reviewer_notes,
-    NULL AS claim_type, computed_confidence, score,
-    supporting_sources, contradicting_sources,
-    total_supporting_evidence, total_contradicting_evidence
-FROM v_cluster_scores;
+FROM v_standalone_claim_scores;
 
 -- Topic coverage
 CREATE OR REPLACE VIEW v_topic_coverage AS
@@ -499,7 +440,7 @@ SELECT t.id AS topic_id, t.name AS topic_name,
 FROM topics t
 LEFT JOIN claim_topics ct ON t.id = ct.topic_id
 LEFT JOIN claims c ON ct.claim_id = c.id
-LEFT JOIN v_claim_scoring_inputs sc ON c.id = sc.claim_id
+LEFT JOIN v_standalone_claim_scores sc ON c.id = sc.claim_id
 LEFT JOIN claim_evidence ce ON c.id = ce.claim_id
 LEFT JOIN evidence e ON ce.evidence_id = e.id
 GROUP BY t.id, t.name;
@@ -515,7 +456,7 @@ SELECT th.id AS theme_id, th.name AS theme_name, th.thesis,
 FROM themes th
 LEFT JOIN claim_themes cth ON th.id = cth.theme_id
 LEFT JOIN claims c ON cth.claim_id = c.id
-LEFT JOIN v_claim_scoring_inputs sc ON c.id = sc.claim_id
+LEFT JOIN v_standalone_claim_scores sc ON c.id = sc.claim_id
 LEFT JOIN claim_topics ct ON c.id = ct.claim_id
 LEFT JOIN topics t ON ct.topic_id = t.id
 GROUP BY th.id, th.name, th.thesis;
@@ -541,22 +482,20 @@ GROUP BY s.id, s.title, s.source_type, s.status;
 
 -- Full evidence for composition
 CREATE OR REPLACE VIEW v_claim_evidence AS
-SELECT c.id AS claim_id, c.statement, c.cluster_id,
-    cc.summary AS cluster_summary,
-    COALESCE(cc.reviewer_notes, c.reviewer_notes) AS reviewer_notes,
+SELECT c.id AS claim_id, c.statement,
+    c.reviewer_notes,
     ce.stance, ce.strength, ce.reasoning,
     e.content AS evidence_content, e.evidence_type, e.verbatim_quote,
     e.evaluation_results AS evidence_evaluation, e.derived_from_evidence_id,
     s.title AS source_title, s.source_type, s.evaluation_results AS source_evaluation,
     GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ') AS contributors
 FROM claims c
-LEFT JOIN claim_clusters cc ON c.cluster_id = cc.id
 JOIN claim_evidence ce ON c.id = ce.claim_id
 JOIN evidence e ON ce.evidence_id = e.id
 JOIN sources s ON e.source_id = s.id
 LEFT JOIN source_contributors sc ON s.id = sc.source_id
 LEFT JOIN contributors p ON sc.contributor_id = p.id
-GROUP BY c.id, c.statement, c.cluster_id, cc.summary,
+GROUP BY c.id, c.statement,
          ce.stance, ce.strength, ce.reasoning,
          e.id, e.content, e.evidence_type,
          e.verbatim_quote, e.evaluation_results, e.derived_from_evidence_id,
@@ -572,7 +511,7 @@ ORDER BY supporting_sources ASC, score ASC;
 -- Expert positions (via evidence chain + direct claim_sources)
 CREATE OR REPLACE VIEW v_expert_positions AS
 SELECT p.id AS contributor_id, p.name, p.affiliation,
-    c.id AS claim_id, c.statement, c.cluster_id,
+    c.id AS claim_id, c.statement,
     ce.stance, ce.strength, e.content AS evidence_content, s.title AS source_title
 FROM contributors p
 JOIN source_contributors sc ON p.id = sc.contributor_id
@@ -582,7 +521,7 @@ JOIN claim_evidence ce ON e.id = ce.evidence_id
 JOIN claims c ON ce.claim_id = c.id
 UNION
 SELECT p.id AS contributor_id, p.name, p.affiliation,
-    c.id AS claim_id, c.statement, c.cluster_id,
+    c.id AS claim_id, c.statement,
     NULL AS stance, NULL AS strength, NULL AS evidence_content, s.title AS source_title
 FROM contributors p
 JOIN source_contributors sc ON p.id = sc.contributor_id

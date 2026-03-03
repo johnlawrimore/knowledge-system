@@ -103,28 +103,16 @@ Table themes {
   created_at timestamp
 }
 
-Table claim_clusters {
-  id int [pk, increment]
-  summary text
-  reviewer_notes text
-  notes text
-  created_at timestamp
-  updated_at timestamp
-}
-
 Table claims {
   id int [pk, increment]
   statement text [not null]
   claim_type enum('assertion','principle','framework','recommendation','prediction','definition','observation','other') [not null, default: 'assertion']
-  cluster_id int
   evaluation_results json
   reviewer_notes text
   notes text
   created_at timestamp
   updated_at timestamp
 }
-
-Ref: claims.cluster_id > claim_clusters.id [delete: set null]
 
 Table claim_relationships {
   id int [pk, increment]
@@ -302,7 +290,7 @@ Ref: pipeline_runs.source_id > sources.id
 Table pipeline_stages {
   id int [pk, increment]
   run_id int [not null]
-  stage enum('collect','distill','decompose','cluster','categorize','evaluate','status') [not null]
+  stage enum('collect','distill','decompose','categorize','evaluate','status') [not null]
   status enum('running','success','error','skipped') [not null, default: 'running']
   duration_s int
   total_tokens int
@@ -331,7 +319,6 @@ TableGroup composition {
 TableGroup decomposition {
   topics
   themes
-  claim_clusters
   claims
   claim_sources
   claim_relationships

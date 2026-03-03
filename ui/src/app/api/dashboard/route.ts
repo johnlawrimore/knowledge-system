@@ -37,16 +37,11 @@ export async function GET() {
         'SELECT COUNT(*) as count FROM v_thin_claims'
       );
 
-      const [[unsummarized]] = await conn.query<RowDataPacket[]>(
-        'SELECT COUNT(*) as count FROM claim_clusters WHERE summary IS NULL'
-      );
-
       const attention = [
         { label: 'Sources stuck in collected', count: Number(collectedStuck.count) },
         { label: 'Distilled sources ready to decompose', count: Number(readyToDecompose.count) },
         { label: 'Uncategorized claims', count: Number(uncategorized.count) },
         { label: 'Thin claims', count: Number(thinClaims.count) },
-        { label: 'Unsummarized clusters', count: Number(unsummarized.count) },
       ];
 
       // Topic coverage (top 10)

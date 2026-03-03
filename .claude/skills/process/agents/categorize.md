@@ -47,20 +47,7 @@ Topics form a hierarchy via `parent_topic_id`. When assigning:
 
 For each claim, check if it advances or challenges any theme's thesis.
 
-### 4. Check Cluster Consistency
-
-If a claim belongs to a cluster, check the cluster's other claims:
-```sql
-SELECT c2.id, ct.topic_id, cth.theme_id
-FROM claims c1
-JOIN claims c2 ON c1.cluster_id = c2.cluster_id AND c1.id != c2.id
-LEFT JOIN claim_topics ct ON c2.id = ct.claim_id
-LEFT JOIN claim_themes cth ON c2.id = cth.claim_id
-WHERE c1.id = <claim_id> AND c1.cluster_id IS NOT NULL;
-```
-Apply the same topic/theme assignments for consistency. Flag any mismatches in the JSON output.
-
-### 5. Apply Tags
+### 4. Apply Tags
 
 Tags describe **what a claim is about** — its subject matter domain. They are not for editorial assessment, writing quality, or pipeline status.
 

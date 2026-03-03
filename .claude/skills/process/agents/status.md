@@ -23,7 +23,6 @@ SELECT
     (SELECT COUNT(*) FROM sources) AS total_sources,
     (SELECT COUNT(*) FROM compositions) AS total_compositions,
     (SELECT COUNT(*) FROM claims) AS total_claims,
-    (SELECT COUNT(*) FROM claim_clusters) AS total_clusters,
     (SELECT COUNT(*) FROM evidence) AS total_evidence,
     (SELECT COUNT(*) FROM contributors) AS total_contributors,
     (SELECT COUNT(*) FROM topics) AS total_topics,
@@ -70,12 +69,6 @@ JOIN evidence e ON s.id = e.source_id
 JOIN claim_evidence ce ON e.id = ce.evidence_id
 GROUP BY p.id, p.name, p.affiliation ORDER BY claims_touched DESC;
 
--- Cluster health (clusters missing summaries)
-SELECT cc.id, COUNT(c.id) AS claim_count,
-       GROUP_CONCAT(c.statement SEPARATOR ' | ') AS claims
-FROM claim_clusters cc JOIN claims c ON cc.id = c.cluster_id
-WHERE cc.summary IS NULL GROUP BY cc.id;
-
 -- Stale sources (stuck in collected for >7 days)
 SELECT id, title, source_type, date_collected FROM sources
 WHERE status = 'collected' AND date_collected < DATE_SUB(NOW(), INTERVAL 7 DAY)
@@ -101,7 +94,7 @@ Pipeline:
   Compositions: X draft, X reviewed, X published
 
 Knowledge:
-  Claims: X (in Y clusters + Z standalone)
+  Claims: X
   Evidence: X records
   Contributors: X | Topics: X | Themes: X | Tags: X
 
@@ -138,10 +131,6 @@ Expert Positions:
   <name> (<affiliation>): X claims (Y supporting, Z contradicting)
   ...
 
-Cluster Health:
-  X clusters missing summaries
-  (list cluster IDs if any)
-
 Stale Sources:
   X sources stuck in 'collected' for >7 days
   (list titles if any)
@@ -157,8 +146,7 @@ What Should I Work On Next:
   4. Categorize X uncategorized claims
   5. Tag X untagged claims
   6. Strengthen X thin claims (< 2 supporting sources)
-  7. Write summaries for X clusters
-  8. Review X contested claims
+  7. Review X contested claims
 ```
 
 **Prioritization order** (highest to lowest):
@@ -168,8 +156,7 @@ What Should I Work On Next:
 4. Uncategorized claims — assign topics
 5. Untagged claims — apply at least domain tags
 6. Thin claims — find more sources to strengthen them
-7. Unsummarized clusters — write summaries
-8. Contested claims — review and write reviewer_notes
+7. Contested claims — review and write reviewer_notes
 
 ## Required Output
 

@@ -47,7 +47,7 @@ export async function GET(
       // Expert positions from v_expert_positions
       const [positions] = await conn.query<RowDataPacket[]>(
         `SELECT
-           claim_id, statement, cluster_id,
+           claim_id, statement,
            stance, strength, evidence_content, source_title
          FROM v_expert_positions
          WHERE contributor_id = ?

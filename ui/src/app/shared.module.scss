@@ -1,5 +1,5 @@
 // ── Shared styles for simpler list/detail pages ─────────────────
-// Topics, Themes, Tags, Contributors, Clusters, Compositions, Evidence
+// Topics, Themes, Tags, Contributors, Compositions, Evidence
 
 .page {
   padding: 1.5rem;
@@ -324,7 +324,7 @@
   font-size: 0.6875rem;
 }
 
-// ── Claim list (reused in topics, themes, tags, clusters) ───────
+// ── Claim list (reused in topics, themes, tags) ───────
 .claimList {
   display: flex;
   flex-direction: column;

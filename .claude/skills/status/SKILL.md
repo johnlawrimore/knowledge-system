@@ -33,7 +33,6 @@ SELECT
     (SELECT COUNT(*) FROM sources) AS total_sources,
     (SELECT COUNT(*) FROM compositions) AS total_compositions,
     (SELECT COUNT(*) FROM claims) AS total_claims,
-    (SELECT COUNT(*) FROM claim_clusters) AS total_clusters,
     (SELECT COUNT(*) FROM evidence) AS total_evidence,
     (SELECT COUNT(*) FROM contributors) AS total_contributors,
     (SELECT COUNT(*) FROM topics) AS total_topics,
@@ -50,7 +49,7 @@ Pipeline:
   Compositions: X draft, X reviewed, X published
 
 Knowledge:
-  Claims: X (in Y clusters + Z standalone)
+  Claims: X
   Evidence: X records
   Contributors: X | Topics: X | Themes: X | Tags: X
 ```
@@ -130,16 +129,7 @@ JOIN claim_evidence ce ON e.id = ce.evidence_id
 GROUP BY p.id, p.name, p.affiliation ORDER BY claims_touched DESC;
 ```
 
-### 12. Cluster Health
-
-```sql
-SELECT cc.id, COUNT(c.id) AS claim_count,
-       GROUP_CONCAT(c.statement SEPARATOR ' | ') AS claims
-FROM claim_clusters cc JOIN claims c ON cc.id = c.cluster_id
-WHERE cc.summary IS NULL GROUP BY cc.id;
-```
-
-### 13. Stale Sources
+### 12. Stale Sources
 
 ```sql
 SELECT id, title, source_type, date_collected FROM sources
@@ -183,8 +173,7 @@ Prioritize:
 4. **Uncategorized claims** — assign topics
 5. **Untagged claims** — apply at least domain tags
 6. **Thin claims** — find more sources to strengthen them
-7. **Unsummarized clusters** — write summaries
-8. **Contested claims** — review and write reviewer_notes
+7. **Contested claims** — review and write reviewer_notes
 
 ```
 Recommended next actions:
@@ -224,8 +213,3 @@ SELECT c.id, c.statement FROM claims c
 JOIN claim_tags ct ON c.id = ct.claim_id WHERE ct.tag = '<tag>';
 ```
 
-**"What claims are in cluster #X?"**
-```sql
-SELECT c.id, c.statement FROM claims c WHERE c.cluster_id = <X>;
-SELECT * FROM v_cluster_scores WHERE cluster_id = <X>;
-```

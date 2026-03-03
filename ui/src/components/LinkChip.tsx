@@ -8,7 +8,6 @@ const kindMap: Record<string, string> = {
   source: s.source,
   contributor: s.contributor,
   claim: s.claim,
-  cluster: s.cluster,
 };
 
 export default function LinkChip({

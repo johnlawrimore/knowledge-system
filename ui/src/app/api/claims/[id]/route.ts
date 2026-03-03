@@ -21,7 +21,7 @@ export async function GET(
     const [claimRows] = await pool.query<RowDataPacket[]>(
       `SELECT
          c.id, c.statement, c.claim_type, c.reviewer_notes, c.notes,
-         c.cluster_id, c.evaluation_results, c.created_at, c.updated_at
+         c.evaluation_results, c.created_at, c.updated_at
        FROM claims c
        WHERE c.id = ?`,
       [id],
@@ -32,21 +32,8 @@ export async function GET(
     const claim = claimRows[0];
 
     // ---- Score data ----
-    // If the claim belongs to a cluster, use v_cluster_scores; otherwise v_standalone_claim_scores
     let scoreData: Record<string, unknown> | null = null;
-    if (claim.cluster_id) {
-      const [csRows] = await pool.query<RowDataPacket[]>(
-        `SELECT
-           cluster_id, computed_confidence, score,
-           supporting_sources, contradicting_sources,
-           total_supporting_evidence AS supporting_evidence,
-           total_contradicting_evidence AS contradicting_evidence
-         FROM v_cluster_scores
-         WHERE cluster_id = ?`,
-        [claim.cluster_id],
-      );
-      scoreData = csRows.length > 0 ? csRows[0] : null;
-    } else {
+    {
       const [ssRows] = await pool.query<RowDataPacket[]>(
         `SELECT
            claim_id, computed_confidence, score,
@@ -198,31 +185,6 @@ export async function GET(
       [id, id, id, id, id],
     );
 
-    // ---- Cluster info ----
-    let cluster: Record<string, unknown> | null = null;
-    if (claim.cluster_id) {
-      const [clusterRows] = await pool.query<RowDataPacket[]>(
-        `SELECT id, summary, reviewer_notes
-         FROM claim_clusters
-         WHERE id = ?`,
-        [claim.cluster_id],
-      );
-      let siblingClaims: RowDataPacket[] = [];
-      if (clusterRows.length > 0) {
-        const [siblingRows] = await pool.query<RowDataPacket[]>(
-          `SELECT id, statement, claim_type
-           FROM claims
-           WHERE cluster_id = ? AND id != ?
-           ORDER BY id`,
-          [claim.cluster_id, id],
-        );
-        siblingClaims = siblingRows;
-      }
-      cluster = clusterRows.length > 0
-        ? { ...clusterRows[0], sibling_claims: siblingClaims }
-        : null;
-    }
-
     const evidence = evidenceRows.map((row) => {
       const evalResults = typeof row.evaluation_results === 'string'
         ? JSON.parse(row.evaluation_results)
@@ -261,7 +223,6 @@ export async function GET(
       claim_type: claim.claim_type,
       reviewer_notes: claim.reviewer_notes,
       notes: claim.notes,
-      cluster_id: claim.cluster_id,
       evaluation_results: claimEvalResults,
       created_at: claim.created_at,
       updated_at: claim.updated_at,
@@ -289,12 +250,6 @@ export async function GET(
         related_claim_id: r.related_claim_id,
         related_statement: r.related_claim_statement,
       })),
-      cluster: cluster ? {
-        id: (cluster as Record<string, unknown>).id,
-        summary: (cluster as Record<string, unknown>).summary ?? null,
-        reviewer_notes: (cluster as Record<string, unknown>).reviewer_notes ?? null,
-        siblings: ((cluster as Record<string, unknown>).sibling_claims as Record<string, unknown>[]) || [],
-      } : null,
     });
   } catch (error) {
     console.error('GET /api/claims/[id] error:', error);

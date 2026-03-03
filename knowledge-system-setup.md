@@ -140,7 +140,6 @@ project-root/
     ├── markdown-formatting/SKILL.md   # Formatting rules
     ├── distill/SKILL.md               # Source distillation
     ├── decompose/SKILL.md             # Claim + evidence extraction
-    ├── cluster/SKILL.md               # Claim grouping
     ├── evaluate/SKILL.md              # Credibility scoring
     ├── manage/SKILL.md                # Topics, themes, tags, editorial
     └── status/SKILL.md                # Dashboard + gap analysis

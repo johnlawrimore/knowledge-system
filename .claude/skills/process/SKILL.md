@@ -1,6 +1,6 @@
 ---
 name: process
-description: End-to-end pipeline that takes a URL through all stages — collect, distill, decompose, cluster, categorize, evaluate, status
+description: End-to-end pipeline that takes a URL through all stages — collect, distill, decompose, categorize, evaluate, status
 ---
 
 # Process
@@ -17,10 +17,10 @@ Run a URL through the full knowledge pipeline using subagents. Each stage runs i
 ## Pipeline
 
 ```
-1. collect → 2. distill → 3. decompose → 4. cluster → [5. categorize || 6. evaluate] → 7. status
+1. collect → 2. distill → 3. decompose → [4. categorize || 5. evaluate] → 6. status
 ```
 
-Stages 5 and 6 run in parallel (they write to disjoint tables).
+Stages 4 and 5 run in parallel (they write to disjoint tables).
 
 ## Architecture
 
@@ -88,7 +88,7 @@ UPDATE pipeline_stages SET
 WHERE id = <stage_id>;"
 ```
 
-For parallel stages (5+6): insert both stage rows before launching, update each when its agent returns.
+For parallel stages (4+5): insert both stage rows before launching, update each when its agent returns.
 
 ### After pipeline completes
 
@@ -119,7 +119,7 @@ UPDATE pipeline_runs SET status = 'failed', completed_at = NOW() WHERE id = <run
 Include timing in each stage report line:
 
 ```
-[1/7] Collected: "<title>" (source #<id>, <word_count> words) — 45s
+[1/6] Collected: "<title>" (source #<id>, <word_count> words) — 45s
 ```
 
 ## Baseline Counts
@@ -147,7 +147,7 @@ SELECT
 
 Report to user:
 ```
-[1/7] Collected: "<title>" (source #<id>, <word_count> words) — <duration>s
+[1/6] Collected: "<title>" (source #<id>, <word_count> words) — <duration>s
 ```
 
 If status is "error", report and abort.
@@ -161,7 +161,7 @@ If status is "error", report and abort.
 
 Report to user:
 ```
-[2/7] Distilled: "<title>" (<word_count> words) — <duration>s
+[2/6] Distilled: "<title>" (<word_count> words) — <duration>s
 ```
 
 ### Stage 3: Decompose
@@ -173,32 +173,20 @@ Report to user:
 
 Report to user:
 ```
-[3/7] Decomposed: <N> claims, <N> evidence records — <duration>s
+[3/6] Decomposed: <N> claims, <N> evidence records — <duration>s
 ```
 
-### Stage 4: Cluster
-
-**Agent prompt:** `process/agents/cluster.md`
-**Model:** haiku
-**Substitutions:** `{{claim_ids}}` → comma-separated list from stage 3
-**Extract from result:** `clusters_created`, `relationships_created`, `claims_merged`
-
-Report to user:
-```
-[4/7] Clustered: <N> clusters, <N> relationships — <duration>s
-```
-
-### Stages 5 + 6: Categorize and Evaluate (parallel)
+### Stages 4 + 5: Categorize and Evaluate (parallel)
 
 Launch BOTH agents simultaneously using parallel Agent tool calls. Capture a single `stage_start` before launching both; capture `stage_end` when BOTH have returned. Report the wall-clock duration for the parallel pair.
 
-**Stage 5 — Categorize:**
+**Stage 4 — Categorize:**
 - **Agent prompt:** `process/agents/categorize.md`
 - **Model:** sonnet
 - **Substitutions:** `{{claim_ids}}` → from stage 3, `{{source_id}}` → from stage 1
 - **Extract:** `topics_assigned`, `themes_assigned`, `tags_applied`
 
-**Stage 6 — Evaluate:**
+**Stage 5 — Evaluate:**
 - **Agent prompt:** `process/agents/evaluate.md`
 - **Model:** sonnet
 - **Substitutions:** `{{source_id}}` → from stage 1, `{{claim_ids}}` → comma-separated list from stage 3, `{{evidence_ids}}` → comma-separated list from stage 3
@@ -206,11 +194,11 @@ Launch BOTH agents simultaneously using parallel Agent tool calls. Capture a sin
 
 Report both results:
 ```
-[5/7] Categorized: <N> topics, <N> themes, <N> tags ┐
-[6/7] Evaluated: grade <A-F>, <N> claims, avg evidence credibility <N> ┘ — <duration>s (parallel)
+[4/6] Categorized: <N> topics, <N> themes, <N> tags ┐
+[5/6] Evaluated: grade <A-F>, <N> claims, avg evidence credibility <N> ┘ — <duration>s (parallel)
 ```
 
-### Stage 7: Status
+### Stage 6: Status
 
 **Agent prompt:** `process/agents/status.md`
 **Model:** haiku
@@ -219,7 +207,7 @@ Report both results:
 
 Report to user:
 ```
-[7/7] Status report generated — <duration>s
+[6/6] Status report generated — <duration>s
 ```
 
 Display the full report text.
@@ -239,7 +227,6 @@ Stage Results:
   ✓ Collected — <source_type>, <word_count> words          <duration>s
   ✓ Distilled — <word_count> words                          <duration>s
   ✓ Decomposed — <N> claims, <N> evidence records          <duration>s
-  ✓ Clustered — <N> clusters, <N> relationships            <duration>s
   ✓ Categorized — <N> topics, <N> themes, <N> tags    ┐
   ✓ Evaluated — Grade: <A-F>, <N> claims, Avg evidence: <score>  ┘ <duration>s
   ✓ Status report                                          <duration>s
@@ -266,7 +253,7 @@ For each stage, follow this pattern:
 5. Parse the JSON block from the last ```json ... ``` fence in the agent's response
 6. Extract the needed IDs and pass them to the next stage
 
-For the parallel stages (5+6), make BOTH Agent tool calls in a single message.
+For the parallel stages (4+5), make BOTH Agent tool calls in a single message.
 
 ## Error Handling
 

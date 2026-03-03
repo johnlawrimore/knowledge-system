@@ -14,7 +14,6 @@ Create, update, and organize topics, themes, tags, and editorial content. This i
 - User says "create topic", "add theme", "manage topics", "organize"
 - User wants to assign claims to topics or themes
 - User wants to add, remove, or clean up tags
-- User wants to write cluster summaries or reviewer notes
 - User wants to create or modify claim relationships
 - User wants to edit or merge contributors
 
@@ -179,26 +178,10 @@ INSERT IGNORE INTO claim_themes (claim_id, theme_id) VALUES (<claim_id>, <theme_
 
 When 50+ claims exist, help discover themes by looking for patterns across topics and presenting suggestions.
 
-## Cluster Summary Writing
-
-```sql
-SELECT cc.id, cc.summary,
-       GROUP_CONCAT(c.statement SEPARATOR '\n---\n') AS claim_statements
-FROM claim_clusters cc JOIN claims c ON cc.id = c.cluster_id
-WHERE cc.summary IS NULL GROUP BY cc.id;
-```
-
-Draft a summary that synthesizes what the claims collectively assert, written in the user's voice. Present for approval, then:
-
-```sql
-UPDATE claim_clusters SET summary = '<approved summary>' WHERE id = <id>;
-```
-
 ## Reviewer Notes
 
 ```sql
 UPDATE claims SET reviewer_notes = '<position>' WHERE id = <id>;
-UPDATE claim_clusters SET reviewer_notes = '<position>' WHERE id = <id>;
 ```
 
 ## Claim Relationship Management

@@ -11,7 +11,6 @@ interface Claim {
   id: number;
   statement: string;
   claim_type: string;
-  cluster_id: number | null;
   computed_confidence: string;
   score: number;
   supporting_sources: number;
@@ -22,7 +21,6 @@ interface Claim {
   topics: string[];
   themes: string[];
   tags: string[];
-  cluster_summary: string | null;
   device_count: number;
   context_count: number;
   method_count: number;
