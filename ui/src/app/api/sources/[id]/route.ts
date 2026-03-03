@@ -91,12 +91,9 @@ export async function GET(
       );
       evidenceTotal = Math.max(evidenceTotal, Number(totalEvidence.count));
 
-      // Claims count via evidence chain
+      // Claims count via claim_sources
       const [[claimsCount]] = await conn.query<RowDataPacket[]>(
-        `SELECT COUNT(DISTINCT ce.claim_id) as count
-         FROM evidence e
-         JOIN claim_evidence ce ON e.id = ce.evidence_id
-         WHERE e.source_id = ?`,
+        `SELECT COUNT(*) as count FROM claim_sources WHERE source_id = ?`,
         [sourceId]
       );
 

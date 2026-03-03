@@ -207,6 +207,111 @@ CREATE TABLE claim_tags (
 
 
 -- ============================================================================
+-- CLAIM SOURCES (direct assertion link)
+-- ============================================================================
+
+CREATE TABLE claim_sources (
+    claim_id INT NOT NULL,
+    source_id INT NOT NULL,
+
+    PRIMARY KEY (claim_id, source_id),
+    FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,
+    FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
+    INDEX idx_claim_sources_source (source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================================
+-- DECOMPOSITION ENTITIES
+-- ============================================================================
+
+CREATE TABLE devices (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    source_id INT NOT NULL,
+    device_type ENUM('analogy', 'metaphor', 'narrative', 'example', 'thought_experiment', 'visual'),
+    effectiveness_note TEXT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
+    INDEX idx_devices_source (source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE device_claims (
+    device_id INT NOT NULL,
+    claim_id INT NOT NULL,
+
+    PRIMARY KEY (device_id, claim_id),
+    FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE,
+    FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE contexts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    source_id INT NOT NULL,
+    context_type ENUM('historical', 'industry', 'technical', 'organizational', 'regulatory', 'cultural', 'scope'),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
+    INDEX idx_contexts_source (source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE context_claims (
+    context_id INT NOT NULL,
+    claim_id INT NOT NULL,
+
+    PRIMARY KEY (context_id, claim_id),
+    FOREIGN KEY (context_id) REFERENCES contexts(id) ON DELETE CASCADE,
+    FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE methods (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    source_id INT NOT NULL,
+    method_type ENUM('process', 'framework', 'technique', 'tool', 'practice', 'metric'),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
+    INDEX idx_methods_source (source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE method_claims (
+    method_id INT NOT NULL,
+    claim_id INT NOT NULL,
+
+    PRIMARY KEY (method_id, claim_id),
+    FOREIGN KEY (method_id) REFERENCES methods(id) ON DELETE CASCADE,
+    FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE reasonings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    source_id INT NOT NULL,
+    reasoning_type ENUM('deductive', 'inductive', 'analogical', 'causal', 'abductive'),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
+    INDEX idx_reasonings_source (source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE reasoning_claims (
+    reasoning_id INT NOT NULL,
+    claim_id INT NOT NULL,
+
+    PRIMARY KEY (reasoning_id, claim_id),
+    FOREIGN KEY (reasoning_id) REFERENCES reasonings(id) ON DELETE CASCADE,
+    FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================================
 -- EVIDENCE
 -- ============================================================================
 
@@ -419,9 +524,19 @@ GROUP BY th.id, th.name, th.thesis;
 CREATE OR REPLACE VIEW v_source_contributions AS
 SELECT s.id AS source_id, s.title, s.source_type, s.status,
     CASE WHEN s.distillation IS NOT NULL THEN 1 ELSE 0 END AS has_distillation,
-    COUNT(DISTINCT e.id) AS evidence_count
+    COUNT(DISTINCT cs.claim_id) AS claims_count,
+    COUNT(DISTINCT e.id) AS evidence_count,
+    COUNT(DISTINCT d.id) AS devices_count,
+    COUNT(DISTINCT ctx.id) AS contexts_count,
+    COUNT(DISTINCT m.id) AS methods_count,
+    COUNT(DISTINCT r.id) AS reasonings_count
 FROM sources s
+LEFT JOIN claim_sources cs ON s.id = cs.source_id
 LEFT JOIN evidence e ON s.id = e.source_id
+LEFT JOIN devices d ON s.id = d.source_id
+LEFT JOIN contexts ctx ON s.id = ctx.source_id
+LEFT JOIN methods m ON s.id = m.source_id
+LEFT JOIN reasonings r ON s.id = r.source_id
 GROUP BY s.id, s.title, s.source_type, s.status;
 
 -- Full evidence for composition
@@ -454,7 +569,7 @@ SELECT ref_id, ref_type, display_text, computed_confidence, score,
 FROM v_all_scored WHERE supporting_sources < 2
 ORDER BY supporting_sources ASC, score ASC;
 
--- Expert positions
+-- Expert positions (via evidence chain + direct claim_sources)
 CREATE OR REPLACE VIEW v_expert_positions AS
 SELECT p.id AS contributor_id, p.name, p.affiliation,
     c.id AS claim_id, c.statement, c.cluster_id,
@@ -465,4 +580,18 @@ JOIN sources s ON sc.source_id = s.id
 JOIN evidence e ON s.id = e.source_id
 JOIN claim_evidence ce ON e.id = ce.evidence_id
 JOIN claims c ON ce.claim_id = c.id
-ORDER BY p.name, c.id;
+UNION
+SELECT p.id AS contributor_id, p.name, p.affiliation,
+    c.id AS claim_id, c.statement, c.cluster_id,
+    NULL AS stance, NULL AS strength, NULL AS evidence_content, s.title AS source_title
+FROM contributors p
+JOIN source_contributors sc ON p.id = sc.contributor_id
+JOIN sources s ON sc.source_id = s.id
+JOIN claim_sources csrc ON s.id = csrc.source_id
+JOIN claims c ON csrc.claim_id = c.id
+WHERE NOT EXISTS (
+    SELECT 1 FROM evidence e2
+    JOIN claim_evidence ce2 ON e2.id = ce2.evidence_id
+    WHERE e2.source_id = s.id AND ce2.claim_id = c.id
+)
+ORDER BY contributor_id, claim_id;

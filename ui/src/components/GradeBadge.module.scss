@@ -9,6 +9,11 @@
   letter-spacing: 0.03em;
   border: 1px solid;
   white-space: nowrap;
+  overflow: visible;
+
+  svg {
+    flex-shrink: 0;
+  }
 }
 
 .gradeA {

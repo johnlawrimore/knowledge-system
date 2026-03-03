@@ -164,6 +164,96 @@ Table claim_tags {
 
 Ref: claim_tags.claim_id > claims.id [delete: cascade]
 
+// --- CLAIM SOURCES (direct assertion link) ---
+
+Table claim_sources {
+  claim_id int [not null]
+  source_id int [not null]
+  indexes { (claim_id, source_id) [pk] }
+}
+
+Ref: claim_sources.claim_id > claims.id [delete: cascade]
+Ref: claim_sources.source_id > sources.id [delete: restrict]
+
+// --- DECOMPOSITION ENTITIES ---
+
+Table devices {
+  id int [pk, increment]
+  content text [not null]
+  source_id int [not null]
+  device_type enum('analogy','metaphor','narrative','example','thought_experiment','visual')
+  effectiveness_note text
+  notes text
+  created_at timestamp
+}
+
+Table device_claims {
+  device_id int [not null]
+  claim_id int [not null]
+  indexes { (device_id, claim_id) [pk] }
+}
+
+Ref: devices.source_id > sources.id [delete: restrict]
+Ref: device_claims.device_id > devices.id [delete: cascade]
+Ref: device_claims.claim_id > claims.id [delete: cascade]
+
+Table contexts {
+  id int [pk, increment]
+  content text [not null]
+  source_id int [not null]
+  context_type enum('historical','industry','technical','organizational','regulatory','cultural','scope')
+  notes text
+  created_at timestamp
+}
+
+Table context_claims {
+  context_id int [not null]
+  claim_id int [not null]
+  indexes { (context_id, claim_id) [pk] }
+}
+
+Ref: contexts.source_id > sources.id [delete: restrict]
+Ref: context_claims.context_id > contexts.id [delete: cascade]
+Ref: context_claims.claim_id > claims.id [delete: cascade]
+
+Table methods {
+  id int [pk, increment]
+  content text [not null]
+  source_id int [not null]
+  method_type enum('process','framework','technique','tool','practice','metric')
+  notes text
+  created_at timestamp
+}
+
+Table method_claims {
+  method_id int [not null]
+  claim_id int [not null]
+  indexes { (method_id, claim_id) [pk] }
+}
+
+Ref: methods.source_id > sources.id [delete: restrict]
+Ref: method_claims.method_id > methods.id [delete: cascade]
+Ref: method_claims.claim_id > claims.id [delete: cascade]
+
+Table reasonings {
+  id int [pk, increment]
+  content text [not null]
+  source_id int [not null]
+  reasoning_type enum('deductive','inductive','analogical','causal','abductive')
+  notes text
+  created_at timestamp
+}
+
+Table reasoning_claims {
+  reasoning_id int [not null]
+  claim_id int [not null]
+  indexes { (reasoning_id, claim_id) [pk] }
+}
+
+Ref: reasonings.source_id > sources.id [delete: restrict]
+Ref: reasoning_claims.reasoning_id > reasonings.id [delete: cascade]
+Ref: reasoning_claims.claim_id > claims.id [delete: cascade]
+
 // --- EVIDENCE ---
 
 Table evidence {
@@ -243,10 +333,22 @@ TableGroup decomposition {
   themes
   claim_clusters
   claims
+  claim_sources
   claim_relationships
   claim_topics
   claim_themes
   claim_tags
+}
+
+TableGroup decomposition_entities {
+  devices
+  device_claims
+  contexts
+  context_claims
+  methods
+  method_claims
+  reasonings
+  reasoning_claims
 }
 
 TableGroup evidence_layer {

@@ -6,7 +6,7 @@ A structured knowledge management pipeline for AI-assisted software development 
 
 1. **Collection** — Ingest raw sources (URLs, YouTube, uploads) into the `sources` table
 2. **Distillation** — Rewrite sources into uniform-voice distillations stored in `sources.distillation`
-3. **Decomposition** — Extract claims and evidence into structured, queryable tables
+3. **Decomposition** — Extract claims, evidence, devices, contexts, methods, and reasonings into structured, queryable tables
 4. **Composition** — Draft thought leadership content from selected sources (on-demand, not part of the pipeline)
 
 The database is MySQL 8.0, accessed via the `mysql` MCP tool.
@@ -19,7 +19,7 @@ The database is MySQL 8.0, accessed via the `mysql` MCP tool.
 | **collect** | "collect", "ingest", "add source", URL pasted | Ingest raw sources. Delegates YouTube retrieval to video-retriever. Handles all DB storage. |
 | **video-retriever** | "retrieve video", "get transcript", YouTube URL | Extract metadata, transcript, speaker attribution from YouTube (retrieval only — no DB) |
 | **distill** | "distill", "distill source #X", "distill next" | Distill sources (writes to `sources.distillation`) |
-| **decompose** | "decompose", "extract claims", "decompose next" | Extract claims + evidence from distillations |
+| **decompose** | "decompose", "extract claims", "decompose next" | Extract claims, evidence, devices, contexts, methods, and reasonings from distillations |
 | **cluster** | "cluster", "find duplicates", "group claims" | Group equivalent claims |
 | **categorize** | "categorize", "assign topics", "tag new claims" | Assign topics, themes, and tags to claims |
 | **evaluate** | "evaluate", "assess", "score", "rate" | Score credibility and quality |
@@ -69,13 +69,31 @@ All markdown content (sources, distillations, compositions) follows **markdown-f
 - **User**: `claude` / `claude2026`
 - **MCP**: `mysql` MCP server with full CRUD access
 
-### Tables (20)
+### Tables (29)
 
 **Collection**: `contributors`, `publications`, `sources` (includes `distillation` column), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
-**Decomposition**: `topics`, `themes`, `claim_clusters`, `claims`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
+**Decomposition**: `topics`, `themes`, `claim_clusters`, `claims`, `claim_sources`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
+**Decomposition Entities**: `devices`, `device_claims`, `contexts`, `context_claims`, `methods`, `method_claims`, `reasonings`, `reasoning_claims`
 **Evidence**: `evidence`, `claim_evidence`
 **Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
+
+### Claim Sources
+
+`claim_sources` provides a direct link between claims and the sources that assert them. This is distinct from the evidence chain (`claim_evidence` → `evidence` → `sources`): a source can assert a claim directly and separately provide evidence for it.
+
+### Decomposition Entity Types
+
+Four entity types are extracted during decomposition alongside claims and evidence:
+
+| Entity | Table | Junction | Purpose |
+|--------|-------|----------|---------|
+| **Devices** | `devices` | `device_claims` | Rhetorical devices — analogies, metaphors, narratives, examples, thought experiments, visuals |
+| **Contexts** | `contexts` | `context_claims` | Boundary conditions — historical, industry, technical, organizational, regulatory, cultural, scope |
+| **Methods** | `methods` | `method_claims` | Application methods — processes, frameworks, techniques, tools, practices, metrics |
+| **Reasonings** | `reasonings` | `reasoning_claims` | Logical connections — deductive, inductive, analogical, causal, abductive |
+
+Each entity has a `source_id` tracing to the originating source and links to one or more claims through its junction table. These entities do not affect claim scoring — scoring remains based on evidence strength, source independence, and contradiction analysis.
 
 ### Key Views
 
@@ -108,6 +126,7 @@ Credibility read from `evidence.evaluation_results` JSON via `JSON_EXTRACT(e.eva
 
 - Claims are written in the user's voice, not source language
 - Evidence always traces to original `source_id`, even when extracted from distillations
+- `claim_sources` records which sources assert which claims; populated during decomposition alongside evidence
 - `evaluation_results` is JSON — use `JSON_EXTRACT()` to query
 - Cluster `summary` is NULL until the user writes it
 - Topics organize content (what the book covers); Themes advance arguments (what the book is about)

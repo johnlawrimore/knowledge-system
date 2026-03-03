@@ -60,9 +60,9 @@ export async function GET(request: NextRequest) {
       values.push(tag);
     }
 
-    // Source filter via evidence chain
+    // Source filter via claim_sources
     if (sourceId) {
-      conditions.push('EXISTS (SELECT 1 FROM claim_evidence ce_f JOIN evidence e_f ON ce_f.evidence_id = e_f.id WHERE ce_f.claim_id = c.id AND e_f.source_id = ?)');
+      conditions.push('EXISTS (SELECT 1 FROM claim_sources cs_f WHERE cs_f.claim_id = c.id AND cs_f.source_id = ?)');
       values.push(parseInt(sourceId, 10));
     }
 
