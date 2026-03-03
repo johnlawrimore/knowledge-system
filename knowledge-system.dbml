@@ -42,6 +42,7 @@ Table sources {
   word_count int
   status enum('collected','distilling','distilled','decomposing','decomposed') [not null, default: 'collected']
   description text
+  content_filter_version_id int
   created_at timestamp
   updated_at timestamp
 }
@@ -54,8 +55,31 @@ Table source_contributors {
 }
 
 Ref: sources.publication_id > publications.id [delete: set null]
+Ref: sources.content_filter_version_id > content_filter_versions.id [delete: set null]
 Ref: source_contributors.source_id > sources.id [delete: cascade]
 Ref: source_contributors.contributor_id > contributors.id [delete: restrict]
+
+// --- CONTENT FILTERING ---
+
+Table content_filters {
+  id          int [pk, increment]
+  name        varchar(255) [not null]
+  description text
+  is_active   boolean [not null, default: true]
+  created_at  timestamp
+  updated_at  timestamp
+}
+
+Table content_filter_versions {
+  id           int [pk, increment]
+  filter_id    int [not null]
+  version      int [not null]
+  instructions text [not null]
+  created_at   timestamp
+  indexes { (filter_id, version) [unique] }
+}
+
+Ref: content_filter_versions.filter_id > content_filters.id [delete: cascade]
 
 // --- STAGE 2: COMPOSITION ---
 
@@ -298,6 +322,11 @@ Table pipeline_stages {
 Ref: pipeline_stages.run_id > pipeline_runs.id
 
 // --- TABLE GROUPS ---
+
+TableGroup content_filtering {
+  content_filters
+  content_filter_versions
+}
 
 TableGroup collection {
   contributors

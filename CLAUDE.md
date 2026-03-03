@@ -65,14 +65,21 @@ All markdown content (sources, distillations, compositions) follows **markdown-f
 - **User**: `claude` / `claude2026`
 - **MCP**: `mysql` MCP server with full CRUD access
 
-### Tables (25)
+### Tables (27)
 
-**Collection**: `contributors`, `publications`, `sources` (includes `distillation` column), `source_contributors`
+**Content Filtering**: `content_filters`, `content_filter_versions`
+**Collection**: `contributors`, `publications`, `sources` (includes `distillation` and `content_filter_version_id` columns), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
 **Decomposition**: `topics`, `themes`, `claims`, `claim_sources`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
 **Decomposition Entities**: `devices`, `claim_devices`, `contexts`, `claim_contexts`, `methods`, `claim_methods`
 **Evidence & Reasoning**: `evidence`, `claim_evidence`, `reasonings`
 **Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
+
+### Content Filters
+
+`content_filters` stores user-defined filters that control what material survives the distillation process. Each filter has a `name`, `description`, and an `is_active` flag. Filters are versioned — every time a filter's `instructions` are edited, a new record is created in `content_filter_versions` (immutable; previous versions are never modified). The `version` field is an integer incrementing from 1.
+
+`sources.content_filter_version_id` records which version of which filter was applied when this source was distilled. NULL means no content filter was applied (only built-in filtering). This field is set during the distillation step and never changes afterward, preserving a stable audit trail of exactly what instructions shaped the distilled content.
 
 ### Claim Sources
 

@@ -53,6 +53,7 @@ interface SourceDetail {
   distillation: string | null;
   contributors: { id: number; name: string; affiliation: string; avatar: string | null; contributor_role: string }[];
   compositions: { count: number; items: { id: number; title: string; status: string }[] };
+  content_filter: { filter_id: number; name: string; version_id: number; version: number; instructions: string } | null;
   evidence: { total: number; byStance: Record<string, number> };
   claims_count: number;
 }
@@ -308,6 +309,27 @@ export default function SourcesContent() {
                         multiline
                         placeholder="Add description..."
                       />
+                    </div>
+
+                    <div className={s.detailSection}>
+                      <div className={s.detailLabel}>Content Filter</div>
+                      {detail.content_filter ? (
+                        <>
+                          <div className={s.detailValue}>
+                            {detail.content_filter.name}
+                            <span style={{ color: 'var(--text-muted)', marginLeft: '0.375rem' }}>
+                              v{detail.content_filter.version}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.375rem', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)' }}>
+                            {detail.content_filter.instructions}
+                          </div>
+                        </>
+                      ) : (
+                        <div className={s.detailValue} style={{ color: 'var(--text-muted)' }}>
+                          None
+                        </div>
+                      )}
                     </div>
 
                     {detail.evaluation_results?.grade && (

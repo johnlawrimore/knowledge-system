@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@mdxeditor/editor": "^3.52.4",
     "@tabler/icons-react": "^3.38.0",
     "@xyflow/react": "^12.10.1",
     "highlight.js": "^11.11.1",

@@ -52,11 +52,18 @@ export async function GET(
     const conn = await pool.getConnection();
 
     try {
-      // Full source record with publication JOIN
+      // Full source record with publication and content filter JOINs
       const [sourceRows] = await conn.query<RowDataPacket[]>(
-        `SELECT s.*, pub.name AS publication
+        `SELECT s.*, pub.name AS publication,
+           cfv.id      AS filter_version_id,
+           cfv.version AS filter_version_num,
+           cfv.instructions AS filter_instructions,
+           cf.id       AS filter_id,
+           cf.name     AS filter_name
          FROM sources s
          LEFT JOIN publications pub ON s.publication_id = pub.id
+         LEFT JOIN content_filter_versions cfv ON s.content_filter_version_id = cfv.id
+         LEFT JOIN content_filters cf ON cfv.filter_id = cf.id
          WHERE s.id = ?`,
         [sourceId]
       );
@@ -138,6 +145,13 @@ export async function GET(
         original,
         content_has_more: hasMore,
         evaluation_results: evaluationResults,
+        content_filter: source.filter_version_id ? {
+          filter_id: source.filter_id,
+          name: source.filter_name,
+          version_id: source.filter_version_id,
+          version: source.filter_version_num,
+          instructions: source.filter_instructions,
+        } : null,
         contributors,
         compositions: {
           count: compositions.length,

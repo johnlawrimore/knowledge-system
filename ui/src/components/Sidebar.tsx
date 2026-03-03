@@ -9,8 +9,9 @@ import s from './Sidebar.module.scss';
 const navItems = [
   { href: '/', label: 'Dashboard', separatorAfter: true },
   { href: '/sources', label: 'Sources' },
-  { href: '/contributors', label: 'Contributors', separatorAfter: true },
-  { href: '/claims', label: 'Claims' },
+  { href: '/contributors', label: 'Contributors' },
+  { href: '/claims', label: 'Claims', separatorAfter: true },
+  { href: '/filters', label: 'Content Filters' },
   { href: '/themes', label: 'Themes' },
   { href: '/topics', label: 'Topics' },
   { href: '/tags', label: 'Tags', separatorAfter: true },

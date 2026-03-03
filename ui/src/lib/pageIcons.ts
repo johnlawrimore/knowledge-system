@@ -8,6 +8,7 @@ import {
   IconTimeline,
   IconTags,
   IconWriting,
+  IconFilter,
 } from '@tabler/icons-react';
 import type { ComponentType } from 'react';
 
@@ -23,6 +24,7 @@ const PAGE_ICONS: Record<string, TablerIcon> = {
   themes: IconTimeline,
   tags: IconTags,
   compositions: IconWriting,
+  filters: IconFilter,
 };
 
 export function pageIcon(page: string): TablerIcon {
