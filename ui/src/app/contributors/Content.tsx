@@ -6,7 +6,7 @@ import InlineEdit from '@/components/InlineEdit';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
 import TierBadge from '@/components/TierBadge';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
-import { stanceLabel, strengthLabel } from '@/lib/enumLabels';
+import { stanceLabel, strengthTierLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
 import { IconExternalLink } from '@tabler/icons-react';
@@ -31,7 +31,7 @@ interface Position {
   claim_id: number;
   statement: string;
   stance: string;
-  strength: string;
+  strength: number | null;
   evidence_content: string;
   source_title: string;
 }
@@ -88,7 +88,7 @@ function groupByStance(positions: Position[]): Record<string, Position[]> {
   return groups;
 }
 
-const STANCE_ORDER = ['supports', 'contradicts', 'qualifies', 'other'];
+const STANCE_ORDER = ['supporting', 'contradicting', 'qualifying', 'other'];
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -370,7 +370,7 @@ export default function ContributorsContent() {
                               className={s.claimRow}
                             >
                               <span className={s.claimScore}>
-                                #{p.claim_id} · {strengthLabel(p.strength)}
+                                #{p.claim_id}{p.strength != null ? ` · ${strengthTierLabel(String(p.strength))}` : ''}
                               </span>
                               {' '}
                               <span className={s.claimStatement}>

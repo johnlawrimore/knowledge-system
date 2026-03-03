@@ -119,8 +119,8 @@ SELECT * FROM v_source_contributions ORDER BY evidence_count DESC LIMIT 20;
 ```sql
 SELECT p.name, p.affiliation,
     COUNT(DISTINCT ce.claim_id) AS claims_touched,
-    SUM(CASE WHEN ce.stance = 'supports' THEN 1 ELSE 0 END) AS supporting,
-    SUM(CASE WHEN ce.stance = 'contradicts' THEN 1 ELSE 0 END) AS contradicting
+    SUM(CASE WHEN ce.stance = 'supporting' THEN 1 ELSE 0 END) AS supporting,
+    SUM(CASE WHEN ce.stance = 'contradicting' THEN 1 ELSE 0 END) AS contradicting
 FROM contributors p
 JOIN source_contributors sc ON p.id = sc.contributor_id
 JOIN sources s ON sc.source_id = s.id

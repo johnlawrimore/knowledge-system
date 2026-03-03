@@ -20,9 +20,9 @@ const EVIDENCE_TYPE_LABELS: Record<string, string> = {
 };
 
 const STANCE_LABELS: Record<string, string> = {
-  supports: 'Supports',
-  contradicts: 'Contradicts',
-  qualifies: 'Qualifies',
+  supporting: 'Supporting',
+  contradicting: 'Contradicting',
+  qualifying: 'Qualifying',
 };
 
 const STRENGTH_LABELS: Record<string, string> = {
@@ -117,6 +117,14 @@ const RELATIONSHIP_LABELS: Record<string, string> = {
   other: 'Other',
 };
 
+const STRENGTH_TIER_LABELS: Record<string, string> = {
+  '1': 'Definitive',
+  '2': 'Strong',
+  '3': 'Moderate',
+  '4': 'Weak',
+  '5': 'Speculative',
+};
+
 const REASONING_TYPE_LABELS: Record<string, string> = {
   deductive: 'Deductive',
   inductive: 'Inductive',
@@ -144,3 +152,4 @@ export const contextTypeLabel = labelFrom(CONTEXT_TYPE_LABELS);
 export const methodTypeLabel = labelFrom(METHOD_TYPE_LABELS);
 export const relationshipLabel = labelFrom(RELATIONSHIP_LABELS);
 export const reasoningTypeLabel = labelFrom(REASONING_TYPE_LABELS);
+export const strengthTierLabel = labelFrom(STRENGTH_TIER_LABELS);

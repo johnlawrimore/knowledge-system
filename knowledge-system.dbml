@@ -259,9 +259,8 @@ Ref: evidence.derived_from_evidence_id > evidence.id [delete: set null]
 Table claim_evidence {
   claim_id int [not null]
   evidence_id int [not null]
-  stance enum('supports','contradicts','qualifies') [not null, default: 'supports']
-  strength enum('strong','moderate','weak') [not null, default: 'moderate']
-  notes text
+  stance enum('supporting','contradicting','qualifying') [not null, default: 'supporting']
+  evaluation_results json [note: 'strength (1–5 numeric), notes (justification), evaluated_at']
   indexes { (claim_id, evidence_id) [pk] }
 }
 

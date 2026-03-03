@@ -1,0 +1,85 @@
+.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.bar {
+  display: block;
+  width: 4px;
+  border-radius: 1px;
+}
+
+.dim {
+  background: var(--border-default);
+  opacity: 0.4;
+}
+
+// Filled bar colors by tier
+.tier1.filled { background: var(--accent-green); }
+.tier2.filled { background: var(--accent-green); opacity: 0.8; }
+.tier3.filled { background: var(--accent-amber); }
+.tier4.filled { background: var(--accent-orange); }
+.tier5.filled { background: var(--accent-red); }
+
+// Label colors by tier
+.label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tier1.label { color: var(--accent-green); }
+.tier2.label { color: var(--accent-green); }
+.tier3.label { color: var(--accent-amber); }
+.tier4.label { color: var(--accent-orange); }
+.tier5.label { color: var(--accent-red); }
+
+// Tooltip
+.tooltipAnchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  &:hover .tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.infoIcon {
+  color: var(--text-placeholder);
+  cursor: default;
+
+  &:hover {
+    color: var(--text-muted);
+  }
+}
+
+.tooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 14rem;
+  background: var(--bg-elevated, var(--bg-raised));
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 50;
+  white-space: normal;
+  text-align: left;
+}

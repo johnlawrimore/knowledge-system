@@ -56,7 +56,7 @@ export async function GET(
          e.verbatim_quote,
          e.evaluation_results,
          ce.stance,
-         ce.strength,
+         ce.evaluation_results AS ce_eval,
          s.id AS source_id,
          s.title AS source_title,
          s.source_type,
@@ -70,7 +70,7 @@ export async function GET(
        JOIN evidence e ON ce.evidence_id = e.id
        JOIN sources s ON e.source_id = s.id
        WHERE ce.claim_id = ?
-       ORDER BY ce.stance, ce.strength DESC`,
+       ORDER BY ce.stance, JSON_EXTRACT(ce.evaluation_results, '$.strength') ASC`,
       [id],
     );
 
@@ -222,13 +222,17 @@ export async function GET(
       const evalResults = typeof row.evaluation_results === 'string'
         ? JSON.parse(row.evaluation_results)
         : row.evaluation_results;
+      const ceEval = typeof row.ce_eval === 'string'
+        ? JSON.parse(row.ce_eval)
+        : row.ce_eval;
       return {
         id: row.evidence_id,
         content: row.content,
         evidence_type: row.evidence_type,
         verbatim_quote: row.verbatim_quote,
         stance: row.stance,
-        strength: row.strength,
+        strength: ceEval?.strength ?? null,
+        strength_notes: ceEval?.notes ?? null,
         source_id: row.source_id,
         source_title: row.source_title,
         source_type: row.source_type,

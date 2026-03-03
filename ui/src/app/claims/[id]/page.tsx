@@ -7,7 +7,8 @@ import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
-import { claimTypeLabel, stanceLabel, strengthLabel, evidenceTypeLabel, deviceTypeLabel, contextTypeLabel, methodTypeLabel, reasoningTypeLabel, relationshipLabel } from '@/lib/enumLabels';
+import StrengthMeter from '@/components/StrengthMeter';
+import { claimTypeLabel, stanceLabel, evidenceTypeLabel, deviceTypeLabel, contextTypeLabel, methodTypeLabel, reasoningTypeLabel, relationshipLabel } from '@/lib/enumLabels';
 import s from './page.module.scss';
 
 interface Evidence {
@@ -16,7 +17,8 @@ interface Evidence {
   evidence_type: string;
   verbatim_quote: string | null;
   stance: string;
-  strength: string;
+  strength: number | null;
+  strength_notes: string | null;
   source_id: number;
   source_title: string;
   source_type: string;
@@ -118,9 +120,9 @@ interface ClaimDetail {
 type Tab = 'about' | 'connections' | 'evidence' | 'devices' | 'contexts' | 'methods';
 
 const stanceStyles: Record<string, { card: string; badge: string }> = {
-  supports: { card: s.evidenceSupports, badge: s.stanceSupports },
-  contradicts: { card: s.evidenceContradicts, badge: s.stanceContradicts },
-  qualifies: { card: s.evidenceQualifies, badge: s.stanceQualifies },
+  supporting:    { card: s.evidenceSupports,    badge: s.stanceSupports },
+  contradicting: { card: s.evidenceContradicts, badge: s.stanceContradicts },
+  qualifying:    { card: s.evidenceQualifies,   badge: s.stanceQualifies },
 };
 
 export default function ClaimDetailPage() {
@@ -181,7 +183,7 @@ export default function ClaimDetailPage() {
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: 'about', label: 'About', count: 0 },
     { key: 'connections', label: 'Connected Claims', count: connectionsCount },
-    { key: 'evidence', label: 'Supporting Evidence', count: claim.evidence.length },
+    { key: 'evidence', label: 'Evidence', count: claim.evidence.length },
     { key: 'devices', label: 'Rhetorical Devices', count: claim.devices.length },
     { key: 'contexts', label: 'Contexts', count: claim.contexts.length },
     { key: 'methods', label: 'Application', count: claim.methods.length },
@@ -383,20 +385,17 @@ export default function ClaimDetailPage() {
             ) : (
               <div className={s.cardList}>
                 {claim.evidence.map((ev) => {
-                  const ss = stanceStyles[ev.stance] || stanceStyles.supports;
+                  const ss = stanceStyles[ev.stance] || stanceStyles.supporting;
                   return (
                     <div key={ev.id} className={`${s.evidenceCard} ${ss.card}`}>
                       <div className={s.evidenceHeader}>
-                        <span className={`${s.stanceBadge} ${ss.badge}`}>{stanceLabel(ev.stance)}</span>
-                        <span>&middot;</span>
-                        <span>{strengthLabel(ev.strength)}</span>
-                        <span>&middot;</span>
-                        <span>{evidenceTypeLabel(ev.evidence_type)}</span>
-                        {ev.credibility != null && (
-                          <>
-                            <span>&middot;</span>
-                            <span>credibility {ev.credibility}</span>
-                          </>
+                        <div className={s.evidenceHeaderLeft}>
+                          <span>{evidenceTypeLabel(ev.evidence_type)}</span>
+                          <span>&middot;</span>
+                          <span className={`${s.stanceBadge} ${ss.badge}`}>{stanceLabel(ev.stance)}</span>
+                        </div>
+                        {ev.strength != null && (
+                          <StrengthMeter strength={ev.strength} notes={ev.strength_notes} />
                         )}
                       </div>
                       <div className={s.cardContent}>{ev.content}</div>

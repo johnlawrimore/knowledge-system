@@ -142,7 +142,7 @@ Reasonings explain why a specific piece of evidence supports a specific claim. T
 Claim scores are never stored — computed from evidence at query time. Formula weights:
 
 - Independent source count (3x) — primary signal
-- Evidence strength (strong=1.0, moderate=0.5, weak=0.25)
+- Evidence strength tiers 1–2 (1.0), tier 3 (0.5), tiers 4–5 (0.25) — from `claim_evidence.evaluation_results.strength` (1=Definitive … 5=Speculative)
 - Reasoning presence (0.5 bonus, capped at 3)
 - Derived evidence discount (-0.5)
 - Contradicting sources (-2.0)

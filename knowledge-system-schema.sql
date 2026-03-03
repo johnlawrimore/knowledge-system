@@ -325,9 +325,8 @@ CREATE TABLE evidence (
 CREATE TABLE claim_evidence (
     claim_id INT NOT NULL,
     evidence_id INT NOT NULL,
-    stance ENUM('supports', 'contradicts', 'qualifies') NOT NULL DEFAULT 'supports',
-    strength ENUM('strong', 'moderate', 'weak') NOT NULL DEFAULT 'moderate',
-    notes TEXT,
+    stance ENUM('supporting', 'contradicting', 'qualifying') NOT NULL DEFAULT 'supporting',
+    evaluation_results JSON NULL     COMMENT 'strength (1–5 numeric), notes (justification), evaluated_at',
 
     PRIMARY KEY (claim_id, evidence_id),
     FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,
@@ -381,16 +380,22 @@ FROM sources GROUP BY status;
 CREATE OR REPLACE VIEW v_claim_scoring_inputs AS
 SELECT
     c.id AS claim_id, c.statement, c.claim_type,
-    COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN ce.evidence_id END) AS supporting_evidence,
-    COUNT(DISTINCT CASE WHEN ce.stance = 'contradicts' THEN ce.evidence_id END) AS contradicting_evidence,
-    COUNT(DISTINCT CASE WHEN ce.stance = 'qualifies' THEN ce.evidence_id END) AS qualifying_evidence,
-    COUNT(DISTINCT CASE WHEN ce.stance = 'supports' THEN e.source_id END) AS supporting_sources,
-    COUNT(DISTINCT CASE WHEN ce.stance = 'contradicts' THEN e.source_id END) AS contradicting_sources,
-    MIN(CASE WHEN ce.stance = 'supports'
+    COUNT(DISTINCT CASE WHEN ce.stance = 'supporting' THEN ce.evidence_id END) AS supporting_evidence,
+    COUNT(DISTINCT CASE WHEN ce.stance = 'contradicting' THEN ce.evidence_id END) AS contradicting_evidence,
+    COUNT(DISTINCT CASE WHEN ce.stance = 'qualifying' THEN ce.evidence_id END) AS qualifying_evidence,
+    COUNT(DISTINCT CASE WHEN ce.stance = 'supporting' THEN e.source_id END) AS supporting_sources,
+    COUNT(DISTINCT CASE WHEN ce.stance = 'contradicting' THEN e.source_id END) AS contradicting_sources,
+    MIN(CASE WHEN ce.stance = 'supporting'
         THEN COALESCE(JSON_EXTRACT(e.evaluation_results, '$.credibility'), 2) END) AS best_support_credibility,
-    SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'strong' THEN 1 ELSE 0 END) AS strong_support_count,
-    SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'moderate' THEN 1 ELSE 0 END) AS moderate_support_count,
-    SUM(CASE WHEN ce.stance = 'supports' AND ce.strength = 'weak' THEN 1 ELSE 0 END) AS weak_support_count,
+    -- Tiers 1-2 → strong bucket
+    SUM(CASE WHEN ce.stance = 'supporting'
+        AND COALESCE(JSON_EXTRACT(ce.evaluation_results, '$.strength'), 3) <= 2 THEN 1 ELSE 0 END) AS strong_support_count,
+    -- Tier 3 → moderate bucket
+    SUM(CASE WHEN ce.stance = 'supporting'
+        AND COALESCE(JSON_EXTRACT(ce.evaluation_results, '$.strength'), 3) = 3 THEN 1 ELSE 0 END) AS moderate_support_count,
+    -- Tiers 4-5 → weak bucket
+    SUM(CASE WHEN ce.stance = 'supporting'
+        AND COALESCE(JSON_EXTRACT(ce.evaluation_results, '$.strength'), 3) >= 4 THEN 1 ELSE 0 END) AS weak_support_count,
     (SELECT COUNT(*) FROM reasonings r2 WHERE r2.claim_id = c.id) AS reasoning_count,
     COUNT(DISTINCT CASE WHEN e.derived_from_evidence_id IS NOT NULL THEN e.id END) AS derived_evidence_count
 FROM claims c
@@ -481,7 +486,7 @@ GROUP BY s.id, s.title, s.source_type, s.status;
 CREATE OR REPLACE VIEW v_claim_evidence AS
 SELECT c.id AS claim_id, c.statement,
     c.reviewer_notes,
-    ce.stance, ce.strength,
+    ce.stance, ce.evaluation_results AS ce_evaluation,
     e.id AS evidence_id, e.content AS evidence_content, e.evidence_type, e.verbatim_quote,
     e.evaluation_results AS evidence_evaluation, e.derived_from_evidence_id,
     s.title AS source_title, s.source_type, s.evaluation_results AS source_evaluation,
@@ -493,7 +498,7 @@ JOIN sources s ON e.source_id = s.id
 LEFT JOIN source_contributors sc ON s.id = sc.source_id
 LEFT JOIN contributors p ON sc.contributor_id = p.id
 GROUP BY c.id, c.statement,
-         ce.stance, ce.strength,
+         ce.stance, ce.evaluation_results,
          e.id, e.content, e.evidence_type,
          e.verbatim_quote, e.evaluation_results, e.derived_from_evidence_id,
          s.title, s.source_type, s.evaluation_results;
@@ -509,7 +514,9 @@ ORDER BY supporting_sources ASC, score ASC;
 CREATE OR REPLACE VIEW v_expert_positions AS
 SELECT p.id AS contributor_id, p.name, p.affiliation,
     c.id AS claim_id, c.statement,
-    ce.stance, ce.strength, e.content AS evidence_content, s.title AS source_title
+    ce.stance,
+    CAST(JSON_EXTRACT(ce.evaluation_results, '$.strength') AS UNSIGNED) AS strength,
+    e.content AS evidence_content, s.title AS source_title
 FROM contributors p
 JOIN source_contributors sc ON p.id = sc.contributor_id
 JOIN sources s ON sc.source_id = s.id

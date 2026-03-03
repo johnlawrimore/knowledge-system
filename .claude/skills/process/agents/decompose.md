@@ -151,14 +151,34 @@ SELECT id, LEFT(content, 60) AS ev FROM evidence WHERE id >= LAST_INSERT_ID() OR
 Write to /tmp/decompose_links.sql:
 
 ```sql
-INSERT INTO claim_evidence (claim_id, evidence_id, stance, strength, reasoning) VALUES
-  (<claim_id>, <ev_id>, 'supports', 'strong', '<reasoning>'),
-  (<claim_id>, <ev_id>, 'supports', 'moderate', '<reasoning>');
+INSERT INTO claim_evidence (claim_id, evidence_id, stance, evaluation_results) VALUES
+  (<claim_id>, <ev_id>, 'supporting', JSON_OBJECT(
+    'strength', <1-5>,
+    'notes', '<justification for this strength score>',
+    'evaluated_at', NOW()
+  )),
+  (<claim_id>, <ev_id>, 'qualifying', JSON_OBJECT(
+    'strength', <1-5>,
+    'notes', '<justification>',
+    'evaluated_at', NOW()
+  ));
 ```
 
-**stance:** supports, contradicts, qualifies
-**strength:** strong (rigorous data), moderate (expert opinion, single case study), weak (anecdotal, theoretical)
-**reasoning:** WHY this evidence matters to this claim. Required for every link.
+**stance:** supporting, contradicting, qualifying
+
+**strength (1–5 scale):**
+
+| Score | Label | Assign when |
+|-------|-------|-------------|
+| 1 | Definitive | Controlled study, primary data, peer-reviewed findings with reproducible results |
+| 2 | Strong | Well-sourced empirical evidence, expert testimony with demonstrated expertise, multiple corroborating data points |
+| 3 | Moderate | Credible argument with some evidence, case study, informed expert opinion |
+| 4 | Weak | Anecdotal evidence, single example, loosely supported claim |
+| 5 | Speculative | Conjecture, unsupported opinion, hypothetical reasoning without grounding |
+
+Default to 3 (Moderate) when uncertain.
+
+**notes (required):** Explain in one sentence why this strength score is appropriate. E.g., "Single case study from one company with no replication data." or "Controlled experiment with N=500 and peer review."
 
 **Reasoning examples:**
 - Empirical data: "This controlled study directly measures the effect described in the claim, with N=500 providing statistical significance."
