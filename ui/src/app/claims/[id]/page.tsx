@@ -138,7 +138,7 @@ export default function ClaimDetailPage() {
       </div>
 
       {claim.evaluation_results && (claim.evaluation_results.validity || claim.evaluation_results.substance) && (
-        <EvalSection label="Claim Evaluation" evaluatedAt={claim.evaluation_results.evaluated_at}>
+        <EvalSection label="Claim Evaluation" row>
           {claim.evaluation_results.validity && (
             <DimensionGrid label="Validity" dimensions={claim.evaluation_results.validity} columns={3} />
           )}

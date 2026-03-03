@@ -47,25 +47,26 @@
   top: calc(100% + 0.25rem);
   left: 0;
   z-index: 20;
-  min-width: 14rem;
-  max-height: 16rem;
+  min-width: 16rem;
+  max-height: 20rem;
   overflow-y: auto;
   background: var(--bg-raised);
   border: 1px solid var(--border-subtle);
   border-radius: 0.375rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 0.25rem 0;
+  padding: 0.375rem 0;
 }
 
 .option {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.3rem 0.5rem;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
   font-size: 0.8125rem;
   color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.1s;
+  white-space: nowrap;
 
   &:hover {
     background: var(--bg-hover);
@@ -74,5 +75,7 @@
   input[type="checkbox"] {
     accent-color: var(--accent-blue);
     flex-shrink: 0;
+    width: 0.875rem;
+    height: 0.875rem;
   }
 }

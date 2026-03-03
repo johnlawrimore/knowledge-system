@@ -113,7 +113,7 @@ export default function MultiSelectDropdown({ label, options, selected, onChange
             <label
               key={opt.id}
               className={s.option}
-              style={{ paddingLeft: `${0.5 + opt.depth * 1}rem` }}
+              style={{ paddingLeft: `${0.75 + opt.depth * 1.25}rem` }}
             >
               <input
                 type="checkbox"

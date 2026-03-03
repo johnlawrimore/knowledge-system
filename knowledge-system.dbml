@@ -14,6 +14,7 @@ Table contributors {
   bio text
   avatar varchar(512)
   website varchar(512)
+  evaluation_results json
   notes text
   created_at timestamp
 }
@@ -116,6 +117,7 @@ Table claims {
   statement text [not null]
   claim_type enum('assertion','principle','framework','recommendation','prediction','definition','observation','other') [not null, default: 'assertion']
   cluster_id int
+  evaluation_results json
   reviewer_notes text
   notes text
   created_at timestamp

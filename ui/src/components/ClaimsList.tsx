@@ -118,6 +118,13 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
       {showFilters && (
         <>
           <div className={s.filters}>
+            <MultiSelectDropdown
+              label="Topics"
+              options={topicOptions}
+              selected={selectedTopics}
+              onChange={(sel) => { setSelectedTopics(sel); setPage(1); }}
+            />
+
             <select className={s.select} value={confidence} onChange={(e) => updateFilter(setConfidence, e.target.value)}>
               <option value="">All confidence</option>
               <option value="strong">Strong</option>
@@ -137,13 +144,6 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
               <option value="definition">Definition</option>
               <option value="observation">Observation</option>
             </select>
-
-            <MultiSelectDropdown
-              label="Topics"
-              options={topicOptions}
-              selected={selectedTopics}
-              onChange={(sel) => { setSelectedTopics(sel); setPage(1); }}
-            />
 
             <input
               className={s.searchInput}

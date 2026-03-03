@@ -3,7 +3,116 @@
   "darkMode": true,
   "gridEnabling": false,
   "detailLevel": "All",
-  "tablePositions": [],
+  "tablePositions": [
+    {
+      "name": "contributors",
+      "schemaName": "public",
+      "x": -434.6910060998124,
+      "y": -24.547399110117567
+    },
+    {
+      "name": "publications",
+      "schemaName": "public",
+      "x": 261.3672720863866,
+      "y": 239.61528234098853
+    },
+    {
+      "name": "sources",
+      "schemaName": "public",
+      "x": 1027.5844832427997,
+      "y": -57.50837607158098
+    },
+    {
+      "name": "source_contributors",
+      "schemaName": "public",
+      "x": -93.2683419728686,
+      "y": -57.50837607158098
+    },
+    {
+      "name": "compositions",
+      "schemaName": "public",
+      "x": 1263.7687479144229,
+      "y": -783.4077212875663
+    },
+    {
+      "name": "composition_sources",
+      "schemaName": "public",
+      "x": 2262.4720702729032,
+      "y": -783.4077212875663
+    },
+    {
+      "name": "topics",
+      "schemaName": "public",
+      "x": 3729.4818499779667,
+      "y": 423.15092326522335
+    },
+    {
+      "name": "themes",
+      "schemaName": "public",
+      "x": 3427.016414331596,
+      "y": 739.2783301586813
+    },
+    {
+      "name": "claim_clusters",
+      "schemaName": "public",
+      "x": 1591.590001723761,
+      "y": 1441.0634470751233
+    },
+    {
+      "name": "claims",
+      "schemaName": "public",
+      "x": 1097.384199161193,
+      "y": 603.0078407992082
+    },
+    {
+      "name": "claim_relationships",
+      "schemaName": "public",
+      "x": 2085.5420613154092,
+      "y": 1378.1715988209212
+    },
+    {
+      "name": "claim_topics",
+      "schemaName": "public",
+      "x": 2874.6666273927995,
+      "y": 533.256234194951
+    },
+    {
+      "name": "claim_themes",
+      "schemaName": "public",
+      "x": 2874.6666273927995,
+      "y": 708.256234194951
+    },
+    {
+      "name": "claim_tags",
+      "schemaName": "public",
+      "x": 2874.6666273927995,
+      "y": 883.2562341949515
+    },
+    {
+      "name": "evidence",
+      "schemaName": "public",
+      "x": 2874.6666273927995,
+      "y": -116.74376580505047
+    },
+    {
+      "name": "claim_evidence",
+      "schemaName": "public",
+      "x": 2874.6666273927995,
+      "y": 283.25623419495014
+    },
+    {
+      "name": "pipeline_runs",
+      "schemaName": "public",
+      "x": 3107.1010497056277,
+      "y": -508.1541590028985
+    },
+    {
+      "name": "pipeline_stages",
+      "schemaName": "public",
+      "x": 3768.028172517478,
+      "y": -540.1541590028985
+    }
+  ],
   "tableGroupCollapseStates": [],
   "stickyNoteLayouts": [],
   "referencePaths": []

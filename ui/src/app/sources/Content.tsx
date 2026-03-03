@@ -294,7 +294,6 @@ export default function SourcesContent() {
                     {detail.evaluation_results?.grade && (
                       <EvalSection
                         label="Source Evaluation"
-                        evaluatedAt={detail.evaluation_results.evaluated_at}
                         headerRight={<GradeBadge grade={detail.evaluation_results.grade} />}
                         notes={detail.evaluation_results.bias_notes}
                       >
