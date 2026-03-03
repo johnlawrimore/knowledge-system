@@ -124,8 +124,7 @@ export default function Dashboard() {
           <div className={s.distLegend}>
             {confItems.filter((c) => distributions.claimConfidence[c.key]).map((c) => (
               <span key={c.key} className={s.legendItem}>
-                <span className={s.legendDot} style={{ background: `var(--accent-${c.key === 'strong' ? 'green' : c.key === 'moderate' ? 'blue' : c.key === 'contested' ? 'orange' : c.key === 'unsupported' ? 'red' : ''})` }}
-                  {...(c.key === 'developing' ? { style: { background: 'var(--text-muted)' } } : {})} />
+                <span className={s.legendDot} style={{ background: c.key === 'developing' ? 'var(--text-muted)' : `var(--accent-${c.key === 'strong' ? 'green' : c.key === 'moderate' ? 'blue' : c.key === 'contested' ? 'orange' : c.key === 'unsupported' ? 'red' : ''})` }} />
                 {distributions.claimConfidence[c.key]} {c.label}
               </span>
             ))}
@@ -145,8 +144,7 @@ export default function Dashboard() {
           <div className={s.distLegend}>
             {gradeItems.filter((g) => distributions.sourceGrades[g.key]).map((g) => (
               <span key={g.key} className={s.legendItem}>
-                <span className={s.legendDot} style={{ background: `var(--accent-${g.key === 'A' ? 'green' : g.key === 'B' ? 'blue' : g.key === 'D' ? 'orange' : g.key === 'F' ? 'red' : ''})` }}
-                  {...(g.key === 'C' ? { style: { background: 'var(--text-muted)' } } : {})} />
+                <span className={s.legendDot} style={{ background: g.key === 'C' ? 'var(--text-muted)' : `var(--accent-${g.key === 'A' ? 'green' : g.key === 'B' ? 'blue' : g.key === 'D' ? 'orange' : g.key === 'F' ? 'red' : ''})` }} />
                 {distributions.sourceGrades[g.key]} Grade {g.label}
               </span>
             ))}
@@ -166,8 +164,7 @@ export default function Dashboard() {
           <div className={s.distLegend}>
             {tierItems.filter((t) => distributions.contributorTiers[t.key]).map((t) => (
               <span key={t.key} className={s.legendItem}>
-                <span className={s.legendDot} style={{ background: `var(--accent-${t.key === '1' ? 'green' : t.key === '2' ? 'blue' : t.key === '3' ? 'purple' : ''})` }}
-                  {...(t.key === '4' ? { style: { background: 'var(--text-muted)' } } : {})} />
+                <span className={s.legendDot} style={{ background: t.key === '4' ? 'var(--text-muted)' : `var(--accent-${t.key === '1' ? 'green' : t.key === '2' ? 'blue' : t.key === '3' ? 'purple' : ''})` }} />
                 {distributions.contributorTiers[t.key]} {t.label}
               </span>
             ))}
