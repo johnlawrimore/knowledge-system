@@ -79,6 +79,42 @@ const GRADE_LABELS: Record<string, string> = {
   F: 'Unreliable',
 };
 
+const DEVICE_TYPE_LABELS: Record<string, string> = {
+  analogy: 'Analogy',
+  metaphor: 'Metaphor',
+  narrative: 'Narrative',
+  example: 'Example',
+  thought_experiment: 'Thought Experiment',
+  visual: 'Visual',
+};
+
+const CONTEXT_TYPE_LABELS: Record<string, string> = {
+  historical: 'Historical',
+  industry: 'Industry',
+  technical: 'Technical',
+  organizational: 'Organizational',
+  regulatory: 'Regulatory',
+  cultural: 'Cultural',
+  scope: 'Scope',
+};
+
+const METHOD_TYPE_LABELS: Record<string, string> = {
+  process: 'Process',
+  framework: 'Framework',
+  technique: 'Technique',
+  tool: 'Tool',
+  practice: 'Practice',
+  metric: 'Metric',
+};
+
+const REASONING_TYPE_LABELS: Record<string, string> = {
+  deductive: 'Deductive',
+  inductive: 'Inductive',
+  analogical: 'Analogical',
+  causal: 'Causal',
+  abductive: 'Abductive',
+};
+
 function labelFrom(map: Record<string, string>) {
   return (value: string): string => map[value] ?? value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, ' ');
 }
@@ -93,3 +129,7 @@ export const compositionStatusLabel = labelFrom(COMPOSITION_STATUS_LABELS);
 export const sourceStatusLabel = labelFrom(SOURCE_STATUS_LABELS);
 export const tierLabel = labelFrom(TIER_LABELS);
 export const gradeLabel = labelFrom(GRADE_LABELS);
+export const deviceTypeLabel = labelFrom(DEVICE_TYPE_LABELS);
+export const contextTypeLabel = labelFrom(CONTEXT_TYPE_LABELS);
+export const methodTypeLabel = labelFrom(METHOD_TYPE_LABELS);
+export const reasoningTypeLabel = labelFrom(REASONING_TYPE_LABELS);

@@ -135,7 +135,11 @@ export async function GET(request: NextRequest) {
           SELECT GROUP_CONCAT(ctg.tag ORDER BY ctg.tag SEPARATOR '||')
           FROM claim_tags ctg
           WHERE ctg.claim_id = c.id
-        ) AS tags
+        ) AS tags,
+        (SELECT COUNT(*) FROM device_claims dc WHERE dc.claim_id = c.id) AS device_count,
+        (SELECT COUNT(*) FROM context_claims cc WHERE cc.claim_id = c.id) AS context_count,
+        (SELECT COUNT(*) FROM method_claims mc WHERE mc.claim_id = c.id) AS method_count,
+        (SELECT COUNT(*) FROM reasoning_claims rc WHERE rc.claim_id = c.id) AS reasoning_count
       FROM claims c
       LEFT JOIN v_standalone_claim_scores scs ON c.id = scs.claim_id
       ${whereClause}
@@ -161,6 +165,10 @@ export async function GET(request: NextRequest) {
       topics: row.topic_names ? row.topic_names.split('||') : [],
       themes: row.theme_names ? row.theme_names.split('||') : [],
       tags: row.tags ? row.tags.split('||') : [],
+      device_count: Number(row.device_count),
+      context_count: Number(row.context_count),
+      method_count: Number(row.method_count),
+      reasoning_count: Number(row.reasoning_count),
     }));
 
     return NextResponse.json({

@@ -23,6 +23,10 @@ interface Claim {
   themes: string[];
   tags: string[];
   cluster_summary: string | null;
+  device_count: number;
+  context_count: number;
+  method_count: number;
+  reasoning_count: number;
 }
 
 interface TopicNode {
@@ -185,6 +189,10 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
                 <div className={s.claimMeta}>
                   <span className={s.evidenceSummary}>
                     {c.supporting_sources} sources &middot; {c.supporting_evidence + c.contradicting_evidence + c.qualifying_evidence} evidence
+                    {c.device_count > 0 && ` · ${c.device_count} device${c.device_count !== 1 ? 's' : ''}`}
+                    {c.context_count > 0 && ` · ${c.context_count} context${c.context_count !== 1 ? 's' : ''}`}
+                    {c.method_count > 0 && ` · ${c.method_count} method${c.method_count !== 1 ? 's' : ''}`}
+                    {c.reasoning_count > 0 && ` · ${c.reasoning_count} reasoning${c.reasoning_count !== 1 ? 's' : ''}`}
                     {c.contradicting_sources > 0 && ` · ${c.contradicting_sources} contradictions`}
                   </span>
                 </div>

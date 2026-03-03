@@ -3,7 +3,7 @@ import {
   IconFileStack,
   IconUsers,
   IconBulb,
-  IconScale,
+
   IconListTree,
   IconTimeline,
   IconTags,
@@ -18,7 +18,7 @@ const PAGE_ICONS: Record<string, TablerIcon> = {
   sources: IconFileStack,
   contributors: IconUsers,
   claims: IconBulb,
-  evidence: IconScale,
+
   topics: IconListTree,
   themes: IconTimeline,
   tags: IconTags,

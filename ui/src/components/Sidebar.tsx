@@ -11,9 +11,8 @@ const navItems = [
   { href: '/sources', label: 'Sources' },
   { href: '/contributors', label: 'Contributors', separatorAfter: true },
   { href: '/claims', label: 'Claims' },
-  { href: '/evidence', label: 'Evidence' },
-  { href: '/topics', label: 'Topics' },
   { href: '/themes', label: 'Themes' },
+  { href: '/topics', label: 'Topics' },
   { href: '/tags', label: 'Tags', separatorAfter: true },
   { href: '/compositions', label: 'Compositions' },
 ];

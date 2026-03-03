@@ -113,6 +113,64 @@ export async function GET(
       [id],
     );
 
+    // ---- Sources (via claim_sources) ----
+    const [sourceRows] = await pool.query<RowDataPacket[]>(
+      `SELECT s.id, s.title, s.source_type
+       FROM claim_sources cs
+       JOIN sources s ON cs.source_id = s.id
+       WHERE cs.claim_id = ?
+       ORDER BY s.title`,
+      [id],
+    );
+
+    // ---- Devices ----
+    const [deviceRows] = await pool.query<RowDataPacket[]>(
+      `SELECT d.id, d.content, d.device_type, d.effectiveness_note,
+              s.id AS source_id, s.title AS source_title
+       FROM device_claims dc
+       JOIN devices d ON dc.device_id = d.id
+       JOIN sources s ON d.source_id = s.id
+       WHERE dc.claim_id = ?
+       ORDER BY d.id`,
+      [id],
+    );
+
+    // ---- Contexts ----
+    const [contextRows] = await pool.query<RowDataPacket[]>(
+      `SELECT ctx.id, ctx.content, ctx.context_type,
+              s.id AS source_id, s.title AS source_title
+       FROM context_claims cc
+       JOIN contexts ctx ON cc.context_id = ctx.id
+       JOIN sources s ON ctx.source_id = s.id
+       WHERE cc.claim_id = ?
+       ORDER BY ctx.id`,
+      [id],
+    );
+
+    // ---- Methods ----
+    const [methodRows] = await pool.query<RowDataPacket[]>(
+      `SELECT m.id, m.content, m.method_type,
+              s.id AS source_id, s.title AS source_title
+       FROM method_claims mc
+       JOIN methods m ON mc.method_id = m.id
+       JOIN sources s ON m.source_id = s.id
+       WHERE mc.claim_id = ?
+       ORDER BY m.id`,
+      [id],
+    );
+
+    // ---- Reasonings ----
+    const [reasoningRows] = await pool.query<RowDataPacket[]>(
+      `SELECT r.id, r.content, r.reasoning_type,
+              s.id AS source_id, s.title AS source_title
+       FROM reasoning_claims rc
+       JOIN reasonings r ON rc.reasoning_id = r.id
+       JOIN sources s ON r.source_id = s.id
+       WHERE rc.claim_id = ?
+       ORDER BY r.id`,
+      [id],
+    );
+
     // ---- Relationships (both directions) ----
     const [relRows] = await pool.query<RowDataPacket[]>(
       `SELECT
@@ -215,6 +273,11 @@ export async function GET(
       contradicting_evidence: scoreData?.contradicting_evidence ?? 0,
       qualifying_evidence: scoreData?.qualifying_evidence ?? 0,
       evidence,
+      sources: sourceRows,
+      devices: deviceRows,
+      contexts: contextRows,
+      methods: methodRows,
+      reasonings: reasoningRows,
       topics: topicRows,
       themes: themeRows,
       tags: tagRows.map((r) => r.tag),

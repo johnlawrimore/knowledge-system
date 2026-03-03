@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { IconFlagFilled, IconAlertTriangle, IconInfoCircle } from '@tabler/icons-react';
 import { pageIcon } from '@/lib/pageIcons';
 import s from './page.module.scss';
 
@@ -74,15 +75,19 @@ export default function Dashboard() {
         <>
           <div className={s.sectionTitle}>What Needs Attention</div>
           <div className={s.attentionList}>
-            {data.attention.filter((a) => a.count > 0).map((item, i) => (
-              <div key={i} className={s.attentionItem}>
-                <span className={`${s.attentionIcon} ${i < 2 ? s.iconWarning : s.iconInfo}`}>
-                  {i < 2 ? '!' : '-'}
-                </span>
-                {item.label}
-                <span className={s.attentionCount}>{item.count}</span>
-              </div>
-            ))}
+            {data.attention.filter((a) => a.count > 0).map((item, i) => {
+              const isThin = item.label === 'Thin claims';
+              const isWarning = item.label.includes('stuck') || item.label.includes('ready to decompose');
+              return (
+                <div key={i} className={s.attentionItem}>
+                  <span className={`${s.attentionIcon} ${isThin ? s.iconDanger : isWarning ? s.iconWarning : s.iconInfo}`}>
+                    {isThin ? <IconFlagFilled size={20} /> : isWarning ? <IconAlertTriangle size={14} /> : <IconInfoCircle size={14} />}
+                  </span>
+                  {item.label}
+                  <span className={s.attentionCount}>{item.count}</span>
+                </div>
+              );
+            })}
           </div>
         </>
       )}

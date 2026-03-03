@@ -7,7 +7,7 @@ import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
-import { claimTypeLabel, stanceLabel, strengthLabel, evidenceTypeLabel } from '@/lib/enumLabels';
+import { claimTypeLabel, stanceLabel, strengthLabel, evidenceTypeLabel, deviceTypeLabel, contextTypeLabel, methodTypeLabel, reasoningTypeLabel } from '@/lib/enumLabels';
 import s from './page.module.scss';
 
 interface Evidence {
@@ -33,6 +33,45 @@ interface Relationship {
   direction: string;
 }
 
+interface ClaimSource {
+  id: number;
+  title: string;
+  source_type: string;
+}
+
+interface Device {
+  id: number;
+  content: string;
+  device_type: string;
+  effectiveness_note: string | null;
+  source_id: number;
+  source_title: string;
+}
+
+interface Context {
+  id: number;
+  content: string;
+  context_type: string;
+  source_id: number;
+  source_title: string;
+}
+
+interface Method {
+  id: number;
+  content: string;
+  method_type: string;
+  source_id: number;
+  source_title: string;
+}
+
+interface Reasoning {
+  id: number;
+  content: string;
+  reasoning_type: string;
+  source_id: number;
+  source_title: string;
+}
+
 interface ClaimEvaluation {
   validity?: Record<string, number>;
   substance?: Record<string, number>;
@@ -56,7 +95,12 @@ interface ClaimDetail {
   topics: { id: number; name: string }[];
   themes: { id: number; name: string }[];
   tags: string[];
+  sources: ClaimSource[];
   evidence: Evidence[];
+  devices: Device[];
+  contexts: Context[];
+  methods: Method[];
+  reasonings: Reasoning[];
   relationships: Relationship[];
   cluster: {
     id: number;
@@ -240,6 +284,103 @@ export default function ClaimDetailPage() {
             );
           })}
         </div>
+      )}
+
+      {claim.sources.length > 0 && (
+        <>
+          <hr className={s.divider} />
+          <div className={s.sectionTitle}>Sources ({claim.sources.length})</div>
+          <div className={s.entityList}>
+            {claim.sources.map((src) => (
+              <Link key={src.id} href={`/sources?id=${src.id}`} className={s.entityChip}>
+                {src.title}
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+
+      {claim.devices.length > 0 && (
+        <>
+          <hr className={s.divider} />
+          <div className={s.sectionTitle}>Devices ({claim.devices.length})</div>
+          <div className={s.entityCardList}>
+            {claim.devices.map((d) => (
+              <div key={d.id} className={s.entityCard}>
+                <div className={s.entityCardHeader}>
+                  <span className={s.entityTypeBadge}>{deviceTypeLabel(d.device_type)}</span>
+                </div>
+                <div className={s.entityCardContent}>{d.content}</div>
+                {d.effectiveness_note && (
+                  <div className={s.entityCardNote}>Effectiveness: {d.effectiveness_note}</div>
+                )}
+                <div className={s.entityCardSource}>
+                  Source: <Link href={`/sources?id=${d.source_id}`}>{d.source_title}</Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {claim.contexts.length > 0 && (
+        <>
+          <hr className={s.divider} />
+          <div className={s.sectionTitle}>Contexts ({claim.contexts.length})</div>
+          <div className={s.entityCardList}>
+            {claim.contexts.map((c) => (
+              <div key={c.id} className={s.entityCard}>
+                <div className={s.entityCardHeader}>
+                  <span className={s.entityTypeBadge}>{contextTypeLabel(c.context_type)}</span>
+                </div>
+                <div className={s.entityCardContent}>{c.content}</div>
+                <div className={s.entityCardSource}>
+                  Source: <Link href={`/sources?id=${c.source_id}`}>{c.source_title}</Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {claim.methods.length > 0 && (
+        <>
+          <hr className={s.divider} />
+          <div className={s.sectionTitle}>Methods ({claim.methods.length})</div>
+          <div className={s.entityCardList}>
+            {claim.methods.map((m) => (
+              <div key={m.id} className={s.entityCard}>
+                <div className={s.entityCardHeader}>
+                  <span className={s.entityTypeBadge}>{methodTypeLabel(m.method_type)}</span>
+                </div>
+                <div className={s.entityCardContent}>{m.content}</div>
+                <div className={s.entityCardSource}>
+                  Source: <Link href={`/sources?id=${m.source_id}`}>{m.source_title}</Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {claim.reasonings.length > 0 && (
+        <>
+          <hr className={s.divider} />
+          <div className={s.sectionTitle}>Reasonings ({claim.reasonings.length})</div>
+          <div className={s.entityCardList}>
+            {claim.reasonings.map((r) => (
+              <div key={r.id} className={s.entityCard}>
+                <div className={s.entityCardHeader}>
+                  <span className={s.entityTypeBadge}>{reasoningTypeLabel(r.reasoning_type)}</span>
+                </div>
+                <div className={s.entityCardContent}>{r.content}</div>
+                <div className={s.entityCardSource}>
+                  Source: <Link href={`/sources?id=${r.source_id}`}>{r.source_title}</Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {claim.relationships.length > 0 && (
