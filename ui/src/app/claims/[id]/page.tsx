@@ -7,7 +7,7 @@ import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
-import { claimTypeLabel, stanceLabel, strengthLabel, evidenceTypeLabel, deviceTypeLabel, contextTypeLabel, methodTypeLabel, reasoningTypeLabel } from '@/lib/enumLabels';
+import { claimTypeLabel, stanceLabel, strengthLabel, evidenceTypeLabel, deviceTypeLabel, contextTypeLabel, methodTypeLabel, reasoningTypeLabel, relationshipLabel } from '@/lib/enumLabels';
 import s from './page.module.scss';
 
 interface Evidence {
@@ -114,6 +114,8 @@ interface ClaimDetail {
   relationships: Relationship[];
 }
 
+type Tab = 'about' | 'connections' | 'evidence' | 'devices' | 'contexts' | 'methods' | 'reasonings';
+
 const stanceStyles: Record<string, { card: string; badge: string }> = {
   supports: { card: s.evidenceSupports, badge: s.stanceSupports },
   contradicts: { card: s.evidenceContradicts, badge: s.stanceContradicts },
@@ -126,6 +128,7 @@ export default function ClaimDetailPage() {
   const id = params.id as string;
   const [claim, setClaim] = useState<ClaimDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<Tab>('about');
 
   const load = useCallback(() => {
     fetch(`/api/claims/${id}`)
@@ -164,8 +167,22 @@ export default function ClaimDetailPage() {
   if (loading) return <div className={s.loading}>Loading claim...</div>;
   if (!claim) return <div className={s.empty}>Claim not found</div>;
 
+  const connectionsCount =
+    (claim.parent_claim ? 1 : 0) + claim.children.length + claim.relationships.length;
+
+  const tabs: { key: Tab; label: string; count: number }[] = [
+    { key: 'about', label: 'About', count: 0 },
+    { key: 'connections', label: 'Connections', count: connectionsCount },
+    { key: 'evidence', label: 'Evidence', count: claim.evidence.length },
+    { key: 'devices', label: 'Devices', count: claim.devices.length },
+    { key: 'contexts', label: 'Contexts', count: claim.contexts.length },
+    { key: 'methods', label: 'Methods', count: claim.methods.length },
+    { key: 'reasonings', label: 'Reasonings', count: claim.reasonings.length },
+  ];
+
   return (
     <div className={s.page}>
+      {/* ── Hero: just the claim identity ──────────────────────────── */}
       <button onClick={() => router.back()} className={s.backLink}>
         &larr; Back
       </button>
@@ -176,262 +193,312 @@ export default function ClaimDetailPage() {
         <ConfidenceBadge confidence={claim.computed_confidence} score={claim.score} />
       </div>
 
-      <div className={s.statementBox}>
+      <blockquote className={s.statementBox}>
         <InlineEdit
           value={claim.statement}
           onSave={(v) => patchClaim('statement', v)}
           multiline
           placeholder="Claim statement..."
         />
+      </blockquote>
+
+      {/* ── Tab bar ────────────────────────────────────────────────── */}
+      <div className={s.contentTabs}>
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            className={tab === t.key ? s.contentTabActive : s.contentTab}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+            {t.count > 0 && <span className={s.tabBadge}>{t.count}</span>}
+          </button>
+        ))}
       </div>
 
-      {claim.parent_claim && (
-        <div className={s.parentSection}>
-          <div className={s.metaLabel}>Parent Claim</div>
-          <Link href={`/claims/${claim.parent_claim.id}`} className={s.parentLink}>
-            <span className={s.claimId}>#{claim.parent_claim.id}</span>
-            <span className={s.claimType}>{claimTypeLabel(claim.parent_claim.claim_type)}</span>
-            <ConfidenceBadge confidence={claim.parent_claim.computed_confidence} score={claim.parent_claim.score} />
-            <span className={s.parentStatement}>{claim.parent_claim.statement}</span>
-          </Link>
-        </div>
-      )}
+      {/* ── Tab content ────────────────────────────────────────────── */}
+      <div className={s.tabContent}>
 
-      {claim.children.length > 0 && (
-        <div className={s.childrenSection}>
-          <div className={s.metaLabel}>Child Claims ({claim.children.length})</div>
-          <div className={s.childList}>
-            {claim.children.map((child) => (
-              <Link key={child.id} href={`/claims/${child.id}`} className={s.childItem}>
-                <span className={s.claimId}>#{child.id}</span>
-                <span className={s.claimType}>{claimTypeLabel(child.claim_type)}</span>
-                <ConfidenceBadge confidence={child.computed_confidence} score={child.score} />
-                <span className={s.childStatement}>{child.statement}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {claim.evaluation_results && (claim.evaluation_results.validity || claim.evaluation_results.substance) && (
-        <EvalSection label="Claim Evaluation" row>
-          {claim.evaluation_results.validity && (
-            <DimensionGrid label="Validity" dimensions={claim.evaluation_results.validity} columns={3} />
-          )}
-          {claim.evaluation_results.substance && (
-            <DimensionGrid label="Substance" dimensions={claim.evaluation_results.substance} columns={3} />
-          )}
-        </EvalSection>
-      )}
-
-      <div className={s.notesSection}>
-        <div className={s.metaLabel}>Reviewer Notes</div>
-        <InlineEdit
-          value={claim.reviewer_notes}
-          onSave={(v) => patchClaim('reviewer_notes', v)}
-          multiline
-          placeholder="Add reviewer notes..."
-        />
-      </div>
-
-      <div className={s.metaGrid}>
-        <div className={s.metaSection}>
-          <div className={s.metaLabel}>Topics</div>
-          <div className={s.chipRow}>
-            {claim.topics.map((t) => (
-              <LinkChip
-                key={t.id}
-                href={`/topics?id=${t.id}`}
-                label={t.name}
-                kind="topic"
-                onRemove={() => removeTopic(t.id)}
-              />
-            ))}
-            <button className={s.addBtn}>+ Add</button>
-          </div>
-        </div>
-
-        <div className={s.metaSection}>
-          <div className={s.metaLabel}>Themes</div>
-          <div className={s.chipRow}>
-            {claim.themes.map((t) => (
-              <LinkChip
-                key={t.id}
-                href={`/themes?id=${t.id}`}
-                label={t.name}
-                kind="theme"
-                onRemove={() => removeTheme(t.id)}
-              />
-            ))}
-            <button className={s.addBtn}>+ Add</button>
-          </div>
-        </div>
-      </div>
-
-      <div className={s.metaSection}>
-        <div className={s.metaLabel}>Tags</div>
-        <div className={s.chipRow}>
-          {claim.tags.map((t) => (
-            <LinkChip key={t} label={t} kind="tag" onRemove={() => removeTag(t)} />
-          ))}
-          <button className={s.addBtn}>+ Add</button>
-        </div>
-      </div>
-
-      <hr className={s.divider} />
-
-      <div className={s.sectionTitle}>Evidence ({claim.evidence.length})</div>
-      {claim.evidence.length === 0 ? (
-        <div className={s.empty}>No evidence yet — this claim needs sources</div>
-      ) : (
-        <div className={s.evidenceList}>
-          {claim.evidence.map((ev) => {
-            const ss = stanceStyles[ev.stance] || stanceStyles.supports;
-            return (
-              <div key={ev.id} className={`${s.evidenceCard} ${ss.card}`}>
-                <div className={s.evidenceHeader}>
-                  <span className={`${s.stanceBadge} ${ss.badge}`}>{stanceLabel(ev.stance)}</span>
-                  <span>&middot;</span>
-                  <span>{strengthLabel(ev.strength)}</span>
-                  <span>&middot;</span>
-                  <span>{evidenceTypeLabel(ev.evidence_type)}</span>
-                  {ev.credibility != null && (
-                    <>
-                      <span>&middot;</span>
-                      <span>credibility {ev.credibility}</span>
-                    </>
-                  )}
+        {tab === 'about' && (
+          <>
+            <div className={s.aboutGrid}>
+              <div className={s.aboutSection}>
+                <div className={s.metaLabel}>Topics</div>
+                <div className={s.chipRow}>
+                  {claim.topics.map((t) => (
+                    <LinkChip
+                      key={t.id}
+                      href={`/topics?id=${t.id}`}
+                      label={t.name}
+                      kind="topic"
+                      onRemove={() => removeTopic(t.id)}
+                    />
+                  ))}
+                  <button className={s.addBtn}>+ Add</button>
                 </div>
-                <div className={s.evidenceContent}>{ev.content}</div>
-                {ev.reasoning && (
-                  <div className={s.evidenceReasoning}>
-                    Reasoning: {ev.reasoning}
+              </div>
+
+              <div className={s.aboutSection}>
+                <div className={s.metaLabel}>Themes</div>
+                <div className={s.chipRow}>
+                  {claim.themes.map((t) => (
+                    <LinkChip
+                      key={t.id}
+                      href={`/themes?id=${t.id}`}
+                      label={t.name}
+                      kind="theme"
+                      onRemove={() => removeTheme(t.id)}
+                    />
+                  ))}
+                  <button className={s.addBtn}>+ Add</button>
+                </div>
+              </div>
+
+              <div className={s.aboutSection}>
+                <div className={s.metaLabel}>Tags</div>
+                <div className={s.chipRow}>
+                  {claim.tags.map((t) => (
+                    <LinkChip key={t} label={t} kind="tag" onRemove={() => removeTag(t)} />
+                  ))}
+                  <button className={s.addBtn}>+ Add</button>
+                </div>
+              </div>
+
+              {claim.sources.length > 0 && (
+                <div className={s.aboutSection}>
+                  <div className={s.metaLabel}>Sources ({claim.sources.length})</div>
+                  <div className={s.chipRow}>
+                    {claim.sources.map((src) => (
+                      <Link key={src.id} href={`/sources?id=${src.id}`} className={s.sourceChip}>
+                        {src.title}
+                      </Link>
+                    ))}
                   </div>
+                </div>
+              )}
+            </div>
+
+            {claim.evaluation_results && (claim.evaluation_results.validity || claim.evaluation_results.substance) && (
+              <EvalSection label="Claim Evaluation" row>
+                {claim.evaluation_results.validity && (
+                  <DimensionGrid label="Validity" dimensions={claim.evaluation_results.validity} columns={3} />
                 )}
-                <div className={s.evidenceSource}>
-                  Source: <Link href={`/sources?id=${ev.source_id}`}>{ev.source_title}</Link>
-                  {ev.contributors && ` (${ev.contributors})`}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {claim.sources.length > 0 && (
-        <>
-          <hr className={s.divider} />
-          <div className={s.sectionTitle}>Sources ({claim.sources.length})</div>
-          <div className={s.entityList}>
-            {claim.sources.map((src) => (
-              <Link key={src.id} href={`/sources?id=${src.id}`} className={s.entityChip}>
-                {src.title}
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
-
-      {claim.devices.length > 0 && (
-        <>
-          <hr className={s.divider} />
-          <div className={s.sectionTitle}>Devices ({claim.devices.length})</div>
-          <div className={s.entityCardList}>
-            {claim.devices.map((d) => (
-              <div key={d.id} className={s.entityCard}>
-                <div className={s.entityCardHeader}>
-                  <span className={s.entityTypeBadge}>{deviceTypeLabel(d.device_type)}</span>
-                </div>
-                <div className={s.entityCardContent}>{d.content}</div>
-                {d.effectiveness_note && (
-                  <div className={s.entityCardNote}>Effectiveness: {d.effectiveness_note}</div>
+                {claim.evaluation_results.substance && (
+                  <DimensionGrid label="Substance" dimensions={claim.evaluation_results.substance} columns={3} />
                 )}
-                <div className={s.entityCardSource}>
-                  Source: <Link href={`/sources?id=${d.source_id}`}>{d.source_title}</Link>
+              </EvalSection>
+            )}
+
+            <div className={s.notesGrid}>
+              <div className={s.aboutSection}>
+                <div className={s.metaLabel}>Reviewer Notes</div>
+                <InlineEdit
+                  value={claim.reviewer_notes}
+                  onSave={(v) => patchClaim('reviewer_notes', v)}
+                  multiline
+                  placeholder="Add reviewer notes..."
+                />
+              </div>
+              <div className={s.aboutSection}>
+                <div className={s.metaLabel}>Notes</div>
+                <InlineEdit
+                  value={claim.notes}
+                  onSave={(v) => patchClaim('notes', v)}
+                  multiline
+                  placeholder="Add notes..."
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {tab === 'connections' && (
+          <>
+            {claim.parent_claim && (
+              <div className={s.connectionGroup}>
+                <div className={s.metaLabel}>Parent Claim</div>
+                <div className={s.connectionList}>
+                  <Link href={`/claims/${claim.parent_claim.id}`} className={s.connectionCard}>
+                    <div className={s.connectionTopRow}>
+                      <span className={s.claimType}>{claimTypeLabel(claim.parent_claim.claim_type)}</span>
+                      <span className={s.claimId}>#{claim.parent_claim.id}</span>
+                    </div>
+                    <span className={s.connectionStatement}>{claim.parent_claim.statement}</span>
+                  </Link>
                 </div>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+            )}
 
-      {claim.contexts.length > 0 && (
-        <>
-          <hr className={s.divider} />
-          <div className={s.sectionTitle}>Contexts ({claim.contexts.length})</div>
-          <div className={s.entityCardList}>
-            {claim.contexts.map((c) => (
-              <div key={c.id} className={s.entityCard}>
-                <div className={s.entityCardHeader}>
-                  <span className={s.entityTypeBadge}>{contextTypeLabel(c.context_type)}</span>
-                </div>
-                <div className={s.entityCardContent}>{c.content}</div>
-                <div className={s.entityCardSource}>
-                  Source: <Link href={`/sources?id=${c.source_id}`}>{c.source_title}</Link>
+            {claim.children.length > 0 && (
+              <div className={s.connectionGroup}>
+                <div className={s.metaLabel}>Child Claims ({claim.children.length})</div>
+                <div className={s.connectionList}>
+                  {claim.children.map((child) => (
+                    <Link key={child.id} href={`/claims/${child.id}`} className={s.connectionCard}>
+                      <div className={s.connectionTopRow}>
+                        <span className={s.claimType}>{claimTypeLabel(child.claim_type)}</span>
+                        <span className={s.claimId}>#{child.id}</span>
+                      </div>
+                      <span className={s.connectionStatement}>{child.statement}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+            )}
 
-      {claim.methods.length > 0 && (
-        <>
-          <hr className={s.divider} />
-          <div className={s.sectionTitle}>Methods ({claim.methods.length})</div>
-          <div className={s.entityCardList}>
-            {claim.methods.map((m) => (
-              <div key={m.id} className={s.entityCard}>
-                <div className={s.entityCardHeader}>
-                  <span className={s.entityTypeBadge}>{methodTypeLabel(m.method_type)}</span>
-                </div>
-                <div className={s.entityCardContent}>{m.content}</div>
-                <div className={s.entityCardSource}>
-                  Source: <Link href={`/sources?id=${m.source_id}`}>{m.source_title}</Link>
+            {claim.relationships.length > 0 && (
+              <div className={s.connectionGroup}>
+                <div className={s.metaLabel}>Relationships ({claim.relationships.length})</div>
+                <div className={s.connectionList}>
+                  {claim.relationships.map((r) => (
+                    <Link key={r.id} href={`/claims/${r.related_claim_id}`} className={s.connectionCard}>
+                      <div className={s.connectionTopRow}>
+                        <span className={s.relBadge}>{relationshipLabel(r.relationship)}</span>
+                        <span className={s.claimId}>#{r.related_claim_id}</span>
+                      </div>
+                      <span className={s.connectionStatement}>{r.related_statement}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+            )}
 
-      {claim.reasonings.length > 0 && (
-        <>
-          <hr className={s.divider} />
-          <div className={s.sectionTitle}>Reasonings ({claim.reasonings.length})</div>
-          <div className={s.entityCardList}>
-            {claim.reasonings.map((r) => (
-              <div key={r.id} className={s.entityCard}>
-                <div className={s.entityCardHeader}>
-                  <span className={s.entityTypeBadge}>{reasoningTypeLabel(r.reasoning_type)}</span>
-                </div>
-                <div className={s.entityCardContent}>{r.content}</div>
-                <div className={s.entityCardSource}>
-                  Source: <Link href={`/sources?id=${r.source_id}`}>{r.source_title}</Link>
-                </div>
+            {connectionsCount === 0 && (
+              <div className={s.emptyTab}>No connections — this claim has no parent, children, or relationships</div>
+            )}
+          </>
+        )}
+
+        {tab === 'evidence' && (
+          <>
+            {claim.evidence.length === 0 ? (
+              <div className={s.emptyTab}>No evidence yet — this claim needs sources</div>
+            ) : (
+              <div className={s.cardList}>
+                {claim.evidence.map((ev) => {
+                  const ss = stanceStyles[ev.stance] || stanceStyles.supports;
+                  return (
+                    <div key={ev.id} className={`${s.evidenceCard} ${ss.card}`}>
+                      <div className={s.evidenceHeader}>
+                        <span className={`${s.stanceBadge} ${ss.badge}`}>{stanceLabel(ev.stance)}</span>
+                        <span>&middot;</span>
+                        <span>{strengthLabel(ev.strength)}</span>
+                        <span>&middot;</span>
+                        <span>{evidenceTypeLabel(ev.evidence_type)}</span>
+                        {ev.credibility != null && (
+                          <>
+                            <span>&middot;</span>
+                            <span>credibility {ev.credibility}</span>
+                          </>
+                        )}
+                      </div>
+                      <div className={s.cardContent}>{ev.content}</div>
+                      {ev.reasoning && (
+                        <div className={s.cardNote}>Reasoning: {ev.reasoning}</div>
+                      )}
+                      <div className={s.cardSource}>
+                        Source: <Link href={`/sources?id=${ev.source_id}`}>{ev.source_title}</Link>
+                        {ev.contributors && ` (${ev.contributors})`}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        </>
-      )}
+            )}
+          </>
+        )}
 
-      {claim.relationships.length > 0 && (
-        <>
-          <hr className={s.divider} />
-          <div className={s.sectionTitle}>Relationships</div>
-          <div className={s.relList}>
-            {claim.relationships.map((r) => (
-              <div key={r.id} className={s.relItem}>
-                <span className={s.relType}>{r.relationship} &rarr;</span>
-                <Link href={`/claims/${r.related_claim_id}`} className={s.relClaim}>
-                  #{r.related_claim_id}: {r.related_statement}
-                </Link>
+        {tab === 'devices' && (
+          <>
+            {claim.devices.length === 0 ? (
+              <div className={s.emptyTab}>No devices linked to this claim</div>
+            ) : (
+              <div className={s.cardList}>
+                {claim.devices.map((d) => (
+                  <div key={d.id} className={s.entityCard}>
+                    <div className={s.entityCardHeader}>
+                      <span className={s.entityTypeBadge}>{deviceTypeLabel(d.device_type)}</span>
+                    </div>
+                    <div className={s.cardContent}>{d.content}</div>
+                    {d.effectiveness_note && (
+                      <div className={s.cardNote}>Effectiveness: {d.effectiveness_note}</div>
+                    )}
+                    <div className={s.cardSource}>
+                      Source: <Link href={`/sources?id=${d.source_id}`}>{d.source_title}</Link>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </>
-      )}
+            )}
+          </>
+        )}
 
+        {tab === 'contexts' && (
+          <>
+            {claim.contexts.length === 0 ? (
+              <div className={s.emptyTab}>No contexts linked to this claim</div>
+            ) : (
+              <div className={s.cardList}>
+                {claim.contexts.map((c) => (
+                  <div key={c.id} className={s.entityCard}>
+                    <div className={s.entityCardHeader}>
+                      <span className={s.entityTypeBadge}>{contextTypeLabel(c.context_type)}</span>
+                    </div>
+                    <div className={s.cardContent}>{c.content}</div>
+                    <div className={s.cardSource}>
+                      Source: <Link href={`/sources?id=${c.source_id}`}>{c.source_title}</Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === 'methods' && (
+          <>
+            {claim.methods.length === 0 ? (
+              <div className={s.emptyTab}>No methods linked to this claim</div>
+            ) : (
+              <div className={s.cardList}>
+                {claim.methods.map((m) => (
+                  <div key={m.id} className={s.entityCard}>
+                    <div className={s.entityCardHeader}>
+                      <span className={s.entityTypeBadge}>{methodTypeLabel(m.method_type)}</span>
+                    </div>
+                    <div className={s.cardContent}>{m.content}</div>
+                    <div className={s.cardSource}>
+                      Source: <Link href={`/sources?id=${m.source_id}`}>{m.source_title}</Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === 'reasonings' && (
+          <>
+            {claim.reasonings.length === 0 ? (
+              <div className={s.emptyTab}>No reasonings linked to this claim</div>
+            ) : (
+              <div className={s.cardList}>
+                {claim.reasonings.map((r) => (
+                  <div key={r.id} className={s.entityCard}>
+                    <div className={s.entityCardHeader}>
+                      <span className={s.entityTypeBadge}>{reasoningTypeLabel(r.reasoning_type)}</span>
+                    </div>
+                    <div className={s.cardContent}>{r.content}</div>
+                    <div className={s.cardSource}>
+                      Source: <Link href={`/sources?id=${r.source_id}`}>{r.source_title}</Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

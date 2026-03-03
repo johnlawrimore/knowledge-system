@@ -107,6 +107,16 @@ const METHOD_TYPE_LABELS: Record<string, string> = {
   metric: 'Metric',
 };
 
+const RELATIONSHIP_LABELS: Record<string, string> = {
+  contradicts: 'Contradicts',
+  refines: 'Refines',
+  generalizes: 'Generalizes',
+  depends_on: 'Depends On',
+  enables: 'Enables',
+  tensions_with: 'Tensions With',
+  other: 'Other',
+};
+
 const REASONING_TYPE_LABELS: Record<string, string> = {
   deductive: 'Deductive',
   inductive: 'Inductive',
@@ -132,4 +142,5 @@ export const gradeLabel = labelFrom(GRADE_LABELS);
 export const deviceTypeLabel = labelFrom(DEVICE_TYPE_LABELS);
 export const contextTypeLabel = labelFrom(CONTEXT_TYPE_LABELS);
 export const methodTypeLabel = labelFrom(METHOD_TYPE_LABELS);
+export const relationshipLabel = labelFrom(RELATIONSHIP_LABELS);
 export const reasoningTypeLabel = labelFrom(REASONING_TYPE_LABELS);
