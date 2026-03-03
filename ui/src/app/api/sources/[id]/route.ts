@@ -2,6 +2,41 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const sourceId = Number(id);
+
+  if (isNaN(sourceId)) {
+    return NextResponse.json({ error: 'Invalid source ID' }, { status: 400 });
+  }
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [result] = await conn.query<ResultSetHeader>(
+      'DELETE FROM sources WHERE id = ?',
+      [sourceId]
+    );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json({ error: 'Source not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Source DELETE API error:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete source' },
+      { status: 500 }
+    );
+  } finally {
+    conn.release();
+  }
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

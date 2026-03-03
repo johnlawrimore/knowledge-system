@@ -8,7 +8,8 @@ import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import StrengthMeter from '@/components/StrengthMeter';
-import { claimTypeLabel, stanceLabel, evidenceTypeLabel, deviceTypeLabel, contextTypeLabel, methodTypeLabel, reasoningTypeLabel, relationshipLabel } from '@/lib/enumLabels';
+import ClaimGraph from '@/components/ClaimGraph';
+import { claimTypeLabel, stanceLabel, evidenceTypeLabel, deviceTypeLabel, contextTypeLabel, methodTypeLabel, reasoningTypeLabel } from '@/lib/enumLabels';
 import s from './page.module.scss';
 
 interface Evidence {
@@ -30,6 +31,9 @@ interface Relationship {
   id: number;
   related_claim_id: number;
   related_statement: string;
+  related_claim_type: string;
+  related_confidence: string | null;
+  related_score: number | null;
   relationship: string;
   direction: string;
 }
@@ -323,6 +327,22 @@ export default function ClaimDetailPage() {
 
         {tab === 'connections' && (
           <>
+            {connectionsCount > 0 ? (
+              <ClaimGraph
+                focalId={claim.id}
+                focalStatement={claim.statement}
+                focalType={claim.claim_type}
+                focalConfidence={claim.computed_confidence}
+                focalScore={claim.score}
+                parent={claim.parent_claim}
+                children={claim.children}
+                relationships={claim.relationships}
+              />
+            ) : (
+              <div className={s.emptyTab}>No connections — this claim has no parent, children, or relationships</div>
+            )}
+
+            {/* Old list view — kept for reference, delete when graph is stable
             {claim.parent_claim && (
               <div className={s.connectionGroup}>
                 <div className={s.metaLabel}>Parent Claim</div>
@@ -371,10 +391,7 @@ export default function ClaimDetailPage() {
                 </div>
               </div>
             )}
-
-            {connectionsCount === 0 && (
-              <div className={s.emptyTab}>No connections — this claim has no parent, children, or relationships</div>
-            )}
+            */}
           </>
         )}
 

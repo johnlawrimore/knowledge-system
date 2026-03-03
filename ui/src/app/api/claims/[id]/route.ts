@@ -207,12 +207,16 @@ export async function GET(
            WHEN cr.claim_id_a = ? THEN 'outgoing'
            ELSE 'incoming'
          END AS direction,
-         rc.statement AS related_claim_statement
+         rc.statement AS related_claim_statement,
+         rc.claim_type AS related_claim_type,
+         scs.computed_confidence AS related_confidence,
+         scs.score AS related_score
        FROM claim_relationships cr
        JOIN claims rc ON rc.id = CASE
          WHEN cr.claim_id_a = ? THEN cr.claim_id_b
          ELSE cr.claim_id_a
        END
+       LEFT JOIN v_standalone_claim_scores scs ON scs.claim_id = rc.id
        WHERE cr.claim_id_a = ? OR cr.claim_id_b = ?
        ORDER BY cr.relationship`,
       [id, id, id, id, id],
@@ -294,6 +298,9 @@ export async function GET(
         notes: r.notes,
         related_claim_id: r.related_claim_id,
         related_statement: r.related_claim_statement,
+        related_claim_type: r.related_claim_type ?? 'assertion',
+        related_confidence: r.related_confidence ?? null,
+        related_score: r.related_score ?? null,
       })),
     });
   } catch (error) {

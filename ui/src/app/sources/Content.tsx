@@ -67,6 +67,7 @@ export default function SourcesContent() {
   const [contentTab, setContentTab] = useState<'about' | 'distillation' | 'original' | 'claims'>('about');
 
   const [publicationNames, setPublicationNames] = useState<string[]>([]);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   const selectedId = searchParams.get('id');
   const status = searchParams.get('status') || '';
@@ -125,6 +126,24 @@ export default function SourcesContent() {
     });
     const r = await fetch(`/api/sources/${selectedId}`);
     setDetail(await r.json());
+  };
+
+  const discardSource = async () => {
+    if (!selectedId) return;
+    await fetch(`/api/sources/${selectedId}`, { method: 'DELETE' });
+    setDetail(null);
+    setConfirmDiscard(false);
+    router.push('/sources');
+    // Refresh list
+    const params = new URLSearchParams();
+    if (status) params.set('status', status);
+    if (type) params.set('type', type);
+    if (search) params.set('search', search);
+    params.set('limit', '100');
+    const r = await fetch(`/api/sources?${params}`);
+    const d = await r.json();
+    setSources(d.sources || []);
+    setTotal(d.total || 0);
   };
 
   return (
@@ -336,6 +355,28 @@ export default function SourcesContent() {
                       </div>
                     )}
 
+                    <hr className={s.divider} />
+                    <div className={s.discardSection}>
+                      {!confirmDiscard ? (
+                        <button className={s.discardBtn} onClick={() => setConfirmDiscard(true)}>
+                          Discard Source
+                        </button>
+                      ) : (
+                        <div className={s.confirmBox}>
+                          <div className={s.confirmText}>
+                            This will permanently remove this source and all its evidence, devices, contexts, methods, and reasonings. Claims will not be deleted but will lose their link to this source.
+                          </div>
+                          <div className={s.confirmActions}>
+                            <button className={s.confirmCancel} onClick={() => setConfirmDiscard(false)}>
+                              Cancel
+                            </button>
+                            <button className={s.confirmDiscard} onClick={discardSource}>
+                              Yes, Discard Source
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : contentTab === 'distillation' ? (
                   detail.distillation ? (
