@@ -1,8 +1,23 @@
 .contributorHeader {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 1rem;
+  margin: -1.25rem -1.25rem 1rem;
+  padding: 1.25rem;
+  background: #8070a3;
+
+  :global(html.dark) & {
+    background: #4a3d6b;
+  }
+
+  .headerName,
+  .headerMeta {
+    color: #fff;
+  }
+
+  .headerMeta {
+    opacity: 0.85;
+  }
 }
 
 .avatarButton {
@@ -20,6 +35,8 @@
   .avatarPlaceholder {
     width: 6rem;
     height: 6rem;
+    border-color: rgba(255, 255, 255, 0.6);
+    border-width: 2px;
   }
 
   .avatarPlaceholder {
@@ -33,6 +50,7 @@
   height: 3rem;
   border-radius: 50%;
   border: 1px solid var(--border-default);
+  flex-shrink: 0;
 }
 
 .avatar {
@@ -41,12 +59,13 @@
 }
 
 .avatarPlaceholder {
-  background: var(--bg-raised);
+  background: #4a4a4e;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
-  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .headerInfo {
@@ -65,29 +84,6 @@
   color: var(--text-muted);
   margin-top: 0.125rem;
   margin-bottom: 0.25rem;
-}
-
-.listAvatar,
-.listAvatarPlaceholder {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  border: 1px solid var(--border-default);
-  flex-shrink: 0;
-}
-
-.listAvatar {
-  object-fit: cover;
-}
-
-.listAvatarPlaceholder {
-  background: var(--bg-raised);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  font-size: 1rem;
-  font-weight: 600;
 }
 
 .listItemRow {

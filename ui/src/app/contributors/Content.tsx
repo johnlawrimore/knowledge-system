@@ -9,6 +9,7 @@ import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import { stanceLabel, strengthLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
+import { IconExternalLink } from '@tabler/icons-react';
 import s from '../shared.module.scss';
 
 const ContributorsIcon = pageIcon('contributors');
@@ -186,9 +187,9 @@ export default function ContributorsContent() {
                 >
                   <div className={ps.listItemRow}>
                     {c.avatar ? (
-                      <img src={c.avatar} alt="" className={ps.listAvatar} />
+                      <img src={c.avatar} alt="" className={ps.avatar} />
                     ) : (
-                      <span className={ps.listAvatarPlaceholder}>
+                      <span className={ps.avatarPlaceholder}>
                         {getInitials(c.name)}
                       </span>
                     )}
@@ -302,7 +303,7 @@ export default function ContributorsContent() {
                           className={ps.launchBtn}
                           title="Open in new tab"
                         >
-                          &#x2197;
+                          <IconExternalLink size={16} />
                         </a>
                       )}
                     </div>
