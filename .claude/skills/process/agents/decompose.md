@@ -84,7 +84,7 @@ Before inserting, determine if any claims form compound arguments — multiple c
 - A set of claims where removing any one breaks the logic
 - A distinction claim paired with claims that only make sense in light of that distinction
 
-Do NOT create parent-child for: claims that simply share a topic, loosely related claims (use `claim_relationships`), or claims from different sources supporting the same theme.
+Do NOT create parent-child for: claims that simply share a topic, loosely related claims (use `claim_links`), or claims from different sources supporting the same theme.
 
 A claim can only have one parent. Nesting can go multiple levels deep.
 

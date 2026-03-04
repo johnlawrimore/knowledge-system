@@ -70,7 +70,7 @@ All markdown content (sources, distillations, compositions) follows **markdown-f
 **Content Filtering**: `content_filters`, `content_filter_versions`
 **Collection**: `contributors`, `publications`, `sources` (includes `distillation` and `content_filter_version_id` columns), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
-**Decomposition**: `topics`, `themes`, `claims`, `claim_sources`, `claim_relationships`, `claim_topics`, `claim_themes`, `claim_tags`
+**Decomposition**: `topics`, `themes`, `claims`, `claim_sources`, `claim_links`, `claim_topics`, `claim_themes`, `claim_tags`
 **Decomposition Entities**: `devices`, `claim_devices`, `contexts`, `claim_contexts`, `methods`, `claim_methods`
 **Evidence & Reasoning**: `evidence`, `claim_evidence`, `reasonings`
 **Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
@@ -109,7 +109,7 @@ When to create parent-child relationships during decomposition:
 - A model claim followed by claims describing its parts — model is parent, parts are children
 - A set of claims where removing any one breaks the logic
 
-Do NOT use parent-child for claims that simply share a topic (use topics), are loosely related (use `claim_relationships`), or happen to support the same theme from different sources (use themes).
+Do NOT use parent-child for claims that simply share a topic (use topics), are loosely related (use `claim_links`), or happen to support the same theme from different sources (use themes).
 
 Scoring: parent and child claims each score independently. The parent's score does not aggregate from its children.
 

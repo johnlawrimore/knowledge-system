@@ -4,6 +4,7 @@ import { CompositionDetail as CompositionDetailType } from '@/lib/types';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import DetailSection from '@/components/DetailSection';
+import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import { compositionStatusLabel } from '@/lib/enumLabels';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
@@ -52,11 +53,21 @@ export default function CompositionDetailView({
       )}
 
       {detail.evaluation_results && (
-        <DetailSection label="Evaluation Results">
-          <div className={ps.evalBlock}>
-            {JSON.stringify(detail.evaluation_results, null, 2)}
-          </div>
-        </DetailSection>
+        <EvalSection
+          label="AI Evaluation"
+          evaluatedAt={detail.evaluation_results.evaluated_at}
+          notes={detail.evaluation_results.notes}
+        >
+          <DimensionGrid
+            dimensions={{
+              'Quality': detail.evaluation_results.quality ?? null,
+              'Completeness': detail.evaluation_results.completeness ?? null,
+              'Voice': detail.evaluation_results.voice_consistency ?? null,
+              'Readiness': detail.evaluation_results.decomposition_readiness ?? null,
+            }}
+            columns={4}
+          />
+        </EvalSection>
       )}
 
       <DetailSection label="Content">

@@ -151,11 +151,11 @@ CREATE TABLE claims (
     FOREIGN KEY (parent_claim_id) REFERENCES claims(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE claim_relationships (
+CREATE TABLE claim_links (
     id INT AUTO_INCREMENT PRIMARY KEY,
     claim_id_a INT NOT NULL,
     claim_id_b INT NOT NULL,
-    relationship ENUM(
+    link_type ENUM(
         'contradicts', 'refines', 'generalizes', 'depends_on',
         'enables', 'tensions_with', 'other'
     ) NOT NULL,
@@ -164,7 +164,7 @@ CREATE TABLE claim_relationships (
 
     FOREIGN KEY (claim_id_a) REFERENCES claims(id) ON DELETE CASCADE,
     FOREIGN KEY (claim_id_b) REFERENCES claims(id) ON DELETE CASCADE,
-    UNIQUE INDEX idx_claim_rel_pair (claim_id_a, claim_id_b, relationship)
+    UNIQUE INDEX idx_claim_link_pair (claim_id_a, claim_id_b, link_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE claim_topics (

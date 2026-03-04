@@ -41,8 +41,6 @@ export default function ContributorList({
                 <div className={s.listItemTitle}>{c.name}</div>
                 <MetaLine className={s.listItemMeta}>
                   <span>{c.affiliation || 'No affiliation'}</span>
-                  <span>{c.claim_count} claim{c.claim_count !== 1 ? 's' : ''}</span>
-                  <span>{c.source_count} source{c.source_count !== 1 ? 's' : ''}</span>
                 </MetaLine>
               </div>
             </div>

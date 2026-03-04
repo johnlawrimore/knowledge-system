@@ -191,34 +191,34 @@ export async function GET(
       [id],
     );
 
-    // ---- Relationships (both directions) ----
+    // ---- Links (both directions) ----
     const [relRows] = await pool.query<RowDataPacket[]>(
       `SELECT
-         cr.id AS relationship_id,
-         cr.relationship,
-         cr.notes,
-         cr.claim_id_a,
-         cr.claim_id_b,
+         cl.id AS link_id,
+         cl.link_type,
+         cl.notes,
+         cl.claim_id_a,
+         cl.claim_id_b,
          CASE
-           WHEN cr.claim_id_a = ? THEN cr.claim_id_b
-           ELSE cr.claim_id_a
+           WHEN cl.claim_id_a = ? THEN cl.claim_id_b
+           ELSE cl.claim_id_a
          END AS related_claim_id,
          CASE
-           WHEN cr.claim_id_a = ? THEN 'outgoing'
+           WHEN cl.claim_id_a = ? THEN 'outgoing'
            ELSE 'incoming'
          END AS direction,
          rc.statement AS related_claim_statement,
          rc.claim_type AS related_claim_type,
          scs.computed_confidence AS related_confidence,
          scs.score AS related_score
-       FROM claim_relationships cr
+       FROM claim_links cl
        JOIN claims rc ON rc.id = CASE
-         WHEN cr.claim_id_a = ? THEN cr.claim_id_b
-         ELSE cr.claim_id_a
+         WHEN cl.claim_id_a = ? THEN cl.claim_id_b
+         ELSE cl.claim_id_a
        END
        LEFT JOIN v_standalone_claim_scores scs ON scs.claim_id = rc.id
-       WHERE cr.claim_id_a = ? OR cr.claim_id_b = ?
-       ORDER BY cr.relationship`,
+       WHERE cl.claim_id_a = ? OR cl.claim_id_b = ?
+       ORDER BY cl.link_type`,
       [id, id, id, id, id],
     );
 
@@ -291,9 +291,9 @@ export async function GET(
       topics: topicRows,
       themes: themeRows,
       tags: tagRows.map((r) => r.tag),
-      relationships: relRows.map((r) => ({
-        id: r.relationship_id,
-        relationship: r.relationship,
+      links: relRows.map((r) => ({
+        id: r.link_id,
+        link_type: r.link_type,
         direction: r.direction,
         notes: r.notes,
         related_claim_id: r.related_claim_id,

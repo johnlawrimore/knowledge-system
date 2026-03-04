@@ -139,17 +139,17 @@ Table claims {
 
 Ref: claims.parent_claim_id > claims.id [delete: set null]
 
-Table claim_relationships {
+Table claim_links {
   id int [pk, increment]
   claim_id_a int [not null]
   claim_id_b int [not null]
-  relationship enum('contradicts','refines','generalizes','depends_on','enables','tensions_with','other') [not null]
+  link_type enum('contradicts','refines','generalizes','depends_on','enables','tensions_with','other') [not null]
   notes text
   created_at timestamp
 }
 
-Ref: claim_relationships.claim_id_a > claims.id [delete: cascade]
-Ref: claim_relationships.claim_id_b > claims.id [delete: cascade]
+Ref: claim_links.claim_id_a > claims.id [delete: cascade]
+Ref: claim_links.claim_id_b > claims.id [delete: cascade]
 
 Table claim_topics {
   claim_id int [not null]
@@ -345,7 +345,7 @@ TableGroup decomposition {
   themes
   claims
   claim_sources
-  claim_relationships
+  claim_links
   claim_topics
   claim_themes
   claim_tags

@@ -100,17 +100,17 @@ export interface Evidence {
 }
 
 /**
- * Claim-to-claim relationship.
+ * Claim-to-claim link.
  * From: claims/[id]/page.tsx
  */
-export interface Relationship {
+export interface ClaimLink {
   id: number;
   related_claim_id: number;
   related_statement: string;
   related_claim_type: string;
   related_confidence: string | null;
   related_score: number | null;
-  relationship: string;
+  link_type: string;
   direction: string;
 }
 
@@ -226,7 +226,7 @@ export interface ClaimDetail {
   contexts: Context[];
   methods: Method[];
   reasonings: Reasoning[];
-  relationships: Relationship[];
+  links: ClaimLink[];
 }
 
 /**
@@ -268,17 +268,17 @@ export interface GraphClaim {
 }
 
 /**
- * Relationship data shaped for the claim graph component.
+ * Link data shaped for the claim graph component.
  * From: ClaimGraph.tsx
  */
-export interface GraphRelationship {
+export interface GraphLink {
   id: number;
   related_claim_id: number;
   related_statement: string;
   related_claim_type?: string | null;
   related_confidence?: string | null;
   related_score?: number | null;
-  relationship: string;
+  link_type: string;
   direction: string;
 }
 
@@ -534,6 +534,19 @@ export interface CompositionSource {
 }
 
 /**
+ * Evaluation results stored as JSON on a composition.
+ * From: compositions/Content.tsx
+ */
+export interface CompositionEvaluation {
+  quality?: number | null;
+  completeness?: number | null;
+  voice_consistency?: number | null;
+  decomposition_readiness?: number | null;
+  notes?: string | null;
+  evaluated_at?: string;
+}
+
+/**
  * Full composition detail returned by /api/compositions/:id.
  * From: compositions/Content.tsx
  */
@@ -542,7 +555,7 @@ export interface CompositionDetail {
   title: string;
   content: string;
   word_count: number;
-  evaluation_results: Record<string, unknown> | null;
+  evaluation_results: CompositionEvaluation | null;
   status: string;
   created_at: string;
   updated_at: string;

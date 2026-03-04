@@ -4,13 +4,13 @@ import ClaimGraph from '@/components/ClaimGraph';
 import type { ClaimDetail } from '@/lib/types';
 import s from '../page.module.scss';
 
-interface ClaimConnectionsTabProps {
+interface ClaimRelationshipsTabProps {
   claim: ClaimDetail;
 }
 
-export default function ClaimConnectionsTab({ claim }: ClaimConnectionsTabProps) {
+export default function ClaimRelationshipsTab({ claim }: ClaimRelationshipsTabProps) {
   const connectionsCount =
-    (claim.parent_claim ? 1 : 0) + claim.children.length + claim.relationships.length;
+    (claim.parent_claim ? 1 : 0) + claim.children.length + claim.links.length;
 
   return (
     <>
@@ -23,10 +23,10 @@ export default function ClaimConnectionsTab({ claim }: ClaimConnectionsTabProps)
           focalScore={claim.score}
           parent={claim.parent_claim}
           children={claim.children}
-          relationships={claim.relationships}
+          links={claim.links}
         />
       ) : (
-        <div className={s.emptyTab}>No connections — this claim has no parent, children, or relationships</div>
+        <div className={s.emptyTab}>No connections — this claim has no parent, children, or links</div>
       )}
     </>
   );

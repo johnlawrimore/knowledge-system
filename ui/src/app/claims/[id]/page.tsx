@@ -9,7 +9,7 @@ import { claimTypeLabel } from '@/lib/enumLabels';
 import type { ClaimDetail } from '@/lib/types';
 import ClaimAboutTab from './tabs/ClaimAboutTab';
 import ClaimEvidenceTab from './tabs/ClaimEvidenceTab';
-import ClaimConnectionsTab from './tabs/ClaimConnectionsTab';
+import ClaimRelationshipsTab from './tabs/ClaimRelationshipsTab';
 import ClaimEntitiesTab from './tabs/ClaimEntitiesTab';
 import s from './page.module.scss';
 
@@ -61,11 +61,11 @@ export default function ClaimDetailPage() {
   if (!claim) return <div className={s.empty}>Claim not found</div>;
 
   const connectionsCount =
-    (claim.parent_claim ? 1 : 0) + claim.children.length + claim.relationships.length;
+    (claim.parent_claim ? 1 : 0) + claim.children.length + claim.links.length;
 
   const tabs: { key: string; label: string; count: number }[] = [
     { key: 'about', label: 'About', count: 0 },
-    { key: 'connections', label: 'Connected Claims', count: connectionsCount },
+    { key: 'connections', label: 'Relationships', count: connectionsCount },
     { key: 'evidence', label: 'Evidence', count: claim.evidence.length },
     { key: 'devices', label: 'Rhetorical Devices', count: claim.devices.length },
     { key: 'contexts', label: 'Contexts', count: claim.contexts.length },
@@ -110,7 +110,7 @@ export default function ClaimDetailPage() {
         )}
 
         {tab === 'connections' && (
-          <ClaimConnectionsTab claim={claim} />
+          <ClaimRelationshipsTab claim={claim} />
         )}
 
         {tab === 'evidence' && (

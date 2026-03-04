@@ -184,26 +184,26 @@ When 50+ claims exist, help discover themes by looking for patterns across topic
 UPDATE claims SET reviewer_notes = '<position>' WHERE id = <id>;
 ```
 
-## Claim Relationship Management
+## Claim Link Management
 
 ### Create
 
 ```sql
-INSERT INTO claim_relationships (claim_id_a, claim_id_b, relationship, notes)
+INSERT INTO claim_links (claim_id_a, claim_id_b, link_type, notes)
 VALUES (<id_a>, <id_b>, '<type>', '<explanation>');
 ```
 
 ### View for a Claim
 
 ```sql
-SELECT cr.relationship,
-    CASE WHEN cr.claim_id_a = <id> THEN cb.statement ELSE ca.statement END AS related_claim,
-    CASE WHEN cr.claim_id_a = <id> THEN cr.claim_id_b ELSE cr.claim_id_a END AS related_id,
-    cr.notes
-FROM claim_relationships cr
-JOIN claims ca ON cr.claim_id_a = ca.id
-JOIN claims cb ON cr.claim_id_b = cb.id
-WHERE cr.claim_id_a = <id> OR cr.claim_id_b = <id>;
+SELECT cl.link_type,
+    CASE WHEN cl.claim_id_a = <id> THEN cb.statement ELSE ca.statement END AS related_claim,
+    CASE WHEN cl.claim_id_a = <id> THEN cl.claim_id_b ELSE cl.claim_id_a END AS related_id,
+    cl.notes
+FROM claim_links cl
+JOIN claims ca ON cl.claim_id_a = ca.id
+JOIN claims cb ON cl.claim_id_b = cb.id
+WHERE cl.claim_id_a = <id> OR cl.claim_id_b = <id>;
 ```
 
 ## Contributor Management

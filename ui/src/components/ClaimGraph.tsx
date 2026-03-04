@@ -12,8 +12,8 @@ import {
   type NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { claimTypeLabel, relationshipLabel } from '@/lib/enumLabels';
-import { GraphClaim, GraphRelationship } from '@/lib/types';
+import { claimTypeLabel, linkTypeLabel } from '@/lib/enumLabels';
+import { GraphClaim, GraphLink } from '@/lib/types';
 import f from './ClaimGraph.module.scss';
 
 export interface ClaimGraphProps {
@@ -24,7 +24,7 @@ export interface ClaimGraphProps {
   focalScore?: number | null;
   parent?: GraphClaim | null;
   children: GraphClaim[];
-  relationships: GraphRelationship[];
+  links: GraphLink[];
 }
 
 /* ── Internal node data types ───────────────────────────────────── */
@@ -180,7 +180,7 @@ const nodeTypes = {
 
 export default function ClaimGraph({
   focalId, focalStatement, focalType,
-  parent, children, relationships,
+  parent, children, links,
 }: ClaimGraphProps) {
   const router = useRouter();
   const go = useCallback((id: number) => router.push(`/claims/${id}`), [router]);
@@ -246,10 +246,10 @@ export default function ClaimGraph({
       ...children.map((c) => c.id),
     ]);
 
-    const byType: Record<string, GraphRelationship[]> = {};
-    for (const r of relationships) {
+    const byType: Record<string, GraphLink[]> = {};
+    for (const r of links) {
       if (excludeIds.has(r.related_claim_id)) continue; // skip already-shown claims
-      (byType[r.relationship] ??= []).push(r);
+      (byType[r.link_type] ??= []).push(r);
     }
 
     // Split by direction: outgoing → right side, incoming → left side
@@ -283,7 +283,7 @@ export default function ClaimGraph({
           position: { x: hubX, y: hubCenterY - HUB_H / 2 },
           data: {
             relType,
-            label: relationshipLabel(relType),
+            label: linkTypeLabel(relType),
             stroke: ec.stroke,
             labelColor: ec.labelColor,
           } as HubNodeData,
@@ -297,7 +297,7 @@ export default function ClaimGraph({
           target: isRight ? hubId   : 'focal',
           sourceHandle: isRight ? 'r' : 'r',
           targetHandle: isRight ? 'l' : 'l',
-          type: 'smoothstep',
+          type: 'straight',
           style: edgeStyle(relType),
           ...(ec.arrow
             ? { markerEnd: { type: MarkerType.ArrowClosed, color: ec.stroke, width: 12, height: 12 } }
@@ -329,7 +329,7 @@ export default function ClaimGraph({
             target: isRight ? leafId  : hubId,
             sourceHandle: isRight ? 'r' : 'r',
             targetHandle: isRight ? 'l' : 'l',
-            type: 'smoothstep',
+            type: 'straight',
             style: { stroke: 'var(--border-subtle)', strokeWidth: 1 },
           });
         });
@@ -342,7 +342,7 @@ export default function ClaimGraph({
     placeHubs(leftTypes,  LEFT_HUB_X,  LEFT_LEAF_X,  false);
 
     return { nodes: ns, edges: es };
-  }, [focalId, focalStatement, focalType, parent, children, relationships, go]);
+  }, [focalId, focalStatement, focalType, parent, children, links, go]);
 
   // Legend: deduplicated list in use
   const legendTypes = useMemo(() => {
@@ -351,12 +351,12 @@ export default function ClaimGraph({
     if (parent) { seen.add('parent'); out.push('parent'); }
     if (children.length > 0) { seen.add('child'); out.push('child'); }
     const excludeIds = new Set([...(parent ? [parent.id] : []), ...children.map((c) => c.id)]);
-    for (const r of relationships) {
+    for (const r of links) {
       if (excludeIds.has(r.related_claim_id)) continue;
-      if (!seen.has(r.relationship)) { seen.add(r.relationship); out.push(r.relationship); }
+      if (!seen.has(r.link_type)) { seen.add(r.link_type); out.push(r.link_type); }
     }
     return out;
-  }, [parent, children, relationships]);
+  }, [parent, children, links]);
 
   return (
     <div className={f.wrapper}>
@@ -380,7 +380,7 @@ export default function ClaimGraph({
           const label =
             type === 'parent' ? 'Parent claim' :
             type === 'child'  ? 'Child claim'  :
-            relationshipLabel(type);
+            linkTypeLabel(type);
           return (
             <div key={type} className={f.legendItem}>
               <svg width="28" height="10" aria-hidden>

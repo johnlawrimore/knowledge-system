@@ -90,24 +90,22 @@ export default function ClaimAboutTab({
       )}
 
       <div className={s.notesGrid}>
-        <div className={s.aboutSection}>
-          <div className={s.metaLabel}>Reviewer Notes</div>
+        <DetailSection label="Reviewer Notes">
           <InlineEdit
             value={claim.reviewer_notes}
             onSave={(v) => patchClaim('reviewer_notes', v)}
             multiline
             placeholder="Add reviewer notes..."
           />
-        </div>
-        <div className={s.aboutSection}>
-          <div className={s.metaLabel}>Notes</div>
+        </DetailSection>
+        <DetailSection label="Notes">
           <InlineEdit
             value={claim.notes}
             onSave={(v) => patchClaim('notes', v)}
             multiline
             placeholder="Add notes..."
           />
-        </div>
+        </DetailSection>
       </div>
     </>
   );
