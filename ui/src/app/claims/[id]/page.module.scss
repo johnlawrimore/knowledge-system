@@ -29,6 +29,10 @@
   margin-bottom: 0.5rem;
 }
 
+.headerSpacer {
+  flex: 1;
+}
+
 .claimId {
   font-size: 0.875rem;
   color: var(--text-muted);
@@ -113,11 +117,14 @@
   font-style: italic;
 }
 
-// ── About tab ──────────────────────────────────────────────────
-.aboutGrid {
+// ── About section ─────────────────────────────────────────────
+.taxonomyBox {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  padding: 1rem;
   margin-bottom: 1.25rem;
 }
 
@@ -131,6 +138,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  padding: 1rem;
 }
 
 .metaLabel {

@@ -25,21 +25,44 @@ export default function ClaimAboutTab({
 }: ClaimAboutTabProps) {
   return (
     <>
-      <div className={s.aboutGrid}>
-        <DetailSection label="Topics">
+      {claim.sources.length > 0 && (
+        <DetailSection label="Sources" count={claim.sources.length}>
           <div className={s.chipRow}>
-            {claim.topics.map((t) => (
-              <LinkChip
-                key={t.id}
-                href={`/topics?id=${t.id}`}
-                label={t.name}
-                kind="topic"
-                onRemove={() => onRemoveTopic(t.id)}
-              />
+            {claim.sources.map((src) => (
+              <Link key={src.id} href={`/sources?id=${src.id}`} className={s.sourceChip}>
+                {src.title}
+              </Link>
             ))}
-            <button className={s.addBtn}>+ Add</button>
           </div>
         </DetailSection>
+      )}
+
+      <div className={s.taxonomyBox}>
+        <div>
+          <DetailSection label="Topics">
+            <div className={s.chipRow}>
+              {claim.topics.map((t) => (
+                <LinkChip
+                  key={t.id}
+                  href={`/topics?id=${t.id}`}
+                  label={t.name}
+                  kind="topic"
+                  onRemove={() => onRemoveTopic(t.id)}
+                />
+              ))}
+              <button className={s.addBtn}>+ Add</button>
+            </div>
+          </DetailSection>
+
+          <DetailSection label="Tags">
+            <div className={s.chipRow}>
+              {claim.tags.map((t) => (
+                <LinkChip key={t} label={t} kind="tag" onRemove={() => onRemoveTag(t)} />
+              ))}
+              <button className={s.addBtn}>+ Add</button>
+            </div>
+          </DetailSection>
+        </div>
 
         <DetailSection label="Themes">
           <div className={s.chipRow}>
@@ -55,27 +78,6 @@ export default function ClaimAboutTab({
             <button className={s.addBtn}>+ Add</button>
           </div>
         </DetailSection>
-
-        <DetailSection label="Tags">
-          <div className={s.chipRow}>
-            {claim.tags.map((t) => (
-              <LinkChip key={t} label={t} kind="tag" onRemove={() => onRemoveTag(t)} />
-            ))}
-            <button className={s.addBtn}>+ Add</button>
-          </div>
-        </DetailSection>
-
-        {claim.sources.length > 0 && (
-          <DetailSection label="Sources" count={claim.sources.length}>
-            <div className={s.chipRow}>
-              {claim.sources.map((src) => (
-                <Link key={src.id} href={`/sources?id=${src.id}`} className={s.sourceChip}>
-                  {src.title}
-                </Link>
-              ))}
-            </div>
-          </DetailSection>
-        )}
       </div>
 
       {claim.evaluation_results && (claim.evaluation_results.validity || claim.evaluation_results.substance) && (
@@ -90,20 +92,20 @@ export default function ClaimAboutTab({
       )}
 
       <div className={s.notesGrid}>
-        <DetailSection label="Reviewer Notes">
-          <InlineEdit
-            value={claim.reviewer_notes}
-            onSave={(v) => patchClaim('reviewer_notes', v)}
-            multiline
-            placeholder="Add reviewer notes..."
-          />
-        </DetailSection>
         <DetailSection label="Notes">
           <InlineEdit
             value={claim.notes}
             onSave={(v) => patchClaim('notes', v)}
             multiline
             placeholder="Add notes..."
+          />
+        </DetailSection>
+        <DetailSection label="Reviewer Notes">
+          <InlineEdit
+            value={claim.reviewer_notes}
+            onSave={(v) => patchClaim('reviewer_notes', v)}
+            multiline
+            placeholder="Add reviewer notes..."
           />
         </DetailSection>
       </div>

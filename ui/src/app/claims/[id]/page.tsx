@@ -13,7 +13,7 @@ import ClaimRelationshipsTab from './tabs/ClaimRelationshipsTab';
 import ClaimEntitiesTab from './tabs/ClaimEntitiesTab';
 import s from './page.module.scss';
 
-type Tab = 'about' | 'connections' | 'evidence' | 'devices' | 'contexts' | 'methods';
+type Tab = 'connections' | 'evidence' | 'devices' | 'contexts' | 'methods';
 
 export default function ClaimDetailPage() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function ClaimDetailPage() {
   const id = params.id as string;
   const [claim, setClaim] = useState<ClaimDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>('about');
+  const [tab, setTab] = useState<Tab>('connections');
 
   const load = useCallback(() => {
     fetch(`/api/claims/${id}`)
@@ -64,7 +64,6 @@ export default function ClaimDetailPage() {
     (claim.parent_claim ? 1 : 0) + claim.children.length + claim.links.length;
 
   const tabs: { key: string; label: string; count: number }[] = [
-    { key: 'about', label: 'About', count: 0 },
     { key: 'connections', label: 'Relationships', count: connectionsCount },
     { key: 'evidence', label: 'Evidence', count: claim.evidence.length },
     { key: 'devices', label: 'Rhetorical Devices', count: claim.devices.length },
@@ -82,6 +81,7 @@ export default function ClaimDetailPage() {
       <div className={s.claimHeader}>
         <span className={s.claimId}>CLAIM #{claim.id}</span>
         <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
+        <span className={s.headerSpacer} />
         <ConfidenceBadge confidence={claim.computed_confidence} score={claim.score} />
       </div>
 
@@ -94,21 +94,19 @@ export default function ClaimDetailPage() {
         />
       </blockquote>
 
+      <ClaimAboutTab
+        claim={claim}
+        patchClaim={patchClaim}
+        onRemoveTopic={removeTopic}
+        onRemoveTheme={removeTheme}
+        onRemoveTag={removeTag}
+      />
+
       {/* ── Tab bar ────────────────────────────────────────────────── */}
       <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
 
       {/* ── Tab content ────────────────────────────────────────────── */}
       <div className={s.tabContent}>
-        {tab === 'about' && (
-          <ClaimAboutTab
-            claim={claim}
-            patchClaim={patchClaim}
-            onRemoveTopic={removeTopic}
-            onRemoveTheme={removeTheme}
-            onRemoveTag={removeTag}
-          />
-        )}
-
         {tab === 'connections' && (
           <ClaimRelationshipsTab claim={claim} />
         )}

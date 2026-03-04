@@ -32,14 +32,6 @@ export default function FilterList({
               <span style={{ marginLeft: '0.375rem', fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>inactive</span>
             )}
           </div>
-          <div className={s.listItemMeta}>
-            {f.sources_applied > 0 && (
-              <span style={{ color: 'var(--text-muted)' }}>· {f.sources_applied} source{f.sources_applied === 1 ? '' : 's'}</span>
-            )}
-            {f.description && (
-              <span style={{ color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>· {f.description}</span>
-            )}
-          </div>
         </div>
       ))}
     </div>
