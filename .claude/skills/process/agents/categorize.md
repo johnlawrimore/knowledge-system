@@ -26,7 +26,9 @@ For multi-statement scripts, write to /tmp/categorize.sql and pipe it.
 
 ## Procedure
 
-### 1. Load Everything
+### 1. Load Everything (single query)
+
+Write to /tmp/categorize_load.sql and pipe it:
 
 ```sql
 SELECT id, statement, claim_type FROM claims WHERE id IN ({{claim_ids}});

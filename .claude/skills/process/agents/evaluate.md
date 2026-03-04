@@ -15,7 +15,9 @@ For multi-statement scripts, write to /tmp/evaluate.sql and pipe it.
 
 ## Procedure
 
-### 1. Load Content
+### 1. Load Content (single query)
+
+Write to /tmp/evaluate_load.sql and pipe it:
 
 ```sql
 SELECT id, title, source_type, url, published_date, content, distillation

@@ -35,13 +35,14 @@ Each stage is a self-contained agent prompt in `process/agents/`. The orchestrat
 
 Persist pipeline performance data to the `pipeline_runs` and `pipeline_stages` tables so it survives context compression and session boundaries.
 
+**Display rule (mandatory):** Every Bash call the orchestrator makes MUST use a short, non-technical `description`. Never let raw SQL, docker commands, or file paths display to the user. Descriptions should read like status updates a non-technical person would understand.
+
 ### Before pipeline starts
 
-```bash
-date +%s
-```
+Capture start timestamp and create the run record. Run as two Bash calls:
 
-Store as `pipeline_start`. Then create the run row:
+1. `date +%s` — description: `"Capture start time"`
+2. Create run row — description: `"Starting pipeline run"`
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -53,7 +54,7 @@ Capture the returned `run_id` — use it for all stage inserts.
 
 ### After collect completes
 
-Update the run row with the source_id (not known until collect finishes):
+Update the run row with the source_id. Description: `"Linking source to pipeline run"`
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -62,7 +63,7 @@ UPDATE pipeline_runs SET source_id = <source_id> WHERE id = <run_id>;"
 
 ### Before each stage
 
-Capture `stage_start` via `date +%s`, then insert a stage row:
+Capture `stage_start` via `date +%s` (description: `"Capture stage start time"`), then insert a stage row (description: `"Recording <stage_name> stage start"`):
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -74,7 +75,7 @@ Capture the returned `stage_id`.
 
 ### After each stage
 
-Capture `stage_end` via `date +%s`, compute `duration = stage_end - stage_start`. Parse the agent's JSON result. Extract the `tool_calls` array from the result, then remove it before storing `result_json` (keep the log separate from stage metrics). Then update the stage row:
+Capture `stage_end` via `date +%s` (description: `"Capture stage end time"`), compute `duration = stage_end - stage_start`. Parse the agent's JSON result. Extract the `tool_calls` array from the result, then remove it before storing `result_json` (keep the log separate from stage metrics). Then update the stage row (description: `"Saving <stage_name> results"`):
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -93,6 +94,8 @@ For parallel stages (4+5): insert both stage rows before launching, update each 
 
 ### After pipeline completes
 
+Description: `"Finishing pipeline run"`
+
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
 UPDATE pipeline_runs SET
@@ -103,6 +106,8 @@ WHERE id = <run_id>;"
 ```
 
 ### On error
+
+Description: `"Recording pipeline error"`
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -126,7 +131,7 @@ Include timing in each stage report line:
 
 ## Baseline Counts
 
-Before starting (can run in parallel with the start timestamp), capture current totals for the final report:
+Before starting (can run in parallel with the start timestamp), capture current totals for the final report. Description: `"Counting existing claims and evidence"`
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -156,7 +161,7 @@ If status is "error", report and abort.
 
 ### Stage 2: Distill
 
-**Before spawning**, query active content filters:
+**Before spawning**, query active content filters. Description: `"Checking for active content filters"`
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -239,7 +244,7 @@ Knowledge Base Impact:
 
 For each stage, follow this pattern:
 
-1. Read the agent prompt file using the Read tool
+1. Read the agent prompt file using the Read tool (no description needed — Read tool doesn't display)
 2. If the prompt contains `{{markdown_rules}}` or `{{contributor_enrichment}}`, read `process/agents/collect-shared.md` and substitute each placeholder with the content under its matching `##` heading (everything from the heading to the next `##` or end of file)
 3. Replace all remaining `{{placeholder}}` strings with actual runtime values
 4. Append these rules to every agent prompt (after all substitutions):

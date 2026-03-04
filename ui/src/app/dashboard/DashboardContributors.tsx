@@ -22,10 +22,10 @@ export default function DashboardContributors({
               <div className={s.contributorName}>{c.name}</div>
               {c.affiliation && <div className={s.contributorAffiliation}>{c.affiliation}</div>}
             </div>
-            <TierBadge tier={c.tier} />
             <span className={s.contributorStats}>
-              {c.claim_count} claims · {c.source_count} src
+              {c.source_count} source · {c.claim_count} claims
             </span>
+            <TierBadge tier={c.tier} />
           </Link>
         ))
       )}

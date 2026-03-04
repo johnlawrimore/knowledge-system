@@ -128,9 +128,11 @@ SELECT id, LEFT(content, 60) AS ev FROM evidence WHERE id >= LAST_INSERT_ID() OR
 
 **verbatim_quote:** Only when exact words matter (expert attribution). NULL otherwise.
 
-### 8. Batch Link Evidence to Claims
+### 7. Batch Insert All Relationships, Entities, and Status Update
 
-Write to /tmp/decompose_links.sql:
+Write ALL of the following to a single /tmp/decompose_all.sql and pipe it. Use session variables for entity IDs.
+
+**Evidence-Claim links:**
 
 ```sql
 INSERT INTO claim_evidence (claim_id, evidence_id, stance, evaluation_results) VALUES
@@ -167,7 +169,7 @@ Default to 3 (Moderate) when uncertain.
 - Expert opinion: "Fowler's 20+ years of consulting on refactoring practices gives this assertion significant weight, though it remains one expert's view."
 - Case study: "Google's specific implementation validates the claim at scale, but may not generalize to smaller organizations with different constraints."
 
-### 9. Batch Insert Tags
+**Tags:**
 
 ```sql
 INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
@@ -175,95 +177,55 @@ INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
   (<id>, '<editorial_flag>');
 ```
 
-**Tag conventions:**
+Tag conventions:
 | Prefix | Purpose | Examples |
 |---|---|---|
 | `book-ch-<n>` | Composition targeting | `book-ch-1` |
 | (no prefix) | Domain labels | `tdd`, `code-review`, `ai-agents`, `context-engineering` |
 | (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |
 
-### 10. Assign Topics
+**Topics:**
 
-Topics form a hierarchy via `parent_topic_id` (loaded in Step 1). When assigning:
-
-- **Assign to the most specific level that fits.** If a child topic matches, use it — not the parent. Only assign a parent topic if the claim spans the full breadth of the parent and doesn't fit any single child.
-- **Do not assign both parent and child** unless the claim truly belongs at both levels independently.
-- If no topic fits, note it in the claim's `notes` with a hierarchy-aware suggestion: "May need new topic: '<suggested name>' (child of '<parent_topic>' or top-level)".
-- Do NOT create topics during decomposition — that's handled by the categorize stage.
+Topics form a hierarchy via `parent_topic_id` (loaded in Step 1). Assign to the most specific level that fits. Do not assign both parent and child unless the claim truly belongs at both levels. Do NOT create topics during decomposition — that's handled by the categorize stage.
 
 ```sql
 INSERT IGNORE INTO claim_topics (claim_id, topic_id) VALUES (<claim_id>, <topic_id>);
 ```
 
-### 11. Extract Devices
-
-Identify rhetorical devices in the distillation — analogies, metaphors, narratives, examples, thought experiments, visuals that make claims memorable or communicable.
+**Devices** (skip if none) — rhetorical devices: analogies, metaphors, narratives, examples, thought experiments, visuals.
 
 ```sql
 INSERT INTO devices (content, source_id, device_type, effectiveness_note, notes) VALUES
   ('<device content>', {{source_id}}, '<type>', '<why it works or NULL>', NULL);
-
-SELECT id FROM devices WHERE id >= LAST_INSERT_ID() ORDER BY id;
-```
-
-Link each device to the claim(s) it illustrates:
-
-```sql
-INSERT IGNORE INTO claim_devices (device_id, claim_id) VALUES
-  (<device_id>, <claim_id>);
+SET @dev1 = LAST_INSERT_ID();
+INSERT IGNORE INTO claim_devices (device_id, claim_id) VALUES (@dev1, <claim_id>);
 ```
 
 **device_type:** `analogy`, `metaphor`, `narrative`, `example`, `thought_experiment`, `visual`
 
-Skip this step if the source has no notable devices.
-
-### 12. Extract Contexts
-
-Identify boundary conditions, scope limitations, and caveats that qualify when and where claims apply.
+**Contexts** (skip if none) — boundary conditions, scope limitations, caveats.
 
 ```sql
 INSERT INTO contexts (content, source_id, context_type, notes) VALUES
   ('<context content>', {{source_id}}, '<type>', NULL);
-
-SELECT id FROM contexts WHERE id >= LAST_INSERT_ID() ORDER BY id;
-```
-
-Link each context to the claim(s) it qualifies:
-
-```sql
-INSERT IGNORE INTO claim_contexts (context_id, claim_id) VALUES
-  (<context_id>, <claim_id>);
+SET @ctx1 = LAST_INSERT_ID();
+INSERT IGNORE INTO claim_contexts (context_id, claim_id) VALUES (@ctx1, <claim_id>);
 ```
 
 **context_type:** `historical`, `industry`, `technical`, `organizational`, `regulatory`, `cultural`, `scope`
 
-Skip this step if the source has no notable contexts.
-
-### 13. Extract Methods
-
-Identify processes, frameworks, techniques, tools, practices, or metrics for applying or validating claims.
+**Methods** (skip if none) — processes, frameworks, techniques, tools, practices, metrics.
 
 ```sql
 INSERT INTO methods (content, source_id, method_type, notes) VALUES
   ('<method content>', {{source_id}}, '<type>', NULL);
-
-SELECT id FROM methods WHERE id >= LAST_INSERT_ID() ORDER BY id;
-```
-
-Link each method to the claim(s) it operationalizes:
-
-```sql
-INSERT IGNORE INTO claim_methods (method_id, claim_id) VALUES
-  (<method_id>, <claim_id>);
+SET @meth1 = LAST_INSERT_ID();
+INSERT IGNORE INTO claim_methods (method_id, claim_id) VALUES (@meth1, <claim_id>);
 ```
 
 **method_type:** `process`, `framework`, `technique`, `tool`, `practice`, `metric`
 
-Skip this step if the source has no notable methods.
-
-### 14. Extract Reasonings
-
-Identify logical connections that explain why a specific piece of evidence supports a specific claim. A reasoning record is always tied to both an evidence record and a claim record — it explains the "why" behind the evidence-claim link. Multiple reasoning records can exist for the same evidence-claim pair (different logical arguments).
+**Reasonings** (skip if none) — logical connections explaining why evidence supports a claim. Tied to both an evidence_id and claim_id.
 
 ```sql
 INSERT INTO reasonings (content, source_id, evidence_id, claim_id, reasoning_type, notes) VALUES
@@ -272,24 +234,13 @@ INSERT INTO reasonings (content, source_id, evidence_id, claim_id, reasoning_typ
 
 **reasoning_type:** `deductive`, `inductive`, `analogical`, `causal`, `abductive`
 
-Skip this step if the source has no notable reasonings.
+**Derived evidence** (skip if none) — if the source cites another source already in the KB:
 
-### 15. Check for Derived Evidence
-
-If the source cites another source already in the knowledge base (e.g., "As Fowler wrote..."):
-
-```sql
-SELECT e.id, e.content, s.title
-FROM evidence e JOIN sources s ON e.source_id = s.id
-WHERE s.title LIKE '%<cited source>%' LIMIT 5;
-```
-
-If found, link the new evidence to the original:
 ```sql
 UPDATE evidence SET derived_from_evidence_id = <original_evidence_id> WHERE id = <new_evidence_id>;
 ```
 
-### 16. Update Source Status
+**Status update** (always last):
 
 ```sql
 UPDATE sources SET status = 'decomposed' WHERE id = {{source_id}};
