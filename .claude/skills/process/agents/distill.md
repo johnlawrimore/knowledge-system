@@ -13,25 +13,15 @@ For multi-statement scripts, write to /tmp/distill.sql and pipe it.
 
 ## Procedure
 
-### 1. Load the Source
-
-```sql
-SELECT id, title, source_type, content, status FROM sources WHERE id = {{source_id}};
-```
-
-**Error checks:**
-- If `content` is empty or NULL, return error: "Source has no content"
-- If `status` is not `collected`, return error: "Source status is '<status>', expected 'collected'"
-
-### 2. Load Content Filter
+### 1. Load Source and Content Filter (single query)
 
 The orchestrator provides the content filter via `{{filter_id}}` (an integer ID or `NULL`).
 
-If `{{filter_id}}` is NULL, proceed with no filter (skip to Step 3).
-
-If `{{filter_id}}` is not NULL, fetch the latest version's instructions:
+Run as a single piped script to /tmp/distill_load.sql:
 
 ```sql
+SELECT id, title, source_type, content, status FROM sources WHERE id = {{source_id}};
+-- Only if {{filter_id}} is not NULL:
 SELECT cfv.id AS version_id, cfv.instructions
 FROM content_filter_versions cfv
 WHERE cfv.filter_id = {{filter_id}}
@@ -39,15 +29,15 @@ ORDER BY cfv.version DESC
 LIMIT 1;
 ```
 
-Apply those instructions during distillation (Step 4) to shape what content survives. Record the `version_id` for Step 5.
+If `{{filter_id}}` is NULL, omit the second SELECT.
 
-### 3. Update Status
+**Error checks:**
+- If `content` is empty or NULL, return error: "Source has no content"
+- If `status` is not `collected`, return error: "Source status is '<status>', expected 'collected'"
 
-```sql
-UPDATE sources SET status = 'distilling' WHERE id = {{source_id}};
-```
+If a content filter was loaded, apply its instructions during distillation (Step 3) to shape what content survives. Record the `version_id` for Step 4.
 
-### 4. Distill the Content
+### 2. Distill the Content
 
 Rewrite the source into a structured distillation. Your voice: direct, precise, practitioner-oriented.
 
@@ -96,7 +86,7 @@ In addition to the standard distillation rules above, apply the following user-d
 
 > {{content_filter_instructions}}
 
-If no content filter was selected in Step 2, ignore this block entirely.
+If no content filter was selected in Step 1, ignore this block entirely.
 
 **Quality checks before saving:**
 - **Minimum length:** 300 words. If under 200, return error status — the source may not have enough content.
@@ -106,7 +96,7 @@ If no content filter was selected in Step 2, ignore this block entirely.
 
 {{markdown_rules}}
 
-### 5. Save Distillation (Single Batched Script)
+### 3. Save Distillation
 
 Write to /tmp/distill.sql:
 
@@ -118,7 +108,7 @@ UPDATE sources SET
 WHERE id = {{source_id}};
 ```
 
-Replace `<selected_version_id_or_NULL>` with the `version_id` recorded in Step 2, or `NULL` if no filter was selected.
+Replace `<selected_version_id_or_NULL>` with the `version_id` recorded in Step 1, or `NULL` if no filter was selected.
 
 ## Required Output
 

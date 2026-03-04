@@ -21,7 +21,9 @@ For multi-statement scripts, write to /tmp/decompose.sql and pipe it.
 
 ## Procedure
 
-### 1. Load Source Distillation and Existing Claims
+### 1. Load Source Distillation and Existing Claims (single query)
+
+Write to /tmp/decompose_load.sql and pipe it:
 
 ```sql
 SELECT id, title, distillation FROM sources WHERE id = {{source_id}};
@@ -29,13 +31,7 @@ SELECT id, statement, claim_type FROM claims ORDER BY id;
 SELECT id, name, parent_topic_id FROM topics ORDER BY name;
 ```
 
-### 2. Update Status
-
-```sql
-UPDATE sources SET status = 'decomposing' WHERE id = {{source_id}};
-```
-
-### 3. Identify Claims
+### 2. Identify Claims
 
 Read the distillation and extract every distinct assertion. For each:
 - **Is this a claim?** "TDD was invented in the 1990s" is a historical fact, not a useful claim. "TDD is more valuable in AI-assisted development than in traditional development" is a claim. Historical facts and definitions of common terms are not useful claims.
@@ -52,30 +48,17 @@ Read the distillation and extract every distinct assertion. For each:
 - **Too narrow:** "GPT-4 generates correct Python list comprehensions 87% of the time" → This is evidence, not a claim. The claim might be "AI code generators are highly accurate for common language patterns."
 - **Right level:** "AI code generation shifts the developer's primary task from writing code to evaluating code, requiring a different skill set." → Specific enough to be arguable, broad enough to be supported by multiple pieces of evidence.
 
-### 4. Check for Duplicates
+### 3. Check for Duplicates
 
 **This step is critical for preventing duplicates.**
 
-For each claim, search for similar existing claims:
+You already loaded ALL existing claims in Step 1. Compare each new claim against that list — no additional SQL queries needed for duplicate checking.
 
-```sql
-SELECT id, statement, claim_type
-FROM claims
-WHERE MATCH(statement) AGAINST('<key phrases from your claim>' IN NATURAL LANGUAGE MODE)
-LIMIT 10;
-```
-
-If fulltext doesn't find good matches, try keyword search:
-```sql
-SELECT id, statement, claim_type
-FROM claims WHERE statement LIKE '%<key_phrase>%' LIMIT 10;
-```
-
-**If a strong match exists:** Do NOT create a duplicate. Create evidence and link it to the EXISTING claim.
+**If a strong semantic match exists:** Do NOT create a duplicate. Create evidence and link it to the EXISTING claim.
 **If a partial match exists:** Create the new claim, but note the similar claim ID in `notes`: "Related to claim #X"
 **If no match:** Create a new standalone claim.
 
-### 5. Identify Parent-Child Relationships
+### 4. Identify Parent-Child Relationships
 
 Before inserting, determine if any claims form compound arguments — multiple claims that depend on each other to make a point. Indicators:
 - A claim that establishes "what" (assertion/observation) + "why" (mechanism) + "so what" (recommendation) — the overarching point is the parent
@@ -87,7 +70,7 @@ Do NOT create parent-child for: claims that simply share a topic, loosely relate
 
 A claim can only have one parent. Nesting can go multiple levels deep.
 
-### 6. Batch Insert All Claims and Link to Source
+### 5. Batch Insert All Claims and Link to Source
 
 Insert parent claims first (without `parent_claim_id`), then insert child claims with `parent_claim_id` set to the parent's ID.
 
@@ -118,9 +101,9 @@ INSERT IGNORE INTO claim_sources (claim_id, source_id) VALUES
   (<existing_claim_id>, {{source_id}});
 ```
 
-Every claim that this source asserts — whether newly created or an existing claim matched in step 4 — gets a `claim_sources` entry.
+Every claim that this source asserts — whether newly created or an existing claim matched in step 3 — gets a `claim_sources` entry.
 
-### 7. Batch Insert All Evidence
+### 6. Batch Insert All Evidence
 
 **What counts as evidence:** A data point, a quote, a case study, an expert assertion, a statistical finding, or a logical derivation from established principles. Each evidence record is a discrete piece of support (or contradiction) for one or more claims.
 
