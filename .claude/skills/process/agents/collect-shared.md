@@ -39,12 +39,6 @@ Blockquotes: Use `>` with a blank line before and after.
 
 No YAML frontmatter — metadata lives in database columns.
 
-Character encoding:
-- All text must use clean Unicode — no mojibake (garbled encoding artifacts)
-- Replace double-encoded sequences on sight: `â€"` → `—`, `â€"` → `–`, `â€™` → `'`, `â€˜` → `'`, `â€œ` → `"`, `â€` → `"`, `â€¢` → `•`, `Ã©` → `é`, `Ã±` → `ñ`
-- Use proper Unicode punctuation: em dash `—`, en dash `–`, curly quotes `""''`, ellipsis `…`
-- If source material contains mojibake, fix it before storing — never propagate encoding artifacts into the database
-
 ## contributor_enrichment
 
 For each NEW contributor (not pre-existing), gather context and research their profile.

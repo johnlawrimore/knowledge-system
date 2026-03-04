@@ -15,7 +15,7 @@ The database is MySQL 8.0, accessed via the `mysql` MCP tool.
 
 | Skill | Trigger Phrases | Purpose |
 |-------|----------------|---------|
-| **process** | "process", "process this URL", "run full pipeline" | End-to-end pipeline: collect → distill → decompose → categorize → evaluate → status |
+| **process** | "process", "process this URL", "run full pipeline" | End-to-end pipeline: collect → distill → decompose → categorize → evaluate |
 | **collect** | "collect", "ingest", "add source", URL pasted | Ingest raw sources. Delegates YouTube retrieval to video-retriever. Handles all DB storage. |
 | **video-retriever** | "retrieve video", "get transcript", YouTube URL | Extract metadata, transcript, speaker attribution from YouTube (retrieval only — no DB) |
 | **distill** | "distill", "distill source #X", "distill next" | Distill sources (writes to `sources.distillation`) |
@@ -47,9 +47,6 @@ URL/Upload
                     │
                     ▼
                 evaluate
-                    │
-                    ▼
-                 status
 
          manage ── manual curation at any stage
 ```
@@ -168,3 +165,4 @@ Credibility read from `evidence.evaluation_results` JSON via `JSON_EXTRACT(e.eva
 - Tags are freeform strings on claims — no tag registry, just `claim_tags(claim_id, tag)`
 - All type enums include `other` as an escape valve
 - All markdown follows the **markdown-formatting** skill rules
+- **Encoding**: All text written to the database must use clean Unicode. Fix mojibake on sight — never store double-encoded sequences like `â€"`, `â€™`, `â€œ`, `Ã©`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`, ellipsis `…`. This applies to every field in every table, with no exceptions.

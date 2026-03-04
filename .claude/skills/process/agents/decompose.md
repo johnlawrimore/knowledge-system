@@ -18,7 +18,6 @@ For multi-statement scripts, write to /tmp/decompose.sql and pipe it.
 3. **One evidence can support multiple claims.** Don't duplicate evidence — link it to each relevant claim.
 4. **Capture stance honestly.** supports, contradicts, or qualifies. Don't force everything into `supports` — if evidence contradicts a claim, record it as `contradicts`. If it partially supports with caveats, use `qualifies`.
 5. **Write reasoning for every evidence-claim link.** The `reasoning` field explains WHY this evidence matters to this claim. Without it, the link is just an assertion.
-6. **Clean encoding.** All text must use proper Unicode — no mojibake. Replace garbled sequences on sight: `â€"` → `—`, `â€™` → `'`, `â€œ` → `"`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`. Never propagate encoding artifacts from source material into claims or evidence.
 
 ## Procedure
 

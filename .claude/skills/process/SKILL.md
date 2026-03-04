@@ -1,6 +1,6 @@
 ---
 name: process
-description: End-to-end pipeline that takes a URL through all stages — collect, distill, decompose, categorize, evaluate, status
+description: End-to-end pipeline that takes a URL through all stages — collect, distill, decompose, categorize, evaluate
 ---
 
 # Process
@@ -17,7 +17,7 @@ Run a URL through the full knowledge pipeline using subagents. Each stage runs i
 ## Pipeline
 
 ```
-1. collect → 2. distill → 3. decompose → [4. categorize || 5. evaluate] → 6. status
+1. collect → 2. distill → 3. decompose → [4. categorize || 5. evaluate]
 ```
 
 Stages 4 and 5 run in parallel (they write to disjoint tables).
@@ -119,7 +119,7 @@ UPDATE pipeline_runs SET status = 'failed', completed_at = NOW() WHERE id = <run
 Include timing in each stage report line:
 
 ```
-[1/6] Collected: "<title>" (source #<id>, <word_count> words) — 45s
+[1/5] Collected: "<title>" (source #<id>, <word_count> words) — 45s
 ```
 
 ## Baseline Counts
@@ -147,7 +147,7 @@ SELECT
 
 Report to user:
 ```
-[1/6] Collected: "<title>" (source #<id>, <word_count> words) — <duration>s
+[1/5] Collected: "<title>" (source #<id>, <word_count> words) — <duration>s
 ```
 
 If status is "error", report and abort.
@@ -161,7 +161,7 @@ If status is "error", report and abort.
 
 Report to user:
 ```
-[2/6] Distilled: "<title>" (<word_count> words) — <duration>s
+[2/5] Distilled: "<title>" (<word_count> words) — <duration>s
 ```
 
 ### Stage 3: Decompose
@@ -173,7 +173,7 @@ Report to user:
 
 Report to user:
 ```
-[3/6] Decomposed: <N> claims, <N> evidence records — <duration>s
+[3/5] Decomposed: <N> claims, <N> evidence records — <duration>s
 ```
 
 ### Stages 4 + 5: Categorize and Evaluate (parallel)
@@ -194,23 +194,9 @@ Launch BOTH agents simultaneously using parallel Agent tool calls. Capture a sin
 
 Report both results:
 ```
-[4/6] Categorized: <N> topics, <N> themes, <N> tags ┐
-[5/6] Evaluated: grade <A-F>, <N> claims, avg evidence credibility <N> ┘ — <duration>s (parallel)
+[4/5] Categorized: <N> topics, <N> themes, <N> tags ┐
+[5/5] Evaluated: grade <A-F>, <N> claims, avg evidence credibility <N> ┘ — <duration>s (parallel)
 ```
-
-### Stage 6: Status
-
-**Agent prompt:** `process/agents/status.md`
-**Model:** haiku
-**Substitutions:** `{{source_id}}` → from stage 1
-**Extract:** `report`
-
-Report to user:
-```
-[6/6] Status report generated — <duration>s
-```
-
-Display the full report text.
 
 ## Final Summary
 
@@ -229,7 +215,6 @@ Stage Results:
   ✓ Decomposed — <N> claims, <N> evidence records          <duration>s
   ✓ Categorized — <N> topics, <N> themes, <N> tags    ┐
   ✓ Evaluated — Grade: <A-F>, <N> claims, Avg evidence: <score>  ┘ <duration>s
-  ✓ Status report                                          <duration>s
                                                       ─────────
                                                 Total: <total>s
 
@@ -245,13 +230,15 @@ For each stage, follow this pattern:
 1. Read the agent prompt file using the Read tool
 2. If the prompt contains `{{markdown_rules}}` or `{{contributor_enrichment}}`, read `process/agents/collect-shared.md` and substitute each placeholder with the content under its matching `##` heading (everything from the heading to the next `##` or end of file)
 3. Replace all remaining `{{placeholder}}` strings with actual runtime values
-4. Call the Agent tool with:
+4. Append this encoding rule to every agent prompt (after all substitutions):
+   > **Encoding (mandatory):** All text written to the database must use clean Unicode. Fix mojibake on sight — never store double-encoded sequences like `â€"`, `â€™`, `â€œ`, `Ã©`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`, ellipsis `…`. This applies to every field in every table.
+5. Call the Agent tool with:
    - `subagent_type`: `"general-purpose"`
    - `model`: as specified per stage (sonnet or haiku)
    - `prompt`: the substituted agent prompt text
    - `description`: short label like "Collect web source"
-5. Parse the JSON block from the last ```json ... ``` fence in the agent's response
-6. Extract the needed IDs and pass them to the next stage
+6. Parse the JSON block from the last ```json ... ``` fence in the agent's response
+7. Extract the needed IDs and pass them to the next stage
 
 For the parallel stages (4+5), make BOTH Agent tool calls in a single message.
 

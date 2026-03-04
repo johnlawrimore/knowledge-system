@@ -19,14 +19,26 @@
     {
       "name": "sources",
       "schemaName": "public",
-      "x": 491.52856802489345,
-      "y": -62.27331754018468
+      "x": 315.78444013367823,
+      "y": -72.03688020080773
     },
     {
       "name": "source_contributors",
       "schemaName": "public",
       "x": -634.0891986593786,
       "y": 314.15705847950085
+    },
+    {
+      "name": "content_filters",
+      "schemaName": "public",
+      "x": -327.7719805896824,
+      "y": -277.9390967804865
+    },
+    {
+      "name": "content_filter_versions",
+      "schemaName": "public",
+      "x": 1035.477864061153,
+      "y": -307.7386194710407
     },
     {
       "name": "compositions",
@@ -95,9 +107,9 @@
       "y": 1446.4066548416233
     },
     {
-      "name": "device_claims",
+      "name": "claim_devices",
       "schemaName": "public",
-      "x": 3817.78759765625,
+      "x": 4754.61767578125,
       "y": 12
     },
     {
@@ -107,9 +119,9 @@
       "y": 1078.9841344447075
     },
     {
-      "name": "context_claims",
+      "name": "claim_contexts",
       "schemaName": "public",
-      "x": 3817.78759765625,
+      "x": 4754.61767578125,
       "y": 154
     },
     {
@@ -119,9 +131,9 @@
       "y": 1349.984134444708
     },
     {
-      "name": "method_claims",
+      "name": "claim_methods",
       "schemaName": "public",
-      "x": 3817.78759765625,
+      "x": 4754.61767578125,
       "y": 296
     },
     {
@@ -129,12 +141,6 @@
       "schemaName": "public",
       "x": 2315.682417884369,
       "y": 1620.984134444708
-    },
-    {
-      "name": "reasoning_claims",
-      "schemaName": "public",
-      "x": 3817.78759765625,
-      "y": 438
     },
     {
       "name": "evidence",
