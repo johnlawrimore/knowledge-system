@@ -58,7 +58,6 @@ export async function GET(
       // Contribution stats from v_contributor_scores
       const [scoreRows] = await conn.query<RowDataPacket[]>(
         `SELECT source_count, evidence_count, claim_count,
-                strong_evidence, moderate_evidence, weak_evidence,
                 supporting_count, contradicting_count, qualifying_count
          FROM v_contributor_scores WHERE contributor_id = ?`,
         [contributorId]

@@ -58,6 +58,7 @@ const PAGE_SIZE = 25;
 interface ClaimsListProps {
   sourceId?: number;
   showFilters?: boolean;
+  initialTopicId?: number;
 }
 
 // Recursive component to render a claim and its children
@@ -159,7 +160,7 @@ function ClaimNode({
   );
 }
 
-export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListProps) {
+export default function ClaimsList({ sourceId, showFilters = true, initialTopicId }: ClaimsListProps) {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -170,7 +171,7 @@ export default function ClaimsList({ sourceId, showFilters = true }: ClaimsListP
   const [sort, setSort] = useState('score');
   const [page, setPage] = useState(1);
   const [topicOptions, setTopicOptions] = useState<FlatOption[]>([]);
-  const [selectedTopics, setSelectedTopics] = useState<Set<number>>(new Set());
+  const [selectedTopics, setSelectedTopics] = useState<Set<number>>(new Set(initialTopicId ? [initialTopicId] : []));
 
   const hasActiveFilters = !!(confidence || type || search || selectedTopics.size > 0);
 

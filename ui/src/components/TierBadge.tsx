@@ -1,8 +1,8 @@
 import {
-  IconChess,
-  IconChessRook,
-  IconChessKnight,
-  IconChessKing,
+  IconChessFilled,
+  IconChessRookFilled,
+  IconChessKnightFilled,
+  IconChessKingFilled,
 } from '@tabler/icons-react';
 import { tierLabel } from '@/lib/enumLabels';
 import s from './TierBadge.module.scss';
@@ -11,10 +11,10 @@ import type { ComponentType } from 'react';
 type TablerIcon = ComponentType<{ size?: number; stroke?: number; className?: string }>;
 
 const tierConfig: Record<string, { cls: string; Icon: TablerIcon }> = {
-  '1': { cls: s.tier1, Icon: IconChessKing },
-  '2': { cls: s.tier2, Icon: IconChessRook },
-  '3': { cls: s.tier3, Icon: IconChessKnight },
-  '4': { cls: s.tier4, Icon: IconChess },
+  '1': { cls: s.tier1, Icon: IconChessKingFilled },
+  '2': { cls: s.tier2, Icon: IconChessRookFilled },
+  '3': { cls: s.tier3, Icon: IconChessKnightFilled },
+  '4': { cls: s.tier4, Icon: IconChessFilled },
 };
 
 export default function TierBadge({
@@ -28,7 +28,7 @@ export default function TierBadge({
   const { cls, Icon } = config;
   return (
     <span className={cls}>
-      <Icon size={14} stroke={2} />
+      <Icon size={22} stroke={2} />
       {tierLabel(key).toUpperCase()}
     </span>
   );

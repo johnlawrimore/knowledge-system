@@ -153,7 +153,10 @@ export default function TopicFlow({
     // Layout each tier, wrapping into rows of MAX_COLS
     let cursorY = 0;
 
-    // First pass: compute each tier's visual width (with wrapping) for centering
+    // Track each node's x-center so children can be positioned under their parent
+    const nodeXCenter = new Map<number, number>();
+
+    // First pass: compute each tier's visual width (with wrapping) for overall sizing
     const tierLayouts = tiers.map((tier) => {
       const cols = Math.min(tier.length, MAX_COLS);
       const rows = Math.ceil(tier.length / MAX_COLS);
@@ -164,41 +167,66 @@ export default function TopicFlow({
 
     tiers.forEach((tier, tierIdx) => {
       const layout = tierLayouts[tierIdx];
-      const offsetX = (maxWidth - layout.width) / 2;
 
-      tier.forEach((entry, i) => {
-        const { node, parentId } = entry;
-        const col = i % MAX_COLS;
-        const row = Math.floor(i / MAX_COLS);
-        const x = offsetX + col * (NODE_W + GAP_X);
-        const y = cursorY + row * (NODE_H + GAP_Y);
-        const isSelectedNode = selected?.id === node.id;
+      // Group entries by parent so each child cluster centers under its parent
+      type Group = { parentId: number | null; entries: TierEntry[] };
+      const groups: Group[] = [];
+      for (const entry of tier) {
+        const existing = groups.find((g) => g.parentId === entry.parentId);
+        if (existing) existing.entries.push(entry);
+        else groups.push({ parentId: entry.parentId, entries: [entry] });
+      }
 
-        flowNodes.push({
-          id: `t-${node.id}`,
-          type: 'topic',
-          position: { x, y },
-          data: {
-            label: node.name,
-            claimCount: countClaims(node),
-            hasChildren: node.children.length > 0,
-            childCount: node.children.length,
-            isSelected: isSelectedNode,
-            onSelect: isSelectedNode ? () => {} : () => onSelect(node.id),
-          },
-          draggable: false,
-        });
+      for (const group of groups) {
+        const parentCenterX =
+          group.parentId != null
+            ? (nodeXCenter.get(group.parentId) ?? maxWidth / 2)
+            : maxWidth / 2;
 
-        if (parentId != null) {
-          flowEdges.push({
-            id: `e-${parentId}-${node.id}`,
-            source: `t-${parentId}`,
-            target: `t-${node.id}`,
-            type: 'smoothstep',
-            style: { stroke: 'var(--text-muted)', strokeWidth: 1.5 },
+        const groupCols = Math.min(group.entries.length, MAX_COLS);
+        const groupWidth = groupCols * NODE_W + (groupCols - 1) * GAP_X;
+        // Root tier (no parent): global center. Child tiers: center under parent.
+        const groupOffsetX =
+          group.parentId == null
+            ? (maxWidth - layout.width) / 2
+            : parentCenterX - groupWidth / 2;
+
+        group.entries.forEach((entry, i) => {
+          const { node, parentId } = entry;
+          const col = i % MAX_COLS;
+          const row = Math.floor(i / MAX_COLS);
+          const x = groupOffsetX + col * (NODE_W + GAP_X);
+          const y = cursorY + row * (NODE_H + GAP_Y);
+          const isSelectedNode = selected?.id === node.id;
+
+          nodeXCenter.set(node.id, x + NODE_W / 2);
+
+          flowNodes.push({
+            id: `t-${node.id}`,
+            type: 'topic',
+            position: { x, y },
+            data: {
+              label: node.name,
+              claimCount: countClaims(node),
+              hasChildren: node.children.length > 0,
+              childCount: node.children.length,
+              isSelected: isSelectedNode,
+              onSelect: isSelectedNode ? () => {} : () => onSelect(node.id),
+            },
+            draggable: false,
           });
-        }
-      });
+
+          if (parentId != null) {
+            flowEdges.push({
+              id: `e-${parentId}-${node.id}`,
+              source: `t-${parentId}`,
+              target: `t-${node.id}`,
+              type: 'straight',
+              style: { stroke: 'var(--text-muted)', strokeWidth: 1.5 },
+            });
+          }
+        });
+      }
 
       cursorY += layout.rows * (NODE_H + GAP_Y);
     });

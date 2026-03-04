@@ -40,7 +40,6 @@ interface TopicDetail {
   parent_topic_id: number | null;
   claims: ClaimRow[];
   strongest: ClaimRow[];
-  weakest: ClaimRow[];
   source_count: number;
   avg_claim_score: number | null;
 }
@@ -233,25 +232,16 @@ export default function TopicsContent() {
                 <hr className={s.divider} />
 
                 <ClaimSection title="Strongest Claims" claims={detail.strongest} />
-                <ClaimSection title="Weakest Claims" claims={detail.weakest} />
 
                 {detail.claims.length > 0 && (
-                  <>
-                    <hr className={s.divider} />
-                    <div className={s.detailSection}>
-                      <div className={s.detailLabel}>All Claims ({detail.claims.length})</div>
-                      <div className={s.claimList}>
-                        {detail.claims.map((c) => (
-                          <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
-                            <span className={s.claimScore}>
-                              <ConfidenceBadge confidence={c.computed_confidence} score={c.score} />
-                            </span>{' '}
-                            <span className={s.claimStatement}>{c.statement}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </>
+                  <div className={s.detailSection}>
+                    <Link
+                      href={`/claims?topic=${detail.id}`}
+                      style={{ fontSize: '0.8125rem', color: 'var(--accent-blue)' }}
+                    >
+                      All {detail.claims.length} claims →
+                    </Link>
+                  </div>
                 )}
               </>
             ) : null}
