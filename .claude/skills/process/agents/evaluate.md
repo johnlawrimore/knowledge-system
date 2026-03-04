@@ -104,7 +104,7 @@ Decision questions for Validity:
 |---|---|---|---|---|---|
 | Originality | Entirely derivative; restates what everyone already knows | Repackages known ideas with minor variation | Adds nuance to familiar territory | Combines known ideas in a novel way or offers fresh framing | Genuinely novel perspective, framework, or distinction |
 | Practicality | Blue-sky; disconnected from real-world constraints | Theoretically sound but ignores practical barriers (budget, legacy, team skills) | Mostly feasible; some ideal assumptions | Feasible with known tradeoffs acknowledged | Grounded in real-world constraints; a team could act on it with reasonable effort |
-| Impact | Trivial stakes; low consequence | Minor optimization; small improvement | Meaningful but not transformative | Would significantly change practices for teams that adopt it | Materially affects how engineers work; addresses a decision they face regularly |
+| Impact | Trivial stakes; low consequence | Minor optimization; small improvement | Meaningful but not transformative | Would significantly change practices for teams that adopt it | Materially affects how practitioners work; addresses a decision they face regularly |
 
 Decision questions for Substance:
 - Could this claim be found verbatim in any standard reference or textbook? Yes → Originality ≤ 2, paraphrased → 3, no → ≥ 4

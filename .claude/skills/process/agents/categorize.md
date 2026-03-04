@@ -21,7 +21,7 @@ For multi-statement scripts, write to /tmp/categorize.sql and pipe it.
 5. **Never silently skip a claim.** Every claim in the input list must appear in the output with at least one topic assigned.
 
 **Edge cases:**
-- **Vague claims:** If a claim is too broad to assign a specific topic (e.g., "Software development is changing"), still attempt a best-fit topic, but note in `process_notes` that the claim may need to be rewritten.
+- **Vague claims:** If a claim is too broad to assign a specific topic (e.g., "The world is getting more complex"), still attempt a best-fit topic, but note in `process_notes` that the claim may need to be rewritten.
 - **Empty taxonomy:** If no topics or themes exist yet (fresh database), create topics based on the claim set. Still apply tags normally.
 
 ## Procedure
@@ -41,7 +41,7 @@ SELECT tag, COUNT(*) AS ct FROM claim_tags GROUP BY tag ORDER BY ct DESC LIMIT 3
 
 Topics form a hierarchy via `parent_topic_id`. When assigning:
 
-- **Assign to the most specific level that fits.** If "Productivity Measurement" (child of "AI-Assisted Development") fits, assign to "Productivity Measurement" — not the parent. Only assign the parent if the claim genuinely spans the full breadth of the parent topic and doesn't fit any single child.
+- **Assign to the most specific level that fits.** If "Vaccine Trials" (child of "Public Health") fits, assign to "Vaccine Trials" — not the parent. Only assign the parent if the claim genuinely spans the full breadth of the parent topic and doesn't fit any single child.
 - **Do not assign both parent and child** unless the claim truly belongs at both levels independently.
 - **When creating new topics**, insert them into the `topics` table with a name, description, and `parent_topic_id` (or NULL for top-level). Use `SELECT LAST_INSERT_ID()` to capture the new topic's ID for claim assignment.
 
@@ -58,7 +58,7 @@ Tags describe **what a claim is about** — its subject matter domain. They are 
 | Prefix | Purpose | Examples |
 |---|---|---|
 | `book-ch-<n>` | Composition targeting | `book-ch-1`, `book-ch-3` |
-| (no prefix) | Subject matter domain | `tdd`, `code-review`, `ai-agents`, `context-engineering`, `technical-debt`, `pair-programming` |
+| (no prefix) | Subject matter domain | `monetary-policy`, `vaccine-efficacy`, `supply-chains`, `behavioral-economics`, `urban-planning`, `clinical-trials` |
 
 **Not valid as tags** — these belong elsewhere:
 

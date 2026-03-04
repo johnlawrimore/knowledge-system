@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
 import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
+import SourceLinkList from '@/components/SourceLinkList';
 import type { ClaimDetail } from '@/lib/types';
 import s from '../page.module.scss';
 
@@ -27,13 +27,7 @@ export default function ClaimAboutTab({
     <>
       {claim.sources.length > 0 && (
         <DetailSection label="Sources" count={claim.sources.length}>
-          <div className={s.chipRow}>
-            {claim.sources.map((src) => (
-              <Link key={src.id} href={`/sources?id=${src.id}`} className={s.sourceChip}>
-                {src.title}
-              </Link>
-            ))}
-          </div>
+          <SourceLinkList sources={claim.sources} />
         </DetailSection>
       )}
 

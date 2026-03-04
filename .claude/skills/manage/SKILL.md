@@ -104,7 +104,7 @@ Review the list for inconsistencies (e.g., `book-ch-3` vs `book-chapter-3`) and 
 | Prefix | Purpose | Examples |
 |---|---|---|
 | `book-ch-<n>` | Composition targeting | `book-ch-1`, `book-ch-5` |
-| (no prefix) | Domain labels | `tdd`, `code-review`, `agent-architecture` |
+| (no prefix) | Domain labels | `monetary-policy`, `supply-chains`, `behavioral-economics` |
 | (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |
 | (no prefix) | Workflow | `revisit-later`, `discuss-with-editor` |
 
@@ -113,14 +113,14 @@ Review the list for inconsistencies (e.g., `book-ch-3` vs `book-chapter-3`) and 
 ### Create a Topic
 
 ```sql
-INSERT INTO topics (name, description, parent_topic_id, sort_order)
-VALUES ('<n>', '<description>', <parent_id or NULL>, <sort_order>);
+INSERT INTO topics (name, description, parent_topic_id)
+VALUES ('<n>', '<description>', <parent_id or NULL>);
 ```
 
 Topics support hierarchy:
-- "AI-Assisted Development" (top-level)
-  - "Code Generation" (parent = AI-Assisted Development)
-  - "Test Generation" (parent = AI-Assisted Development)
+- "Public Health" (top-level)
+  - "Vaccine Efficacy" (parent = Public Health)
+  - "Epidemiological Modeling" (parent = Public Health)
 
 ### List Topics
 
@@ -131,7 +131,7 @@ FROM topics t
 LEFT JOIN topics p ON t.parent_topic_id = p.id
 LEFT JOIN claim_topics ct ON t.id = ct.topic_id
 GROUP BY t.id, t.name, t.description, p.name
-ORDER BY t.parent_topic_id IS NULL DESC, t.parent_topic_id, t.sort_order;
+ORDER BY t.parent_topic_id IS NULL DESC, t.parent_topic_id, t.name;
 ```
 
 ### Update / Delete a Topic

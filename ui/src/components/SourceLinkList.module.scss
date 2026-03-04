@@ -1,0 +1,23 @@
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-default);
+  font-size: 0.8125rem;
+
+  &:last-child { border-bottom: none; }
+}
+
+.title {
+  display: block;
+  color: var(--text-secondary);
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+  }
+}

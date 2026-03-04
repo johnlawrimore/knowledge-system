@@ -1,17 +1,19 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import {
   ReactFlow,
   Handle,
   Position,
+  useReactFlow,
+  ReactFlowProvider,
   type Node,
   type Edge,
   type NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { TopicNode } from '@/lib/types';
-import { countClaims, findInTree, buildPath } from '@/lib/treeUtils';
+import { countClaims, buildPath } from '@/lib/treeUtils';
 import f from './TopicFlow.module.scss';
 
 /* ── Types ──────────────────────────────────────────────────────── */
@@ -22,7 +24,6 @@ interface NodeData {
   hasChildren: boolean;
   childCount: number;
   isSelected: boolean;
-  onSelect: () => void;
   [key: string]: unknown;
 }
 
@@ -31,11 +32,11 @@ interface NodeData {
 function TopicNodeRenderer({ data }: NodeProps) {
   const d = data as NodeData;
   return (
-    <div className={d.isSelected ? f.nodeSelected : f.node} onClick={d.onSelect}>
+    <div className={d.isSelected ? f.nodeSelected : f.node}>
       <Handle type="target" position={Position.Top} className={f.handle} />
       <div className={f.nodeName}>{d.label}</div>
       <div className={f.nodeMeta}>{d.claimCount} claims</div>
-      {d.hasChildren && !d.isSelected && (
+      {d.hasChildren && (
         <div className={f.nodeExpand}>{d.childCount} subtopics</div>
       )}
       <Handle type="source" position={Position.Bottom} className={f.handle} />
@@ -53,9 +54,17 @@ const GAP_X = 32;
 const GAP_Y = 64;
 const MAX_COLS = 4;
 
-/* ── Component ──────────────────────────────────────────────────── */
+/* ── Collect subtree node IDs (for fitView targeting) ──────────── */
 
-export default function TopicFlow({
+function collectSubtreeIds(node: TopicNode): string[] {
+  const ids = [`t-${node.id}`];
+  for (const c of node.children) ids.push(...collectSubtreeIds(c));
+  return ids;
+}
+
+/* ── Inner component (needs ReactFlow context) ─────────────────── */
+
+function TopicFlowInner({
   topics,
   selectedId,
   onSelect,
@@ -64,64 +73,42 @@ export default function TopicFlow({
   selectedId: string | null;
   onSelect: (id: number | null) => void;
 }) {
+  const { fitView } = useReactFlow();
+
   const path = useMemo(
     () => (selectedId ? buildPath(topics, Number(selectedId)) : []),
     [topics, selectedId]
   );
 
-  const { nodes, edges } = useMemo(() => {
-    const selected = selectedId ? findInTree(topics, Number(selectedId)) : null;
+  const { nodes, edges, fitNodeIds } = useMemo(() => {
+    const numSelected = selectedId ? Number(selectedId) : null;
 
     const flowNodes: Node[] = [];
     const flowEdges: Edge[] = [];
 
-    // Collect tiers: each tier is an array of { node, parentId }
+    // Always render the full tree
     type TierEntry = { node: TopicNode; parentId: number | null };
     const tiers: TierEntry[][] = [];
 
-    if (selected) {
-      tiers.push([{ node: selected, parentId: null }]);
-      let current = selected.children;
-      let parentIds = [selected.id];
-      while (current.length > 0) {
-        const tier: TierEntry[] = current.map((c) => ({
-          node: c,
-          parentId: parentIds.find((pid) => {
-            const p = findInTree(topics, pid);
-            return p?.children.some((ch) => ch.id === c.id);
-          }) ?? null,
-        }));
-        tiers.push(tier);
-        const nextParentIds: number[] = [];
-        const next: TopicNode[] = [];
-        for (const c of current) {
-          if (c.children.length > 0) {
-            nextParentIds.push(c.id);
-            next.push(...c.children);
-          }
-        }
-        current = next;
-        parentIds = nextParentIds;
-      }
-    } else {
-      // No selection — show roots and their children
-      tiers.push(topics.map((t) => ({ node: t, parentId: null })));
-      const tier2: TierEntry[] = [];
-      for (const t of topics) {
-        for (const c of t.children) {
-          tier2.push({ node: c, parentId: t.id });
+    // Build all tiers from the full tree
+    tiers.push(topics.map((t) => ({ node: t, parentId: null })));
+    let currentLevel = topics;
+    while (currentLevel.length > 0) {
+      const nextTier: TierEntry[] = [];
+      for (const parent of currentLevel) {
+        for (const child of parent.children) {
+          nextTier.push({ node: child, parentId: parent.id });
         }
       }
-      if (tier2.length > 0) tiers.push(tier2);
+      if (nextTier.length === 0) break;
+      tiers.push(nextTier);
+      currentLevel = nextTier.map((e) => e.node);
     }
 
-    // Layout each tier, wrapping into rows of MAX_COLS
+    // Layout each tier
     let cursorY = 0;
-
-    // Track each node's x-center so children can be positioned under their parent
     const nodeXCenter = new Map<number, number>();
 
-    // First pass: compute each tier's visual width (with wrapping) for overall sizing
     const tierLayouts = tiers.map((tier) => {
       const cols = Math.min(tier.length, MAX_COLS);
       const rows = Math.ceil(tier.length / MAX_COLS);
@@ -133,7 +120,6 @@ export default function TopicFlow({
     tiers.forEach((tier, tierIdx) => {
       const layout = tierLayouts[tierIdx];
 
-      // Group entries by parent so each child cluster centers under its parent
       type Group = { parentId: number | null; entries: TierEntry[] };
       const groups: Group[] = [];
       for (const entry of tier) {
@@ -150,7 +136,6 @@ export default function TopicFlow({
 
         const groupCols = Math.min(group.entries.length, MAX_COLS);
         const groupWidth = groupCols * NODE_W + (groupCols - 1) * GAP_X;
-        // Root tier (no parent): global center. Child tiers: center under parent.
         const groupOffsetX =
           group.parentId == null
             ? (maxWidth - layout.width) / 2
@@ -162,7 +147,7 @@ export default function TopicFlow({
           const row = Math.floor(i / MAX_COLS);
           const x = groupOffsetX + col * (NODE_W + GAP_X);
           const y = cursorY + row * (NODE_H + GAP_Y);
-          const isSelectedNode = selected?.id === node.id;
+          const isSelectedNode = numSelected === node.id;
 
           nodeXCenter.set(node.id, x + NODE_W / 2);
 
@@ -176,7 +161,6 @@ export default function TopicFlow({
               hasChildren: node.children.length > 0,
               childCount: node.children.length,
               isSelected: isSelectedNode,
-              onSelect: isSelectedNode ? () => {} : () => onSelect(node.id),
             },
             draggable: false,
           });
@@ -196,8 +180,46 @@ export default function TopicFlow({
       cursorY += layout.rows * (NODE_H + GAP_Y);
     });
 
-    return { nodes: flowNodes, edges: flowEdges };
-  }, [topics, selectedId, onSelect]);
+    // Determine which nodes to zoom into
+    let zoomIds: string[] | undefined;
+    if (numSelected) {
+      const selectedNode = topics
+        .flatMap(function flatten(n: TopicNode): TopicNode[] {
+          return [n, ...n.children.flatMap(flatten)];
+        })
+        .find((n) => n.id === numSelected);
+      if (selectedNode) {
+        zoomIds = collectSubtreeIds(selectedNode);
+        // Also include the parent so the selected node has upward context
+        const parentEntry = path.length >= 2 ? path[path.length - 2] : null;
+        if (parentEntry) zoomIds.push(`t-${parentEntry.id}`);
+      }
+    }
+
+    return { nodes: flowNodes, edges: flowEdges, fitNodeIds: zoomIds };
+  }, [topics, selectedId, path]);
+
+  const handleNodeClick = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      const topicId = Number(node.id.replace('t-', ''));
+      onSelect(topicId === Number(selectedId) ? null : topicId);
+    },
+    [onSelect, selectedId]
+  );
+
+  const zoomToSelection = useCallback(() => {
+    if (fitNodeIds && fitNodeIds.length > 0) {
+      fitView({ nodes: fitNodeIds.map((id) => ({ id })), padding: 0.4, duration: 300 });
+    } else {
+      fitView({ padding: 0.3, duration: 300 });
+    }
+  }, [fitView, fitNodeIds]);
+
+  useEffect(() => {
+    // Small delay to let ReactFlow finish layout before zooming
+    const timer = setTimeout(zoomToSelection, 50);
+    return () => clearTimeout(timer);
+  }, [zoomToSelection]);
 
   return (
     <div>
@@ -223,18 +245,34 @@ export default function TopicFlow({
 
       <div className={f.flowContainer}>
         <ReactFlow
-          key={selectedId ?? 'root'}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          onNodeClick={handleNodeClick}
           fitView
           fitViewOptions={{ padding: 0.3 }}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
+          minZoom={0.2}
+          maxZoom={2}
         >
         </ReactFlow>
       </div>
     </div>
+  );
+}
+
+/* ── Wrapper (provides ReactFlow context) ──────────────────────── */
+
+export default function TopicFlow(props: {
+  topics: TopicNode[];
+  selectedId: string | null;
+  onSelect: (id: number | null) => void;
+}) {
+  return (
+    <ReactFlowProvider>
+      <TopicFlowInner {...props} />
+    </ReactFlowProvider>
   );
 }

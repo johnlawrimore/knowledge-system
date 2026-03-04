@@ -38,9 +38,14 @@ export async function GET(
         `SELECT
            s.id, s.title, s.source_type, s.url,
            s.published_date, s.word_count, s.status,
-           cs.contribution_note
+           cs.contribution_note,
+           pub.name AS publication,
+           (SELECT c.name FROM source_contributors sc2
+            JOIN contributors c ON c.id = sc2.contributor_id
+            WHERE sc2.source_id = s.id LIMIT 1) AS main_contributor
          FROM composition_sources cs
          JOIN sources s ON cs.source_id = s.id
+         LEFT JOIN publications pub ON s.publication_id = pub.id
          WHERE cs.composition_id = ?
          ORDER BY s.title`,
         [compositionId]

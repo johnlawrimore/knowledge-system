@@ -6,6 +6,7 @@ import { ClaimRow } from '@/lib/types';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import DetailSection from '@/components/DetailSection';
+import InlineEdit from '@/components/InlineEdit';
 import EmptyState from '@/components/EmptyState';
 import s from '../shared.module.scss';
 
@@ -24,15 +25,7 @@ export default function TagDetail({
   onDelete: (tag: string) => Promise<void>;
   onClose: () => void;
 }) {
-  const [renaming, setRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-
-  const handleRename = async () => {
-    if (!renameValue.trim()) return;
-    await onRename(tag, renameValue.trim());
-    setRenaming(false);
-  };
 
   const handleDelete = async () => {
     await onDelete(tag);
@@ -43,32 +36,22 @@ export default function TagDetail({
     <div className={s.modalOverlay} onClick={onClose}>
       <div className={s.modal} onClick={(e) => e.stopPropagation()}>
         <div className={s.modalHeader}>
-          <span className={s.modalTitle}>{tag}</span>
+          <InlineEdit
+            value={tag}
+            onSave={(v) => onRename(tag, v)}
+            placeholder="Tag name..."
+            validate={(v) => {
+              if (!v.trim()) return 'Tag name is required';
+              if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(v.trim()))
+                return 'Must be kebab-case (e.g. my-tag-name)';
+              return null;
+            }}
+          />
           <button className={s.modalClose} onClick={onClose}>&times;</button>
         </div>
 
         <div className={s.actions}>
-          {renaming ? (
-            <>
-              <input
-                className={s.searchInput}
-                type="text"
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleRename();
-                  if (e.key === 'Escape') setRenaming(false);
-                }}
-                placeholder="New tag name..."
-              />
-              <button className={s.actionBtn} onClick={handleRename}>
-                Save
-              </button>
-              <button className={s.actionBtn} onClick={() => setRenaming(false)}>
-                Cancel
-              </button>
-            </>
-          ) : confirmingDelete ? (
+          {confirmingDelete ? (
             <ConfirmDialog
               message={`Delete tag "${tag}" from all claims?`}
               confirmLabel="Delete"
@@ -77,20 +60,9 @@ export default function TagDetail({
               variant="danger"
             />
           ) : (
-            <>
-              <button
-                className={s.actionBtn}
-                onClick={() => {
-                  setRenameValue(tag);
-                  setRenaming(true);
-                }}
-              >
-                Rename
-              </button>
-              <button className={s.dangerBtn} onClick={() => setConfirmingDelete(true)}>
-                Delete
-              </button>
-            </>
+            <button className={s.dangerBtn} onClick={() => setConfirmingDelete(true)}>
+              Delete
+            </button>
           )}
         </div>
 

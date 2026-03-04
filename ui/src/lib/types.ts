@@ -70,6 +70,7 @@ export interface TopicDetail {
   name: string;
   description: string | null;
   parent_topic_id: number | null;
+  parent_name: string | null;
   claims: ClaimRow[];
   strongest: ClaimRow[];
   source_count: number;
@@ -115,14 +116,22 @@ export interface ClaimLink {
 }
 
 /**
- * Minimal source reference on a claim.
- * From: claims/[id]/page.tsx
+ * Shared source reference used by SourceLinkList component.
  */
-export interface ClaimSource {
+export interface SourceLinkItem {
   id: number;
   title: string;
   source_type: string;
+  publication: string | null;
+  main_contributor: string | null;
+  published_date: string | null;
 }
+
+/**
+ * Source reference on a claim.
+ * From: claims/[id]/page.tsx
+ */
+export interface ClaimSource extends SourceLinkItem {}
 
 /**
  * Rhetorical device linked to a claim.
@@ -429,15 +438,11 @@ export interface ContributorDetail {
   score_notes: string | null;
   evaluated_at: string | null;
   contributions: Contributions | null;
-  sources: {
-    id: number;
-    title: string;
-    source_type: string;
+  sources: (SourceLinkItem & {
     url: string | null;
-    published_date: string | null;
     status: string;
     contributor_role: string;
-  }[];
+  })[];
   positions: Position[];
 }
 
@@ -523,12 +528,8 @@ export interface CompositionListItem {
  * Source reference within a composition.
  * From: compositions/Content.tsx
  */
-export interface CompositionSource {
-  id: number;
-  title: string;
-  source_type: string;
+export interface CompositionSource extends SourceLinkItem {
   url: string | null;
-  published_date: string | null;
   word_count: number;
   status: string;
   contribution_note: string | null;

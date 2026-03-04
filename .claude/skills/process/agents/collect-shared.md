@@ -61,7 +61,7 @@ Bio source priority: personal site "About" > conference speaker bios > book jack
 Do NOT: copy bios verbatim, include social media metrics or follower counts, include personal details unrelated to expertise, write more than 4 sentences.
 
 Example bio:
-> Kent Beck is a software engineer and the creator of Extreme Programming (XP) and test-driven development (TDD). He is the author of several influential books including "Test-Driven Development: By Example" and "Extreme Programming Explained." He currently works at Mechanical Orchard, focusing on legacy system modernization.
+> Jane Smith is an epidemiologist and the director of the Global Health Institute at Columbia University. She is the author of several widely cited studies on pandemic preparedness and vaccine distribution logistics. She previously served as a senior advisor to the World Health Organization.
 
 **Avatar** — look for a professional headshot. Priority: personal site/blog > GitHub avatar (`https://github.com/<username>.png`) > Gravatar > conference photos > company team page.
 
@@ -128,7 +128,7 @@ WHERE id = @contrib_id;
 
 Scoring guidance:
 - Base scores on evidence found during web research, not assumptions
-- A Stanford professor with 50k citations = Expertise 5, Authority 4-5
-- A senior engineer blogging on their personal site = Expertise 3-4, Reach 2
-- A McKinsey partner publishing via their firm = Authority 4, Reach 3-4
+- A tenured professor with 50k citations = Expertise 5, Authority 4-5
+- A practitioner blogging on their personal site = Expertise 3-4, Reach 2
+- A senior partner at a major consultancy publishing via their firm = Authority 4, Reach 3-4
 - If insufficient information to score, leave `evaluation_results` NULL and add a note: "Contributor scoring deferred — insufficient public information"

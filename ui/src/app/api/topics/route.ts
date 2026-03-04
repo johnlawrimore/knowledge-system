@@ -7,7 +7,6 @@ interface TopicRow {
   name: string;
   description: string | null;
   parent_topic_id: number | null;
-  sort_order: number;
   created_at: string;
   claim_count: number;
   evidence_count: number;
@@ -38,6 +37,12 @@ function buildTree(topics: TopicRow[]): TopicNode[] {
     }
   }
 
+  const sortChildren = (nodes: TopicNode[]) => {
+    nodes.sort((a, b) => a.name.localeCompare(b.name));
+    for (const n of nodes) sortChildren(n.children);
+  };
+  sortChildren(roots);
+
   return roots;
 }
 
@@ -49,14 +54,14 @@ export async function GET() {
       const [rows] = await conn.query<RowDataPacket[]>(
         `SELECT
            t.id, t.name, t.description, t.parent_topic_id,
-           t.sort_order, t.created_at,
+           t.created_at,
            COALESCE(tc.claim_count, 0) AS claim_count,
            COALESCE(tc.evidence_count, 0) AS evidence_count,
            COALESCE(tc.source_count, 0) AS source_count,
            tc.avg_claim_score
          FROM topics t
          LEFT JOIN v_topic_coverage tc ON t.id = tc.topic_id
-         ORDER BY t.sort_order, t.name`
+         ORDER BY t.name`
       );
 
       const tree = buildTree(rows as TopicRow[]);

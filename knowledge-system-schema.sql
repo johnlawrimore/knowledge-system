@@ -115,7 +115,6 @@ CREATE TABLE topics (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     parent_topic_id INT,
-    sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE INDEX idx_topics_name (name),

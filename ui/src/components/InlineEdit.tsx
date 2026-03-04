@@ -9,16 +9,19 @@ export default function InlineEdit({
   multiline = false,
   placeholder = 'Click to edit...',
   className = '',
+  validate,
 }: {
   value: string | null;
   onSave: (val: string) => Promise<void>;
   multiline?: boolean;
   placeholder?: string;
   className?: string;
+  validate?: (val: string) => string | null;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || '');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,10 +32,15 @@ export default function InlineEdit({
   }, [editing]);
 
   const save = async () => {
+    if (validate) {
+      const msg = validate(draft);
+      if (msg) { setError(msg); return; }
+    }
     setSaving(true);
     try {
       await onSave(draft);
       setEditing(false);
+      setError(null);
     } finally {
       setSaving(false);
     }
@@ -40,6 +48,7 @@ export default function InlineEdit({
 
   const cancel = () => {
     setDraft(value || '');
+    setError(null);
     setEditing(false);
   };
 
@@ -63,7 +72,7 @@ export default function InlineEdit({
         <textarea
           ref={ref as React.RefObject<HTMLTextAreaElement>}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => { setDraft(e.target.value); setError(null); }}
           onKeyDown={(e) => e.key === 'Escape' && cancel()}
           rows={4}
           className={s.input}
@@ -72,7 +81,7 @@ export default function InlineEdit({
         <input
           ref={ref as React.RefObject<HTMLInputElement>}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => { setDraft(e.target.value); setError(null); }}
           onKeyDown={(e) => {
             if (e.key === 'Escape') cancel();
             if (e.key === 'Enter') save();
@@ -88,6 +97,7 @@ export default function InlineEdit({
           Cancel
         </button>
       </div>
+      {error && <div className={s.error}>{error}</div>}
     </div>
   );
 }

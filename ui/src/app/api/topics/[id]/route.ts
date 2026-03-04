@@ -20,7 +20,7 @@ export async function GET(
       const [topicRows] = await conn.query<RowDataPacket[]>(
         `SELECT
            t.id, t.name, t.description, t.parent_topic_id,
-           t.sort_order, t.created_at
+           t.created_at
          FROM topics t
          WHERE t.id = ?`,
         [topicId]
@@ -76,8 +76,19 @@ export async function GET(
         ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length
         : null;
 
+      // Parent name lookup
+      let parent_name: string | null = null;
+      if (topic.parent_topic_id) {
+        const [parentRows] = await conn.query<RowDataPacket[]>(
+          'SELECT name FROM topics WHERE id = ?',
+          [topic.parent_topic_id]
+        );
+        if (parentRows.length > 0) parent_name = parentRows[0].name;
+      }
+
       return NextResponse.json({
         ...topic,
+        parent_name,
         claims,
         strongest,
         weakest,

@@ -174,20 +174,6 @@
   }
 }
 
-.sourceChip {
-  font-size: 0.8125rem;
-  color: var(--accent-blue);
-  background: var(--bg-raised);
-  border: 1px solid var(--border-default);
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.25rem;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
 // ── Connections tab ────────────────────────────────────────────
 .connectionGroup {
   margin-bottom: 1.25rem;

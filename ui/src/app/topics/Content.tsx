@@ -48,7 +48,7 @@ export default function TopicsContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  const loadDetail = useCallback(() => {
     if (!selectedId) {
       setDetail(null);
       return;
@@ -60,6 +60,16 @@ export default function TopicsContent() {
       .catch(console.error)
       .finally(() => setDetailLoading(false));
   }, [selectedId]);
+
+  useEffect(() => { loadDetail(); }, [loadDetail]);
+
+  const reloadAll = useCallback(() => {
+    fetch('/api/topics')
+      .then((r) => r.json())
+      .then((d) => setTopics(d.topics || []))
+      .catch(console.error);
+    loadDetail();
+  }, [loadDetail]);
 
   return (
     <div className={s.page}>
@@ -93,7 +103,7 @@ export default function TopicsContent() {
             {detailLoading ? (
               <div className={s.loading}>Loading topic...</div>
             ) : detail ? (
-              <TopicDetailPanel detail={detail} />
+              <TopicDetailPanel detail={detail} topics={topics} onUpdate={reloadAll} />
             ) : null}
           </div>
         </div>

@@ -52,7 +52,7 @@ Extract these fields from the JSON:
 | View count | `view_count` |
 | URL | `webpage_url` |
 
-**Publication:** Use the channel name as the publication (stored in the `publications` table, e.g., "Lex Fridman Podcast", "Fireship"). For podcasts hosted on YouTube, use the show name rather than the channel name if they differ.
+**Publication:** Use the channel name as the publication (stored in the `publications` table, e.g., "TED", "Talks at Google"). For podcasts hosted on YouTube, use the show name rather than the channel name if they differ.
 
 ### 4. Retrieve Transcript
 
@@ -74,7 +74,7 @@ If no captions are available, report it and proceed with metadata only.
 ### 5. Identify Speakers and Attribute Turns
 
 **From the description and title**, identify all speakers:
-- Extract names, roles (host, guest, panelist, speaker — capitalize role: "Software Engineer", not "software engineer"), and one-clause identifiers
+- Extract names, roles (host, guest, panelist, speaker — capitalize role: "Research Director", not "research director"), and one-clause identifiers
 - Produce a speaker roster
 
 **Single-speaker videos:** If only one speaker and the transcript reads as a monologue, label the entire transcript with that speaker.
@@ -86,7 +86,7 @@ If no captions are available, report it and proceed with metadata only.
 - **Strong signals (weight heavily):**
   - Explicit introductions ("My guest today is...", "I'm here with...")
   - Direct address by name ("So, Jack, what do you think...") — the named person is being spoken TO; the responding text is that person
-  - First-person framing matching a known speaker's identity ("As someone who co-founded Anthropic..." → likely the Anthropic co-founder)
+  - First-person framing matching a known speaker's identity ("As someone who led the WHO response to..." → likely the public health official)
   - References to the speaker's own published work, show, or previous statements
 
 - **Moderate signals (useful but not conclusive alone):**

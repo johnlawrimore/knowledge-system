@@ -60,8 +60,8 @@ print(' '.join(e.result))
 From the content and URL, extract:
 - **title**: Article/paper title
 - **published_date**: YYYY-MM-DD or NULL
-- **publication**: The name of the blog, newsletter, platform, publication, or content series (stored in the `publications` table). Examples: "The Pragmatic Engineer", "Stratechery", "ACM Queue", "Medium", "Substack", "Dev.to", "Harvard Business Review", "IEEE Spectrum". Look for site name, masthead, breadcrumbs, platform branding, or series indicators. For platform-hosted content (Medium, Substack, Dev.to), use the platform name. NULL if the source is a standalone page with no clear publication identity.
-- **contributors**: Author name(s), affiliation, role (capitalize role: "Software Engineer", not "software engineer")
+- **publication**: The name of the blog, newsletter, platform, publication, or content series (stored in the `publications` table). Examples: "Harvard Business Review", "The Lancet", "Foreign Affairs", "Nature", "Medium", "Substack", "The Economist", "SSRN". Look for site name, masthead, breadcrumbs, platform branding, or series indicators. For platform-hosted content (Medium, Substack), use the platform name. NULL if the source is a standalone page with no clear publication identity.
+- **contributors**: Author name(s), affiliation, role (capitalize role: "Research Director", not "research director")
 
 ### 4. Check for Duplicates
 

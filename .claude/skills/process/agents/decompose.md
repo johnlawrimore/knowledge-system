@@ -34,8 +34,8 @@ SELECT id, name, parent_topic_id FROM topics ORDER BY name;
 ### 2. Identify Claims
 
 Read the distillation and extract every distinct assertion. For each:
-- **Is this a claim?** "TDD was invented in the 1990s" is a historical fact, not a useful claim. "TDD is more valuable in AI-assisted development than in traditional development" is a claim. Historical facts and definitions of common terms are not useful claims.
-- **Is this specific enough?** "AI is changing development" is too vague.
+- **Is this a claim?** "Penicillin was discovered in 1928" is a historical fact, not a useful claim. "Preventive care reduces total healthcare costs more effectively than reactive treatment" is a claim. Historical facts and definitions of common terms are not useful claims.
+- **Is this specific enough?** "The economy is changing" is too vague.
 - **Claim type:** assertion, recommendation, prediction, definition, observation, mechanism, distinction, other
 
 **Error checks:**
@@ -44,9 +44,9 @@ Read the distillation and extract every distinct assertion. For each:
 - If zero claims are extracted after reading the distillation, return error suggesting re-distillation.
 
 **Claim granularity guidelines:**
-- **Too broad:** "AI is transforming software development" → This is a theme, not a claim. Break into specific assertions.
-- **Too narrow:** "GPT-4 generates correct Python list comprehensions 87% of the time" → This is evidence, not a claim. The claim might be "AI code generators are highly accurate for common language patterns."
-- **Right level:** "AI code generation shifts the developer's primary task from writing code to evaluating code, requiring a different skill set." → Specific enough to be arguable, broad enough to be supported by multiple pieces of evidence.
+- **Too broad:** "Climate change is affecting agriculture" → This is a theme, not a claim. Break into specific assertions.
+- **Too narrow:** "Wheat yields in Kansas fell 12% in the 2023 drought" → This is evidence, not a claim. The claim might be "Extended drought periods disproportionately reduce grain yields in rain-dependent farming regions."
+- **Right level:** "Crop diversification reduces economic risk for smallholder farmers by spreading exposure across commodities with uncorrelated price movements." → Specific enough to be arguable, broad enough to be supported by multiple pieces of evidence.
 
 ### 3. Check for Duplicates
 
@@ -166,8 +166,8 @@ Default to 3 (Moderate) when uncertain.
 
 **Reasoning examples:**
 - Empirical data: "This controlled study directly measures the effect described in the claim, with N=500 providing statistical significance."
-- Expert opinion: "Fowler's 20+ years of consulting on refactoring practices gives this assertion significant weight, though it remains one expert's view."
-- Case study: "Google's specific implementation validates the claim at scale, but may not generalize to smaller organizations with different constraints."
+- Expert opinion: "The contributor's 20+ years of fieldwork in this domain gives this assertion significant weight, though it remains one expert's view."
+- Case study: "This organization's specific implementation validates the claim at scale, but may not generalize to smaller organizations with different constraints."
 
 **Tags:**
 
@@ -181,7 +181,7 @@ Tag conventions:
 | Prefix | Purpose | Examples |
 |---|---|---|
 | `book-ch-<n>` | Composition targeting | `book-ch-1` |
-| (no prefix) | Domain labels | `tdd`, `code-review`, `ai-agents`, `context-engineering` |
+| (no prefix) | Domain labels | `monetary-policy`, `vaccine-efficacy`, `supply-chains`, `behavioral-economics` |
 | (no prefix) | Editorial flags | `strong-opener`, `quotable`, `controversial`, `needs-evidence` |
 
 **Topics:**

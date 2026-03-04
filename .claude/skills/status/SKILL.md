@@ -177,7 +177,7 @@ Prioritize:
 
 ```
 Recommended next actions:
-  1. Distill 12 collected sources (oldest: "Fowler on TDD" from Jan 15)
+  1. Distill 12 collected sources (oldest: "WHO Report on Pandemic Preparedness" from Jan 15)
   2. Decompose 5 distilled sources
   3. Evaluate 8 unevaluated sources
   4. Categorize 23 uncategorized claims

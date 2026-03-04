@@ -15,34 +15,6 @@
   text-transform: uppercase;
 }
 
-.linkedList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.linkedItem {
-  font-size: 0.8125rem;
-  color: var(--accent-blue);
-  padding: 0.125rem 0;
-
-  &:hover { text-decoration: underline; }
-}
-
-.sourceRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  padding: 0.25rem 0;
-}
-
-.sourceType {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-}
-
 .contributionNote {
   color: var(--text-muted);
   font-size: 0.75rem;

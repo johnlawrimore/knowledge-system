@@ -1,10 +1,9 @@
 'use client';
-import Link from 'next/link';
 import { CompositionDetail as CompositionDetailType } from '@/lib/types';
-import SourceTypeBadge from '@/components/SourceTypeBadge';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
+import SourceLinkList from '@/components/SourceLinkList';
 import { compositionStatusLabel } from '@/lib/enumLabels';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
@@ -31,24 +30,14 @@ export default function CompositionDetailView({
 
       {detail.sources.length > 0 && (
         <DetailSection label="Sources" count={detail.sources.length}>
-          <div className={ps.linkedList}>
-            {detail.sources.map((src) => (
-              <div key={src.id} className={ps.sourceRow}>
-                <Link
-                  href={`/sources?id=${src.id}`}
-                  className={ps.linkedItem}
-                >
-                  {src.title}
-                </Link>
-                <SourceTypeBadge type={src.source_type} size={13} />
-                {src.contribution_note && (
-                  <span className={ps.contributionNote}>
-                    {src.contribution_note}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+          <SourceLinkList
+            sources={detail.sources}
+            renderExtra={(src) =>
+              src.contribution_note ? (
+                <span className={ps.contributionNote}>{src.contribution_note}</span>
+              ) : null
+            }
+          />
         </DetailSection>
       )}
 

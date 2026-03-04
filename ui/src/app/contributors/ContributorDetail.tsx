@@ -4,13 +4,12 @@ import Link from 'next/link';
 import { ContributorDetail as ContributorDetailType, Position } from '@/lib/types';
 import Avatar from '@/components/Avatar';
 import InlineEdit from '@/components/InlineEdit';
-import SourceTypeBadge from '@/components/SourceTypeBadge';
 import TierBadge from '@/components/TierBadge';
 import MetaLine from '@/components/MetaLine';
 import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import StrengthMeter from '@/components/StrengthMeter';
-import { formatDate } from '@/lib/formatDate';
+import SourceLinkList from '@/components/SourceLinkList';
 import { IconExternalLink } from '@tabler/icons-react';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
@@ -146,19 +145,7 @@ export default function ContributorDetailView({
         {detail.sources.length === 0 ? (
           <div className={s.detailValue}>No sources linked</div>
         ) : (
-          <div className={s.claimList}>
-            {detail.sources.map((src) => (
-              <Link key={src.id} href={`/sources?id=${src.id}`} className={ps.sourceRow}>
-                <div className={ps.sourceTitle}>{src.title}</div>
-                <div className={ps.sourceMeta}>
-                  <SourceTypeBadge type={src.source_type} size={13} />
-                  {src.published_date && (
-                    <><span>&middot;</span><span>{formatDate(src.published_date)}</span></>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
+          <SourceLinkList sources={detail.sources} />
         )}
       </DetailSection>
 
