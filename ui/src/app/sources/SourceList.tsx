@@ -30,27 +30,19 @@ export default function SourceList({
       {sources.length === 0 ? (
         <EmptyState message="No sources found" />
       ) : (
-        sources.map((src) => {
-          const isReady = src.status === 'decomposed';
-          return (
+        sources.map((src) => (
             <div
               key={src.id}
-              className={
-                !isReady ? s.sourceItemDisabled
-                  : String(src.id) === selectedId ? s.sourceItemActive
-                  : s.sourceItem
-              }
-              onClick={isReady ? () => onFilter('id', String(src.id)) : undefined}
+              className={String(src.id) === selectedId ? s.sourceItemActive : s.sourceItem}
+              onClick={() => onFilter('id', String(src.id))}
             >
               <div className={s.sourceTitle}>{src.title}</div>
               <MetaLine>
                 <SourceTypeBadge type={src.source_type} size={14} />
                 {src.main_contributor && <span>{src.main_contributor}</span>}
-                {!isReady && <span className={s.processingBadge}>Processing</span>}
               </MetaLine>
             </div>
-          );
-        })
+        ))
       )}
     </div>
   );

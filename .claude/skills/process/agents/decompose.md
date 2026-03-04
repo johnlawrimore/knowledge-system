@@ -206,7 +206,7 @@ Topics form a hierarchy via `parent_topic_id` (loaded in Step 1). When assigning
 - **Assign to the most specific level that fits.** If a child topic matches, use it — not the parent. Only assign a parent topic if the claim spans the full breadth of the parent and doesn't fit any single child.
 - **Do not assign both parent and child** unless the claim truly belongs at both levels independently.
 - If no topic fits, note it in the claim's `notes` with a hierarchy-aware suggestion: "May need new topic: '<suggested name>' (child of '<parent_topic>' or top-level)".
-- Do NOT create topics during decomposition — that's a curation decision.
+- Do NOT create topics during decomposition — that's handled by the categorize stage.
 
 ```sql
 INSERT IGNORE INTO claim_topics (claim_id, topic_id) VALUES (<claim_id>, <topic_id>);

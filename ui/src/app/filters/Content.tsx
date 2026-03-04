@@ -94,7 +94,7 @@ export default function FiltersContent() {
         </button>
       </div>
       <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: '0 0 1.25rem', maxWidth: '65rem' }}>
-        Content filters shape what material survives source distillation. Content filters can be applied to the distillation process in addition to standard filtering, thereby limiting what content reaches claims, evidence, etc.
+        Content filters shape what material survives the distillation process. Content filters can optionally be applied during source processing to limit what data is included in claims, evidence, etc.
       </p>
 
       {loading ? (

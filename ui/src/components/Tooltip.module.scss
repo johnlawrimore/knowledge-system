@@ -1,0 +1,30 @@
+.anchor {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.icon {
+  color: var(--text-placeholder);
+
+  &:hover {
+    color: var(--text-muted);
+  }
+}
+
+.tooltip {
+  position: fixed;
+  width: 14rem;
+  background: var(--bg-elevated, var(--bg-raised));
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  z-index: 9999;
+  white-space: normal;
+  text-align: left;
+  pointer-events: none;
+}

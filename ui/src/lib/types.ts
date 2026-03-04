@@ -349,6 +349,7 @@ export interface SourceDetail {
     version_id: number;
     version: number;
     instructions: string;
+    description: string | null;
   } | null;
   evidence: {
     total: number;

@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import ScoreRing from './ScoreRing';
+import Tooltip from './Tooltip';
 import { formatDate } from '@/lib/formatDate';
 import s from './EvalSection.module.scss';
 
@@ -41,26 +42,32 @@ interface EvalSectionProps {
 
 export default function EvalSection({ label, evaluatedAt, headerRight, notes, row, children }: EvalSectionProps) {
   return (
-    <div className={s.card}>
-      <div className={s.header}>
-        <span className={s.headerLabel}>{label}</span>
-        {headerRight && <div className={s.headerRight}>{headerRight}</div>}
-      </div>
-      <div className={s.body}>
-        <div className={row ? s.contentRow : s.contentCol}>
-          {children}
+    <>
+      <div className={s.card}>
+        <div className={s.header}>
+          <span className={s.headerLabel}>{label}</span>
+          {headerRight && (
+            <div className={s.headerRight}>
+              {notes && <Tooltip text={notes} />}
+              {headerRight}
+            </div>
+          )}
         </div>
-        {notes && <div className={s.notes}>{notes}</div>}
-        {evaluatedAt && (
-          <div className={s.evaluatedAt}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            Last updated {formatDate(evaluatedAt)}
+        <div className={s.body}>
+          <div className={row ? s.contentRow : s.contentCol}>
+            {children}
           </div>
-        )}
+        </div>
       </div>
-    </div>
+      {evaluatedAt && (
+        <div className={s.evaluatedAt}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Last updated {formatDate(evaluatedAt)}
+        </div>
+      )}
+    </>
   );
 }

@@ -17,12 +17,12 @@ For multi-statement scripts, write to /tmp/categorize.sql and pipe it.
 1. **Every claim should have at least one topic.**
 2. **Themes are selective** — only assign claims that genuinely advance or challenge a theme's thesis.
 3. **Tags are liberal** — apply freely. Prefer reusing existing tags.
-4. **Do NOT create new topics or themes** — only assign to existing ones. Note gaps for the user.
-5. **Never silently skip a claim.** Every claim in the input list must appear in the output — either with assignments or in the `uncategorized_claims` list with a reason.
+4. **Create new topics when needed.** If no existing topic fits a claim, create one. Prefer reusing existing topics, but never leave a claim uncategorized just because the taxonomy is incomplete. When creating a new topic, place it in the hierarchy (set `parent_topic_id`) where it logically belongs.
+5. **Never silently skip a claim.** Every claim in the input list must appear in the output with at least one topic assigned.
 
 **Edge cases:**
-- **Vague claims:** If a claim is too broad to assign a specific topic (e.g., "Software development is changing"), still attempt a best-fit topic, but also note that the claim may need to be rewritten before it's useful. If truly no topic fits, include it in `uncategorized_claims` and note "too broad for existing topics" in `proposed_topics`.
-- **Empty taxonomy:** If no topics or themes exist yet (fresh database), categorize ALL claims as uncategorized. Propose topics and themes based on the claim set. Still apply tags normally.
+- **Vague claims:** If a claim is too broad to assign a specific topic (e.g., "Software development is changing"), still attempt a best-fit topic, but note in `process_notes` that the claim may need to be rewritten.
+- **Empty taxonomy:** If no topics or themes exist yet (fresh database), create topics based on the claim set. Still apply tags normally.
 
 ## Procedure
 
@@ -41,7 +41,7 @@ Topics form a hierarchy via `parent_topic_id`. When assigning:
 
 - **Assign to the most specific level that fits.** If "Productivity Measurement" (child of "AI-Assisted Development") fits, assign to "Productivity Measurement" — not the parent. Only assign the parent if the claim genuinely spans the full breadth of the parent topic and doesn't fit any single child.
 - **Do not assign both parent and child** unless the claim truly belongs at both levels independently.
-- **When proposing new topics**, specify where they belong in the hierarchy. A proposed topic about "Code Review Automation" might be a child of "AI-Assisted Development". Set `parent` to the parent topic name (or null for a new top-level topic).
+- **When creating new topics**, insert them into the `topics` table with a name, description, and `parent_topic_id` (or NULL for top-level). Use `SELECT LAST_INSERT_ID()` to capture the new topic's ID for claim assignment.
 
 ### 3. Assign Themes
 
@@ -77,6 +77,11 @@ Prefer reusing existing tags over creating near-duplicates. Check the tag list f
 Write to /tmp/categorize.sql:
 
 ```sql
+-- New topics (if any)
+INSERT INTO topics (name, description, parent_topic_id) VALUES
+  ('<name>', '<description>', <parent_id_or_NULL>);
+-- Capture ID: SELECT LAST_INSERT_ID();
+
 -- Topic assignments
 INSERT IGNORE INTO claim_topics (claim_id, topic_id) VALUES
   (<id>, <topic_id>),
@@ -96,5 +101,5 @@ INSERT IGNORE INTO claim_tags (claim_id, tag) VALUES
 End your response with this exact JSON block:
 
 ```json
-{"stage": "categorize", "status": "success", "topics_assigned": <n>, "themes_assigned": <n>, "tags_applied": <n>, "uncategorized_claims": [<ids_that_fit_no_topic>], "proposed_topics": [{"name": "<name>", "description": "<desc>", "parent": "<parent_topic_or_null>", "claims": [<ids>]}], "proposed_themes": [{"name": "<name>", "thesis": "<thesis_statement>", "claims": [<ids>]}], "process_notes": "<anything unusual, or null>"}
+{"stage": "categorize", "status": "success", "topics_assigned": <n>, "themes_assigned": <n>, "tags_applied": <n>, "topics_created": [{"name": "<name>", "id": <id>}], "process_notes": "<anything unusual, or null>"}
 ```

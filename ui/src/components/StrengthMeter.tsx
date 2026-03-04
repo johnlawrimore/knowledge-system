@@ -1,5 +1,5 @@
-import { IconInfoCircle } from '@tabler/icons-react';
 import { strengthTierLabel } from '@/lib/enumLabels';
+import Tooltip from './Tooltip';
 import s from './StrengthMeter.module.scss';
 
 // Tier 1 = Definitive (strongest) → 5 filled bars
@@ -38,12 +38,7 @@ export default function StrengthMeter({ strength, notes }: StrengthMeterProps) {
         ))}
       </div>
       <span className={`${s.label} ${tierClass}`}>{strengthTierLabel(String(strength))}</span>
-      {notes && (
-        <span className={s.tooltipAnchor}>
-          <IconInfoCircle size={13} stroke={1.75} className={s.infoIcon} />
-          <span className={s.tooltip}>{notes}</span>
-        </span>
-      )}
+      {notes && <Tooltip text={notes} />}
     </div>
   );
 }

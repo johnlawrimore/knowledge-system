@@ -59,7 +59,8 @@ export async function GET(
            cfv.version AS filter_version_num,
            cfv.instructions AS filter_instructions,
            cf.id       AS filter_id,
-           cf.name     AS filter_name
+           cf.name     AS filter_name,
+           cf.description AS filter_description
          FROM sources s
          LEFT JOIN publications pub ON s.publication_id = pub.id
          LEFT JOIN content_filter_versions cfv ON s.content_filter_version_id = cfv.id
@@ -151,6 +152,7 @@ export async function GET(
           version_id: source.filter_version_id,
           version: source.filter_version_num,
           instructions: source.filter_instructions,
+          description: source.filter_description || null,
         } : null,
         contributors,
         compositions: {

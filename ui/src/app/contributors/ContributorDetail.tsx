@@ -9,23 +9,17 @@ import TierBadge from '@/components/TierBadge';
 import MetaLine from '@/components/MetaLine';
 import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
-import { stanceLabel, strengthTierLabel } from '@/lib/enumLabels';
+import StrengthMeter from '@/components/StrengthMeter';
 import { formatDate } from '@/lib/formatDate';
 import { IconExternalLink } from '@tabler/icons-react';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
 
-function groupByStance(positions: Position[]): Record<string, Position[]> {
-  const groups: Record<string, Position[]> = {};
-  for (const p of positions) {
-    const key = p.stance || 'other';
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(p);
-  }
-  return groups;
-}
-
-const STANCE_ORDER = ['supporting', 'contradicting', 'qualifying', 'other'];
+const STANCE_STYLE: Record<string, { label: string; color: string }> = {
+  supporting:    { label: 'Supports',    color: 'var(--accent-green)' },
+  contradicting: { label: 'Contradicts', color: 'var(--accent-red)' },
+  qualifying:    { label: 'Qualifies',   color: 'var(--accent-amber)' },
+};
 
 interface ContributorDetailProps {
   detail: ContributorDetailType;
@@ -39,8 +33,6 @@ export default function ContributorDetailView({
   onAvatarClick,
 }: ContributorDetailProps) {
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
-  const stanceGroups = groupByStance(detail.positions);
-
   return (
     <>
       <div className={ps.contributorHeader}>
@@ -176,28 +168,27 @@ export default function ContributorDetailView({
         {detail.positions.length === 0 ? (
           <div className={s.detailValue}>No positions recorded</div>
         ) : (
-          STANCE_ORDER.filter((stance) => stanceGroups[stance]).map((stance) => (
-            <div key={stance}>
-              <div className={s.detailLabel}>{stanceLabel(stance)}</div>
-              <div className={s.claimList}>
-                {stanceGroups[stance].map((p, i) => (
-                  <Link
-                    key={`${p.claim_id}-${i}`}
-                    href={`/claims/${p.claim_id}`}
-                    className={s.claimRow}
-                  >
-                    <span className={s.claimScore}>
-                      #{p.claim_id}{p.strength != null ? ` · ${strengthTierLabel(String(p.strength))}` : ''}
-                    </span>
+          <div className={s.claimList}>
+            {detail.positions.map((p, i) => {
+              const ss = STANCE_STYLE[p.stance] || { label: p.stance, color: 'var(--text-muted)' };
+              return (
+                <Link
+                  key={`${p.claim_id}-${i}`}
+                  href={`/claims/${p.claim_id}`}
+                  className={ps.positionRow}
+                >
+                  <div>
+                    <span style={{ color: ss.color, fontSize: '0.75rem' }}>{ss.label}</span>
                     {' '}
-                    <span className={s.claimStatement}>
-                      {p.statement}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))
+                    <span className={s.claimScore}>#{p.claim_id}</span>
+                    {' '}
+                    <span className={s.claimStatement}>{p.statement}</span>
+                  </div>
+                  <StrengthMeter strength={p.strength} />
+                </Link>
+              );
+            })}
+          </div>
         )}
       </DetailSection>
     </>

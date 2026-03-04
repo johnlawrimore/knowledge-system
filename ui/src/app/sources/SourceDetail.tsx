@@ -17,6 +17,7 @@ import Tabs from '@/components/Tabs';
 import Avatar from '@/components/Avatar';
 import StanceStats from '@/components/StanceStats';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import Tooltip from '@/components/Tooltip';
 import { contributorRoleLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
 import { SourceDetail as SourceDetailType } from '@/lib/types';
@@ -53,7 +54,10 @@ export default function SourceDetailView({
 
   return (
     <>
-      <div className={s.detailTitle}>{detail.title}</div>
+      <div className={s.detailHeader}>
+        <div className={s.detailTitle}>{detail.title}</div>
+        {detail.status !== 'decomposed' && <span className={s.processingBadge}>Processing</span>}
+      </div>
       <MetaLine>
         <SourceTypeBadge type={detail.source_type} size={16} />
         {detail.publication && <span>{detail.publication}</span>}
@@ -109,17 +113,13 @@ export default function SourceDetailView({
 
           <DetailSection label="Content Filter">
             {detail.content_filter ? (
-              <>
-                <div className={s.detailValue}>
-                  {detail.content_filter.name}
-                  <span style={{ color: 'var(--text-muted)', marginLeft: '0.375rem' }}>
-                    v{detail.content_filter.version}
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.375rem', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)' }}>
-                  {detail.content_filter.instructions}
-                </div>
-              </>
+              <div className={s.detailValue} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>
+                {detail.content_filter.name}
+                <span style={{ color: 'var(--text-muted)' }}>
+                  v{detail.content_filter.version}
+                </span>
+                {detail.content_filter.description && <Tooltip text={detail.content_filter.description} />}
+              </div>
             ) : (
               <div className={s.detailValue} style={{ color: 'var(--text-muted)' }}>
                 None

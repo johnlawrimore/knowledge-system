@@ -107,7 +107,7 @@ If no captions are available, report it and proceed with metadata only.
 - If transcript has no speaker cues at all, label entire transcript with the primary speaker and note low confidence
 - If multiple guests, look for introduction order and use it to disambiguate early turns
 
-Format: `SPEAKER NAME: <text>` with blank lines between turns.
+Format: `**SPEAKER NAME:** <text>` with blank lines between turns. Speaker names must be bold.
 
 ### 6. Compose Source Markdown
 
