@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { pageIcon } from '@/lib/pageIcons';
 import { TopicNode, TopicDetail } from '@/lib/types';
+import EmptyState from '@/components/EmptyState';
 import TopicFlow from './TopicFlow';
 import TopicTree from './TopicTree';
 import TopicDetailPanel from './TopicDetailPanel';
@@ -72,7 +73,7 @@ export default function TopicsContent() {
         <div className={s.splitLayout}>
           <div className={s.listPanel}>
             {topics.length === 0 ? (
-              <div className={s.empty}>No topics found</div>
+              <EmptyState message="No topics found" />
             ) : (
               <TopicTree
                 topics={topics}

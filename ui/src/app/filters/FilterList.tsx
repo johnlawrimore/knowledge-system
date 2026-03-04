@@ -1,6 +1,7 @@
 'use client';
 
 import { FilterListItem } from '@/lib/types';
+import EmptyState from '@/components/EmptyState';
 import s from '../shared.module.scss';
 
 export default function FilterList({
@@ -17,7 +18,7 @@ export default function FilterList({
   return (
     <div className={s.listPanel}>
       {filters.length === 0 && (
-        <div className={s.empty}>No content filters yet</div>
+        <EmptyState message="No content filters yet" />
       )}
       {filters.map((f) => (
         <div

@@ -1,0 +1,15 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item {
+  font-size: 0.8125rem;
+  color: var(--accent-blue);
+  padding: 0.125rem 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ContributorListItem, ContributorDetail } from '@/lib/types';
 import { pageIcon } from '@/lib/pageIcons';
+import EmptyState from '@/components/EmptyState';
+import FilterBar, { filterStyles } from '@/components/FilterBar';
 import ContributorList from './ContributorList';
 import ContributorDetailView from './ContributorDetail';
 import s from '../shared.module.scss';
@@ -70,15 +72,15 @@ export default function ContributorsContent() {
         <h1 className={s.title}><ContributorsIcon size={32} stroke={2} className={s.pageIcon} />Contributors</h1>
       </div>
 
-      <div className={s.filters}>
+      <FilterBar>
         <input
-          className={s.searchInput}
+          className={filterStyles.searchInput}
           type="text"
           placeholder="Search contributors..."
           value={search}
           onChange={(e) => setFilter('search', e.target.value)}
         />
-      </div>
+      </FilterBar>
 
       {loading ? (
         <div className={s.loading}>Loading contributors...</div>
@@ -95,7 +97,7 @@ export default function ContributorsContent() {
 
           <div className={s.detailPanel}>
             {!detail ? (
-              <div className={s.emptyDetail}>Select a contributor to view details</div>
+              <EmptyState message="Select a contributor to view details" variant="detail" />
             ) : (
               <ContributorDetailView
                 detail={detail}

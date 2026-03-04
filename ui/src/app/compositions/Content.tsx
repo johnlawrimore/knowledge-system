@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CompositionListItem, CompositionDetail } from '@/lib/types';
 import { pageIcon } from '@/lib/pageIcons';
+import EmptyState from '@/components/EmptyState';
+import FilterBar, { filterStyles } from '@/components/FilterBar';
 import CompositionList from './CompositionList';
 import CompositionDetailView from './CompositionDetail';
 import s from '../shared.module.scss';
@@ -76,9 +78,9 @@ export default function CompositionsContent() {
         <h1 className={s.title}><CompositionsIcon size={32} stroke={2} className={s.pageIcon} />Compositions</h1>
       </div>
 
-      <div className={s.filters}>
+      <FilterBar>
         <select
-          className={s.select}
+          className={filterStyles.select}
           value={status}
           onChange={(e) => setFilter('status', e.target.value)}
         >
@@ -89,13 +91,13 @@ export default function CompositionsContent() {
         </select>
 
         <input
-          className={s.searchInput}
+          className={filterStyles.searchInput}
           type="text"
           placeholder="Search compositions..."
           value={search}
           onChange={(e) => setFilter('search', e.target.value)}
         />
-      </div>
+      </FilterBar>
 
       {loading ? (
         <div className={s.loading}>Loading compositions...</div>
@@ -109,9 +111,7 @@ export default function CompositionsContent() {
 
           <div className={s.detailPanel}>
             {!detail ? (
-              <div className={s.emptyDetail}>
-                Select a composition to view details
-              </div>
+              <EmptyState message="Select a composition to view details" variant="detail" />
             ) : (
               <CompositionDetailView
                 detail={detail}

@@ -2,10 +2,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ContributorDetail as ContributorDetailType, Position } from '@/lib/types';
-import { getInitials } from '@/lib/stringUtils';
+import Avatar from '@/components/Avatar';
 import InlineEdit from '@/components/InlineEdit';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
 import TierBadge from '@/components/TierBadge';
+import MetaLine from '@/components/MetaLine';
+import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import { stanceLabel, strengthTierLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
@@ -47,20 +49,14 @@ export default function ContributorDetailView({
           onClick={() => setAvatarModalOpen(true)}
           title="Edit avatar"
         >
-          {detail.avatar ? (
-            <img src={detail.avatar} alt="" className={ps.avatar} />
-          ) : (
-            <span className={ps.avatarPlaceholder}>
-              {getInitials(detail.name)}
-            </span>
-          )}
+          <Avatar name={detail.name} url={detail.avatar} size={96} />
         </button>
         <div className={ps.headerInfo}>
           <div className={ps.headerName}>{detail.name}</div>
-          <div className={ps.headerMeta}>
-            {detail.affiliation || 'No affiliation'}
-            {detail.role && <> &middot; {detail.role}</>}
-          </div>
+          <MetaLine className={ps.headerMeta}>
+            <span>{detail.affiliation || 'No affiliation'}</span>
+            {detail.role && <span>{detail.role}</span>}
+          </MetaLine>
           <TierBadge tier={detail.tier} />
         </div>
       </div>
@@ -96,26 +92,23 @@ export default function ContributorDetailView({
       </div>
 
       <div className={ps.fieldGrid}>
-        <div className={s.detailSection}>
-          <div className={s.detailLabel}>Affiliation</div>
+        <DetailSection label="Affiliation">
           <InlineEdit
             value={detail.affiliation}
             onSave={(v) => onPatch('affiliation', v)}
             placeholder="Add affiliation..."
           />
-        </div>
+        </DetailSection>
 
-        <div className={s.detailSection}>
-          <div className={s.detailLabel}>Role</div>
+        <DetailSection label="Role">
           <InlineEdit
             value={detail.role}
             onSave={(v) => onPatch('role', v)}
             placeholder="Add role..."
           />
-        </div>
+        </DetailSection>
 
-        <div className={s.detailSection}>
-          <div className={s.detailLabel}>Website</div>
+        <DetailSection label="Website">
           <div className={ps.urlRow}>
             <InlineEdit
               value={detail.website}
@@ -134,7 +127,7 @@ export default function ContributorDetailView({
               </a>
             )}
           </div>
-        </div>
+        </DetailSection>
       </div>
 
       {detail.tier != null && (
@@ -157,8 +150,7 @@ export default function ContributorDetailView({
 
       <hr className={s.divider} />
 
-      <div className={s.detailSection}>
-        <div className={s.detailLabel}>Sources ({detail.sources.length})</div>
+      <DetailSection label="Sources" count={detail.sources.length}>
         {detail.sources.length === 0 ? (
           <div className={s.detailValue}>No sources linked</div>
         ) : (
@@ -176,14 +168,11 @@ export default function ContributorDetailView({
             ))}
           </div>
         )}
-      </div>
+      </DetailSection>
 
       <hr className={s.divider} />
 
-      <div className={s.detailSection}>
-        <div className={s.detailLabel}>
-          Positions ({detail.positions.length})
-        </div>
+      <DetailSection label="Positions" count={detail.positions.length}>
         {detail.positions.length === 0 ? (
           <div className={s.detailValue}>No positions recorded</div>
         ) : (
@@ -210,7 +199,7 @@ export default function ContributorDetailView({
             </div>
           ))
         )}
-      </div>
+      </DetailSection>
     </>
   );
 }

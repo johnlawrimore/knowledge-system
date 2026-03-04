@@ -1,6 +1,8 @@
 'use client';
 
+import EmptyState from '@/components/EmptyState';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
+import MetaLine from '@/components/MetaLine';
 import { SOURCE_TYPES } from '@/lib/sourceTypes';
 import { SourceListItem } from '@/lib/types';
 import s from './page.module.scss';
@@ -26,7 +28,7 @@ export default function SourceList({
   return (
     <div className={s.listPanel}>
       {sources.length === 0 ? (
-        <div className={s.empty}>No sources found</div>
+        <EmptyState message="No sources found" />
       ) : (
         sources.map((src) => {
           const isReady = src.status === 'decomposed';
@@ -41,21 +43,11 @@ export default function SourceList({
               onClick={isReady ? () => onFilter('id', String(src.id)) : undefined}
             >
               <div className={s.sourceTitle}>{src.title}</div>
-              <div className={s.sourceMeta}>
+              <MetaLine>
                 <SourceTypeBadge type={src.source_type} size={14} />
-                {src.main_contributor && (
-                  <>
-                    <span>&middot;</span>
-                    <span>{src.main_contributor}</span>
-                  </>
-                )}
-                {!isReady && (
-                  <>
-                    <span>&middot;</span>
-                    <span className={s.processingBadge}>Processing</span>
-                  </>
-                )}
-              </div>
+                {src.main_contributor && <span>{src.main_contributor}</span>}
+                {!isReady && <span className={s.processingBadge}>Processing</span>}
+              </MetaLine>
             </div>
           );
         })

@@ -1,6 +1,6 @@
 import Link from 'next/link';
+import Avatar from '@/components/Avatar';
 import TierBadge from '@/components/TierBadge';
-import { getInitials } from '@/lib/stringUtils';
 import { DashboardData } from '@/lib/types';
 import s from '../page.module.scss';
 
@@ -17,11 +17,7 @@ export default function DashboardContributors({
       ) : (
         contributors.map((c) => (
           <Link key={c.id} href={`/contributors?id=${c.id}`} className={s.contributorRow}>
-            {c.avatar ? (
-              <img src={c.avatar} alt="" className={s.contributorAvatar} />
-            ) : (
-              <span className={s.avatarFallback}>{getInitials(c.name)}</span>
-            )}
+            <Avatar name={c.name} url={c.avatar} size={28} />
             <div className={s.contributorInfo}>
               <div className={s.contributorName}>{c.name}</div>
               {c.affiliation && <div className={s.contributorAffiliation}>{c.affiliation}</div>}

@@ -1,7 +1,9 @@
 'use client';
 import { ContributorListItem } from '@/lib/types';
-import { getInitials } from '@/lib/stringUtils';
+import Avatar from '@/components/Avatar';
+import EmptyState from '@/components/EmptyState';
 import TierBadge from '@/components/TierBadge';
+import MetaLine from '@/components/MetaLine';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
 
@@ -25,7 +27,7 @@ export default function ContributorList({
   return (
     <div className={s.listPanel}>
       {contributors.length === 0 ? (
-        <div className={s.empty}>No contributors found</div>
+        <EmptyState message="No contributors found" />
       ) : (
         contributors.map((c) => (
           <div
@@ -34,22 +36,14 @@ export default function ContributorList({
             onClick={() => onSelect(c.id)}
           >
             <div className={ps.listItemRow}>
-              {c.avatar ? (
-                <img src={c.avatar} alt="" className={ps.avatar} />
-              ) : (
-                <span className={ps.avatarPlaceholder}>
-                  {getInitials(c.name)}
-                </span>
-              )}
+              <Avatar name={c.name} url={c.avatar} size={48} />
               <div className={ps.listItemContent}>
                 <div className={s.listItemTitle}>{c.name}</div>
-                <div className={s.listItemMeta}>
-                  {c.affiliation || 'No affiliation'}
-                  {' · '}
-                  {c.claim_count} claim{c.claim_count !== 1 ? 's' : ''}
-                  {' · '}
-                  {c.source_count} source{c.source_count !== 1 ? 's' : ''}
-                </div>
+                <MetaLine className={s.listItemMeta}>
+                  <span>{c.affiliation || 'No affiliation'}</span>
+                  <span>{c.claim_count} claim{c.claim_count !== 1 ? 's' : ''}</span>
+                  <span>{c.source_count} source{c.source_count !== 1 ? 's' : ''}</span>
+                </MetaLine>
               </div>
             </div>
           </div>

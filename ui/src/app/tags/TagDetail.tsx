@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ClaimRow } from '@/lib/types';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import DetailSection from '@/components/DetailSection';
+import EmptyState from '@/components/EmptyState';
 import s from '../shared.module.scss';
 
 export default function TagDetail({
@@ -94,14 +96,11 @@ export default function TagDetail({
 
         <hr className={s.divider} />
 
-        <div className={s.detailSection}>
-          <div className={s.detailLabel}>
-            Claims ({claims.length})
-          </div>
+        <DetailSection label="Claims" count={claims.length}>
           {claimsLoading ? (
             <div className={s.loading}>Loading claims...</div>
           ) : claims.length === 0 ? (
-            <div className={s.empty}>No claims with this tag</div>
+            <EmptyState message="No claims with this tag" />
           ) : (
             <div className={s.claimList}>
               {claims.map((c) => (
@@ -114,7 +113,7 @@ export default function TagDetail({
               ))}
             </div>
           )}
-        </div>
+        </DetailSection>
       </div>
     </div>
   );

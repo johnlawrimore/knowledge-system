@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterListItem, FilterDetail as FilterDetailType } from '@/lib/types';
 import { pageIcon } from '@/lib/pageIcons';
+import EmptyState from '@/components/EmptyState';
 import FilterList from './FilterList';
 import FilterDetailComponent from './FilterDetail';
 import FilterCreateForm from './FilterCreateForm';
@@ -104,7 +105,7 @@ export default function FiltersContent() {
 
           <div className={s.detailPanel}>
             {!detail ? (
-              <div className={s.emptyDetail}>Select a filter to view details</div>
+              <EmptyState message="Select a filter to view details" variant="detail" />
             ) : (
               <FilterDetailComponent
                 detail={detail}

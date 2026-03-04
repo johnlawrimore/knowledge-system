@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { FilterDetail as FilterDetailType } from '@/lib/types';
 import InlineEdit from '@/components/InlineEdit';
+import DetailSection from '@/components/DetailSection';
 import s from '../shared.module.scss';
 
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), { ssr: false });
@@ -54,26 +55,24 @@ export default function FilterDetail({
         />
       </div>
 
-      <div className={s.detailSection}>
-        <div className={s.detailLabel}>Description</div>
+      <DetailSection label="Description">
         <InlineEdit
           value={detail.description}
           onSave={(v) => onPatch('description', v)}
           multiline
           placeholder="What is this filter for? (optional)"
         />
-      </div>
+      </DetailSection>
 
       <div className={s.divider} />
 
-      <div className={s.detailSection}>
-        <div className={s.detailLabel} style={{ marginBottom: '0.375rem' }}>Instructions</div>
+      <DetailSection label="Instructions">
         <MarkdownEditor
           value={instructionsDraft}
           onChange={setInstructionsDraft}
           placeholder="Describe what content to include or exclude from distillation…"
         />
-      </div>
+      </DetailSection>
 
       <div className={s.divider} />
 

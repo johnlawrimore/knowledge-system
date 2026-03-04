@@ -1,0 +1,17 @@
+.stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8125rem;
+}
+
+.supports {
+  color: var(--accent-green);
+}
+
+.contradicts {
+  color: var(--accent-red);
+}
+
+.qualifies {
+  color: var(--accent-amber);
+}

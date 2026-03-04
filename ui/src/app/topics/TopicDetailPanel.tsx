@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
+import DetailSection from '@/components/DetailSection';
 import { TopicDetail, ClaimRow } from '@/lib/types';
 import s from '../shared.module.scss';
 
 function ClaimSection({ title, claims }: { title: string; claims: ClaimRow[] }) {
   if (claims.length === 0) return null;
   return (
-    <div className={s.detailSection}>
-      <div className={s.detailLabel}>{title}</div>
+    <DetailSection label={title}>
       <div className={s.claimList}>
         {claims.map((c) => (
           <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
@@ -20,7 +20,7 @@ function ClaimSection({ title, claims }: { title: string; claims: ClaimRow[] }) 
           </Link>
         ))}
       </div>
-    </div>
+    </DetailSection>
   );
 }
 
@@ -37,8 +37,7 @@ export default function TopicDetailPanel({
         </div>
       )}
 
-      <div className={s.detailSection}>
-        <div className={s.detailLabel}>Statistics</div>
+      <DetailSection label="Statistics">
         <div className={s.detailValue}>
           {detail.claims.length} claims
           {detail.source_count > 0 && <> &middot; {detail.source_count} sources</>}
@@ -46,7 +45,7 @@ export default function TopicDetailPanel({
             <> &middot; avg score: {Number(detail.avg_claim_score).toFixed(1)}</>
           )}
         </div>
-      </div>
+      </DetailSection>
 
       <hr className={s.divider} />
 

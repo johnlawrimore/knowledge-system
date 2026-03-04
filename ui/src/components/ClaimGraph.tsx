@@ -82,8 +82,8 @@ const HIER_W    = 208; // 13rem
 const HUB_W     = 128; // 8rem
 const HUB_H     = 32;
 const LEAF_W    = 192; // 12rem
-const LEAF_H    = 70;  // approximate height for stagger math
-const LEAF_STEP = 92;  // vertical step between sibling leaves
+const LEAF_H    = 110; // approximate height for stagger math
+const LEAF_STEP = 150; // vertical step between sibling leaves
 const HUB_GAP   = 16;  // vertical gap between hub slots
 
 const FOCAL_X   = 0;
@@ -212,7 +212,7 @@ export default function ClaimGraph({
         id: 'e-parent',
         source: 'parent', sourceHandle: 'b',
         target: 'focal',  targetHandle: 't',
-        type: 'smoothstep',
+        type: 'straight',
         style: edgeStyle('parent'),
         markerEnd: { type: MarkerType.ArrowClosed, color: ec.stroke, width: 14, height: 14 },
       });
@@ -234,7 +234,7 @@ export default function ClaimGraph({
         id: `e-child-${c.id}`,
         source: 'focal', sourceHandle: 'b',
         target: id,      targetHandle: 't',
-        type: 'smoothstep',
+        type: 'straight',
         style: edgeStyle('child'),
         markerEnd: { type: MarkerType.ArrowClosed, color: ec.stroke, width: 12, height: 12 },
       });

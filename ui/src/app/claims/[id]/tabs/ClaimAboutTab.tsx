@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
+import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import type { ClaimDetail } from '@/lib/types';
 import s from '../page.module.scss';
@@ -25,8 +26,7 @@ export default function ClaimAboutTab({
   return (
     <>
       <div className={s.aboutGrid}>
-        <div className={s.aboutSection}>
-          <div className={s.metaLabel}>Topics</div>
+        <DetailSection label="Topics">
           <div className={s.chipRow}>
             {claim.topics.map((t) => (
               <LinkChip
@@ -39,10 +39,9 @@ export default function ClaimAboutTab({
             ))}
             <button className={s.addBtn}>+ Add</button>
           </div>
-        </div>
+        </DetailSection>
 
-        <div className={s.aboutSection}>
-          <div className={s.metaLabel}>Themes</div>
+        <DetailSection label="Themes">
           <div className={s.chipRow}>
             {claim.themes.map((t) => (
               <LinkChip
@@ -55,21 +54,19 @@ export default function ClaimAboutTab({
             ))}
             <button className={s.addBtn}>+ Add</button>
           </div>
-        </div>
+        </DetailSection>
 
-        <div className={s.aboutSection}>
-          <div className={s.metaLabel}>Tags</div>
+        <DetailSection label="Tags">
           <div className={s.chipRow}>
             {claim.tags.map((t) => (
               <LinkChip key={t} label={t} kind="tag" onRemove={() => onRemoveTag(t)} />
             ))}
             <button className={s.addBtn}>+ Add</button>
           </div>
-        </div>
+        </DetailSection>
 
         {claim.sources.length > 0 && (
-          <div className={s.aboutSection}>
-            <div className={s.metaLabel}>Sources ({claim.sources.length})</div>
+          <DetailSection label="Sources" count={claim.sources.length}>
             <div className={s.chipRow}>
               {claim.sources.map((src) => (
                 <Link key={src.id} href={`/sources?id=${src.id}`} className={s.sourceChip}>
@@ -77,7 +74,7 @@ export default function ClaimAboutTab({
                 </Link>
               ))}
             </div>
-          </div>
+          </DetailSection>
         )}
       </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import EmptyState from '@/components/EmptyState';
 import { deviceTypeLabel, contextTypeLabel, methodTypeLabel } from '@/lib/enumLabels';
 import type { Device, Context, Method } from '@/lib/types';
 import s from '../page.module.scss';
@@ -38,7 +39,7 @@ export default function ClaimEntitiesTab({ entityType, devices, contexts, method
     methods;
 
   if (items.length === 0) {
-    return <div className={s.emptyTab}>{config.emptyMessage}</div>;
+    return <EmptyState message={config.emptyMessage} variant="tab" />;
   }
 
   return (

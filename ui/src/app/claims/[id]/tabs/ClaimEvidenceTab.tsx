@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import EmptyState from '@/components/EmptyState';
 import StrengthMeter from '@/components/StrengthMeter';
 import { stanceLabel, evidenceTypeLabel, reasoningTypeLabel } from '@/lib/enumLabels';
 import type { Evidence, Reasoning } from '@/lib/types';
@@ -26,7 +27,7 @@ export default function ClaimEvidenceTab({ evidence, reasonings }: ClaimEvidence
   }, {});
 
   if (evidence.length === 0) {
-    return <div className={s.emptyTab}>No evidence yet — this claim needs sources</div>;
+    return <EmptyState message="No evidence yet — this claim needs sources" variant="tab" />;
   }
 
   return (

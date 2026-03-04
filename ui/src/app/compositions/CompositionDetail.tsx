@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { CompositionDetail as CompositionDetailType } from '@/lib/types';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
 import MarkdownViewer from '@/components/MarkdownViewer';
+import DetailSection from '@/components/DetailSection';
 import { compositionStatusLabel } from '@/lib/enumLabels';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
@@ -28,10 +29,7 @@ export default function CompositionDetailView({
       </div>
 
       {detail.sources.length > 0 && (
-        <div className={s.detailSection}>
-          <div className={s.detailLabel}>
-            Sources ({detail.sources.length})
-          </div>
+        <DetailSection label="Sources" count={detail.sources.length}>
           <div className={ps.linkedList}>
             {detail.sources.map((src) => (
               <div key={src.id} className={ps.sourceRow}>
@@ -50,22 +48,20 @@ export default function CompositionDetailView({
               </div>
             ))}
           </div>
-        </div>
+        </DetailSection>
       )}
 
       {detail.evaluation_results && (
-        <div className={s.detailSection}>
-          <div className={s.detailLabel}>Evaluation Results</div>
+        <DetailSection label="Evaluation Results">
           <div className={ps.evalBlock}>
             {JSON.stringify(detail.evaluation_results, null, 2)}
           </div>
-        </div>
+        </DetailSection>
       )}
 
-      <div className={s.detailSection}>
-        <div className={s.detailLabel}>Content</div>
+      <DetailSection label="Content">
         <MarkdownViewer content={detail.content} />
-      </div>
+      </DetailSection>
     </>
   );
 }

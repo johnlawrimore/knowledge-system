@@ -1,6 +1,7 @@
 'use client';
 import { CompositionListItem } from '@/lib/types';
 import { compositionStatusLabel } from '@/lib/enumLabels';
+import EmptyState from '@/components/EmptyState';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
 
@@ -18,7 +19,7 @@ export default function CompositionList({
   return (
     <div className={s.listPanel}>
       {compositions.length === 0 ? (
-        <div className={s.empty}>No compositions found</div>
+        <EmptyState message="No compositions found" />
       ) : (
         compositions.map((a) => (
           <div

@@ -243,16 +243,6 @@
   &:hover { text-decoration: underline; }
 }
 
-.evidenceStats {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.8125rem;
-}
-
-.evStatSupporting { color: var(--accent-green); }
-.evStatContradicting { color: var(--accent-red); }
-.evStatQualifying { color: var(--accent-amber); }
-
 // ── Content tabs ────────────────────────────────────────────────
 .contentTabs {
   display: flex;

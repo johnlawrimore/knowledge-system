@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { SourceListItem, SourceDetail } from '@/lib/types';
 import { SOURCE_TYPES } from '@/lib/sourceTypes';
 import { pageIcon } from '@/lib/pageIcons';
+import EmptyState from '@/components/EmptyState';
+import FilterBar, { filterStyles } from '@/components/FilterBar';
 import SourceList from './SourceList';
 import SourceDetailView from './SourceDetail';
 import s from './page.module.scss';
@@ -103,8 +105,8 @@ export default function SourcesContent() {
         <h1 className={s.title}><SourcesIcon size={32} stroke={2} className={s.pageIcon} />Sources</h1>
       </div>
 
-      <div className={s.filters}>
-        <select className={s.select} value={type} onChange={(e) => setFilter('type', e.target.value)}>
+      <FilterBar>
+        <select className={filterStyles.select} value={type} onChange={(e) => setFilter('type', e.target.value)}>
           <option value="">All types</option>
           {SOURCE_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
@@ -112,13 +114,13 @@ export default function SourcesContent() {
         </select>
 
         <input
-          className={s.searchInput}
+          className={filterStyles.searchInput}
           type="text"
           placeholder="Search sources..."
           value={search}
           onChange={(e) => setFilter('search', e.target.value)}
         />
-      </div>
+      </FilterBar>
 
       {loading ? (
         <div className={s.loading}>Loading sources...</div>
@@ -137,7 +139,7 @@ export default function SourcesContent() {
 
           <div className={s.detailPanel}>
             {!detail ? (
-              <div className={s.emptyDetail}>Select a source to view details</div>
+              <EmptyState message="Select a source to view details" variant="detail" />
             ) : (
               <SourceDetailView
                 detail={detail}

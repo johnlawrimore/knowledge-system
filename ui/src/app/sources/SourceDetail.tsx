@@ -2,14 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import EmptyState from '@/components/EmptyState';
 import InlineEdit from '@/components/InlineEdit';
 import InlineComboBox from '@/components/InlineComboBox';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import ClaimsList from '@/components/ClaimsList';
+import LinkedList from '@/components/LinkedList';
+import DetailSection from '@/components/DetailSection';
 import SourceTypeBadge from '@/components/SourceTypeBadge';
+import MetaLine from '@/components/MetaLine';
 import GradeBadge from '@/components/GradeBadge';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import Tabs from '@/components/Tabs';
+import Avatar from '@/components/Avatar';
+import StanceStats from '@/components/StanceStats';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { contributorRoleLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
@@ -48,17 +54,13 @@ export default function SourceDetailView({
   return (
     <>
       <div className={s.detailTitle}>{detail.title}</div>
-      <div className={s.detailMeta}>
+      <MetaLine>
         <SourceTypeBadge type={detail.source_type} size={16} />
-        {detail.publication && (
-          <> &middot; {detail.publication}</>
-        )}
-        {' '}&middot; <strong>{formatDate(detail.published_date)}</strong> &middot;{' '}
-        {detail.word_count?.toLocaleString()} words
-        {detail.contributors.length > 0 && (
-          <> &middot; <strong>{detail.contributors[0].name}</strong></>
-        )}
-      </div>
+        {detail.publication && <span>{detail.publication}</span>}
+        <strong>{formatDate(detail.published_date)}</strong>
+        <span>{detail.word_count?.toLocaleString()} words</span>
+        {detail.contributors.length > 0 && <strong>{detail.contributors[0].name}</strong>}
+      </MetaLine>
 
       <Tabs tabs={tabs} active={contentTab} onChange={setContentTab} />
 
@@ -66,55 +68,46 @@ export default function SourceDetailView({
         <div className={s.tabContent}>
           <div className={s.fieldGrid}>
             {detail.contributors.length > 0 && (
-              <div className={s.detailSection}>
-                <div className={s.detailLabel}>Contributors</div>
+              <DetailSection label="Contributors">
                 {detail.contributors.map((c) => (
                   <div key={c.id} className={s.contributorRow}>
-                    {c.avatar ? (
-                      <img src={c.avatar} alt="" className={s.contributorAvatar} />
-                    ) : (
-                      <span className={s.contributorAvatarPlaceholder}>{c.name.charAt(0)}</span>
-                    )}
+                    <Avatar name={c.name} url={c.avatar} size={24} />
                     <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
                     {c.affiliation && <span>({c.affiliation})</span>}
                     <span className={s.contributorRole}>{contributorRoleLabel(c.contributor_role)}</span>
                   </div>
                 ))}
-              </div>
+              </DetailSection>
             )}
 
-            <div className={s.detailSection}>
-              <div className={s.detailLabel}>Publication</div>
+            <DetailSection label="Publication">
               <InlineComboBox
                 value={detail.publication}
                 onSave={(v) => onPatch('publication', v)}
                 suggestions={publicationNames}
                 placeholder="Add publication..."
               />
-            </div>
+            </DetailSection>
           </div>
 
           {detail.url && (
-            <div className={s.detailSection}>
-              <div className={s.detailLabel}>Source URL</div>
+            <DetailSection label="Source URL">
               <a href={detail.url} target="_blank" rel="noopener noreferrer" className={s.linkedItem}>
                 {detail.url}
               </a>
-            </div>
+            </DetailSection>
           )}
 
-          <div className={s.detailSection}>
-            <div className={s.detailLabel}>Description</div>
+          <DetailSection label="Description">
             <InlineEdit
               value={detail.description}
               onSave={(v) => onPatch('description', v)}
               multiline
               placeholder="Add description..."
             />
-          </div>
+          </DetailSection>
 
-          <div className={s.detailSection}>
-            <div className={s.detailLabel}>Content Filter</div>
+          <DetailSection label="Content Filter">
             {detail.content_filter ? (
               <>
                 <div className={s.detailValue}>
@@ -132,7 +125,7 @@ export default function SourceDetailView({
                 None
               </div>
             )}
-          </div>
+          </DetailSection>
 
           {detail.evaluation_results?.grade && (
             <EvalSection
@@ -150,33 +143,19 @@ export default function SourceDetailView({
           )}
 
           {detail.evidence.total > 0 && (
-            <div className={s.detailSection}>
-              <div className={s.detailLabel}>Evidence ({detail.evidence.total})</div>
-              <div className={s.evidenceStats}>
-                {detail.evidence.byStance.supports && (
-                  <span className={s.evStatSupporting}>{detail.evidence.byStance.supports} supporting</span>
-                )}
-                {detail.evidence.byStance.contradicts && (
-                  <span className={s.evStatContradicting}>{detail.evidence.byStance.contradicts} contradicting</span>
-                )}
-                {detail.evidence.byStance.qualifies && (
-                  <span className={s.evStatQualifying}>{detail.evidence.byStance.qualifies} qualifying</span>
-                )}
-              </div>
-            </div>
+            <DetailSection label="Evidence" count={detail.evidence.total}>
+              <StanceStats
+                supports={detail.evidence.byStance.supports}
+                contradicts={detail.evidence.byStance.contradicts}
+                qualifies={detail.evidence.byStance.qualifies}
+              />
+            </DetailSection>
           )}
 
           {detail.compositions.count > 0 && (
-            <div className={s.detailSection}>
-              <div className={s.detailLabel}>Compositions ({detail.compositions.count})</div>
-              <div className={s.linkedList}>
-                {detail.compositions.items.map((a) => (
-                  <Link key={a.id} href={`/compositions?id=${a.id}`} className={s.linkedItem}>
-                    {a.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <DetailSection label="Compositions" count={detail.compositions.count}>
+              <LinkedList items={detail.compositions.items.map((a) => ({ id: a.id, title: a.title, href: `/compositions?id=${a.id}` }))} />
+            </DetailSection>
           )}
 
           <hr className={s.divider} />
@@ -200,7 +179,7 @@ export default function SourceDetailView({
         detail.distillation ? (
           <MarkdownViewer content={detail.distillation} />
         ) : (
-          <div className={s.emptyContent}>No distillation available</div>
+          <EmptyState message="No distillation available" variant="tab" />
         )
       ) : contentTab === 'original' ? (
         <MarkdownViewer content={detail.original} />
