@@ -125,10 +125,10 @@ Replace `<selected_version_id_or_NULL>` with the `version_id` recorded in Step 2
 End your response with this exact JSON block:
 
 ```json
-{"stage": "distill", "status": "success", "source_id": {{source_id}}, "title": "<source_title>", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>"}
+{"stage": "distill", "status": "success", "source_id": {{source_id}}, "title": "<source_title>", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
 
 On error:
 ```json
-{"stage": "distill", "status": "error", "error": "<description>"}
+{"stage": "distill", "status": "error", "error": "<description>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```

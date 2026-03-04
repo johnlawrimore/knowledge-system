@@ -74,7 +74,7 @@ Capture the returned `stage_id`.
 
 ### After each stage
 
-Capture `stage_end` via `date +%s`, compute `duration = stage_end - stage_start`. Parse the agent's JSON result. Then update the stage row:
+Capture `stage_end` via `date +%s`, compute `duration = stage_end - stage_start`. Parse the agent's JSON result. Extract the `tool_calls` array from the result, then remove it before storing `result_json` (keep the log separate from stage metrics). Then update the stage row:
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
@@ -83,7 +83,8 @@ UPDATE pipeline_stages SET
   duration_s = <duration>,
   total_tokens = <from agent metadata>,
   tool_uses = <from agent metadata>,
-  result_json = '<agent JSON output>',
+  tool_call_log = '<tool_calls array from agent JSON>',
+  result_json = '<agent JSON output minus tool_calls>',
   completed_at = NOW()
 WHERE id = <stage_id>;"
 ```
@@ -114,7 +115,8 @@ UPDATE pipeline_runs SET status = 'failed', completed_at = NOW() WHERE id = <run
 - **duration_s**: Wall-clock seconds from `date +%s` before/after
 - **total_tokens**: From the Agent tool's result metadata
 - **tool_uses**: From the Agent tool's result metadata
-- **result_json**: The full JSON block the agent returns (includes `process_notes` for anything unusual)
+- **tool_call_log**: The `tool_calls` array from the agent's JSON output (extracted and stored separately)
+- **result_json**: The agent's JSON block minus `tool_calls` (includes `process_notes` for anything unusual)
 
 Include timing in each stage report line:
 
@@ -240,8 +242,10 @@ For each stage, follow this pattern:
 1. Read the agent prompt file using the Read tool
 2. If the prompt contains `{{markdown_rules}}` or `{{contributor_enrichment}}`, read `process/agents/collect-shared.md` and substitute each placeholder with the content under its matching `##` heading (everything from the heading to the next `##` or end of file)
 3. Replace all remaining `{{placeholder}}` strings with actual runtime values
-4. Append this encoding rule to every agent prompt (after all substitutions):
+4. Append these rules to every agent prompt (after all substitutions):
    > **Encoding (mandatory):** All text written to the database must use clean Unicode. Fix mojibake on sight — never store double-encoded sequences like `â€"`, `â€™`, `â€œ`, `Ã©`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`, ellipsis `…`. This applies to every field in every table.
+   >
+   > **Tool call tracking (mandatory):** Track every tool call you make. In your final JSON output, include a `"tool_calls"` array listing each call in order. Each entry: `{"tool": "<tool_name>", "action": "<brief description>"}`. Use short, specific descriptions (e.g., `{"tool": "Bash", "action": "SELECT source content"}`, `{"tool": "WebFetch", "action": "fetch article URL"}`, `{"tool": "Bash", "action": "INSERT 5 claims"}`). The tool name should match exactly what you called (Bash, WebFetch, WebSearch, Read, Grep, Glob, etc.).
 5. Call the Agent tool with:
    - `subagent_type`: `"general-purpose"`
    - `model`: as specified per stage (sonnet or haiku)

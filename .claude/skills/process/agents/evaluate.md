@@ -169,5 +169,10 @@ UPDATE evidence SET evaluation_results = JSON_OBJECT(
 ## Required Output
 
 ```json
-{"stage": "evaluate", "status": "success", "source_grade": "<A-F>", "claims_evaluated": <count>, "evidence_evaluated": <count>, "avg_evidence_credibility": <float>, "process_notes": "<anything unusual, or null>"}
+{"stage": "evaluate", "status": "success", "source_grade": "<A-F>", "claims_evaluated": <count>, "evidence_evaluated": <count>, "avg_evidence_credibility": <float>, "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
+```
+
+On error:
+```json
+{"stage": "evaluate", "status": "error", "error": "<description>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```

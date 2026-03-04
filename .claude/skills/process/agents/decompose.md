@@ -317,10 +317,10 @@ UPDATE sources SET status = 'decomposed' WHERE id = {{source_id}};
 End your response with this exact JSON block:
 
 ```json
-{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "parent_child_groups": <count>, "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>, "device_ids": [<ids>], "context_ids": [<ids>], "method_ids": [<ids>], "reasoning_ids": [<ids>], "process_notes": "<anything unusual, or null>"}
+{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "parent_child_groups": <count>, "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>, "device_ids": [<ids>], "context_ids": [<ids>], "method_ids": [<ids>], "reasoning_ids": [<ids>], "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
 
 On error:
 ```json
-{"stage": "decompose", "status": "error", "error": "<description>"}
+{"stage": "decompose", "status": "error", "error": "<description>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```

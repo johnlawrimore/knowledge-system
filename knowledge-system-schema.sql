@@ -360,6 +360,7 @@ CREATE TABLE pipeline_stages (
     duration_s INT,
     total_tokens INT,
     tool_uses INT,
+    tool_call_log JSON,
     result_json JSON,
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP NULL,

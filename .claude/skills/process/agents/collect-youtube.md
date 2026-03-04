@@ -197,10 +197,10 @@ Contributor roles mapping:
 End your response with this exact JSON block:
 
 ```json
-{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "youtube_video", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>"}
+{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "youtube_video", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
 
 On error:
 ```json
-{"stage": "collect", "status": "error", "error": "<description>"}
+{"stage": "collect", "status": "error", "error": "<description>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
