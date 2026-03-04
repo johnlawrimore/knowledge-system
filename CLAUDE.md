@@ -16,8 +16,6 @@ The database is MySQL 8.0, accessed via the `mysql` MCP tool.
 | Skill | Trigger Phrases | Purpose |
 |-------|----------------|---------|
 | **process** | "process", "process this URL", "run full pipeline" | End-to-end pipeline: collect → distill → decompose → categorize → evaluate |
-| **status** | "status", "dashboard", "what needs work" | Pipeline reporting and gap analysis |
-| **manage** | "create topic", "add theme", "tag", "organize" | CRUD for topics, themes, tags, editorial |
 
 The **process** skill orchestrates 6 internal agents: collect-web, collect-youtube, distill, decompose, categorize, evaluate. Contributor enrichment and markdown formatting are handled automatically within those agents.
 
@@ -30,9 +28,6 @@ URL/Upload → process skill
   ├─ decompose
   ├─ categorize
   └─ evaluate
-
-manage — manual curation at any stage
-status — reporting and gap analysis
 ```
 
 ## Database
