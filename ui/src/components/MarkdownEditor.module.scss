@@ -39,6 +39,11 @@
     border-color: var(--border-default);
   }
 
+  // Dark mode: invert black toolbar icons to light
+  :global(html.dark) & :global(.mdxeditor-toolbar) svg {
+    filter: invert(1);
+  }
+
   // Popover / dropdown items
   :global(.mdxeditor-select-item) {
     background: var(--bg-surface);
