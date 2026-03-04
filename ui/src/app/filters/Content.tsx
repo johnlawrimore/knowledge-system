@@ -21,11 +21,16 @@ export default function FiltersContent() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
 
-  const loadFilters = useCallback(async () => {
+  const loadFilters = useCallback(async (autoSelect = false) => {
     const res = await fetch('/api/filters');
     const data = await res.json();
-    setFilters(data.filters || []);
+    const list = data.filters || [];
+    setFilters(list);
     setLoading(false);
+    if (autoSelect && !selectedId && list.length > 0) {
+      router.replace(`/filters?id=${list[0].id}`);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadDetail = useCallback(async (id: string) => {
@@ -35,7 +40,7 @@ export default function FiltersContent() {
     setDetail(data);
   }, []);
 
-  useEffect(() => { loadFilters(); }, [loadFilters]);
+  useEffect(() => { loadFilters(true); }, [loadFilters]);
 
   useEffect(() => {
     if (selectedId) {

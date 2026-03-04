@@ -56,11 +56,18 @@ export default function SourcesContent() {
     fetch(`/api/sources?${params}`)
       .then((r) => r.json())
       .then((d) => {
-        setSources(d.sources || []);
+        const list = d.sources || [];
+        setSources(list);
         setTotal(d.total || 0);
+        if (!selectedId && list.length > 0) {
+          const urlParams = new URLSearchParams(searchParams.toString());
+          urlParams.set('id', String(list[0].id));
+          router.replace(`/sources?${urlParams.toString()}`);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, type, search]);
 
   useEffect(() => {

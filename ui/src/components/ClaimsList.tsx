@@ -78,18 +78,20 @@ function ClaimNode({
       <div className={s.claimRow}>
         <Link href={`/claims/${claim.id}`} className={s.claimLink}>
           <div className={s.claimHeader}>
-            <span className={s.claimId}>#{claim.id}</span>
-            <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
+            <div className={s.claimHeaderLeft}>
+              <span className={s.claimId}>#{claim.id}</span>
+              <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
+              {hasChildren && (
+                <button
+                  className={s.expandBtn}
+                  onClick={toggleExpanded}
+                  title={expanded ? 'Collapse children' : 'Expand children'}
+                >
+                  {expanded ? '\u25BC' : '\u25B6'} {claim.child_count} child{claim.child_count !== 1 ? 'ren' : ''}
+                </button>
+              )}
+            </div>
             <ConfidenceBadge confidence={claim.computed_confidence} score={claim.score} />
-            {hasChildren && (
-              <button
-                className={s.expandBtn}
-                onClick={toggleExpanded}
-                title={expanded ? 'Collapse children' : 'Expand children'}
-              >
-                {expanded ? '\u25BC' : '\u25B6'} {claim.child_count} child{claim.child_count !== 1 ? 'ren' : ''}
-              </button>
-            )}
           </div>
           <div className={s.claimStatement}>{claim.statement}</div>
           <div className={s.claimMeta}>

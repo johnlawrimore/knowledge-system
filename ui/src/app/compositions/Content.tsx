@@ -43,11 +43,18 @@ export default function CompositionsContent() {
     fetch(`/api/compositions?${params}`)
       .then((r) => r.json())
       .then((d) => {
-        setCompositions(d.compositions || []);
+        const list = d.compositions || [];
+        setCompositions(list);
         setTotal(d.total || 0);
+        if (!selectedId && list.length > 0) {
+          const urlParams = new URLSearchParams(searchParams.toString());
+          urlParams.set('id', String(list[0].id));
+          router.replace(`/compositions?${urlParams.toString()}`);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, search]);
 
   useEffect(() => {

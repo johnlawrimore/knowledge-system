@@ -207,21 +207,26 @@
 }
 
 .treeItem {
-  padding: 0.25rem 0;
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.25rem;
   cursor: pointer;
   color: var(--text-secondary);
-  transition: color 0.15s;
+  transition: color 0.12s, background 0.12s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  &:hover { color: var(--text-primary); }
+  &:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
 }
 
 .treeItemActive {
   @extend .treeItem;
   color: var(--text-primary);
   font-weight: 500;
+  background: var(--bg-raised);
 }
 
 .treeToggle {

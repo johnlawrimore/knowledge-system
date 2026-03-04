@@ -35,9 +35,16 @@ export default function ContributorsContent() {
     setLoading(true);
     fetch('/api/contributors')
       .then((r) => r.json())
-      .then((d) => setContributors(d.contributors || []))
+      .then((d) => {
+        const list = d.contributors || [];
+        setContributors(list);
+        if (!selectedId && list.length > 0) {
+          router.replace(`/contributors?id=${list[0].id}`);
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -138,7 +138,7 @@ function ClaimNodeRenderer({ data }: NodeProps) {
   const roleLabel = ROLE_LABEL[d.role];
 
   return (
-    <div className={cls} onClick={() => d.onNavigate(d.claimId)}>
+    <div className={cls}>
       <Handle id="t" type="target" position={Position.Top}    className={f.handle} />
       <Handle id="l" type="target" position={Position.Left}   className={f.handle} />
       <div className={f.nodeHead}>
@@ -184,6 +184,12 @@ export default function ClaimGraph({
 }: ClaimGraphProps) {
   const router = useRouter();
   const go = useCallback((id: number) => router.push(`/claims/${id}`), [router]);
+
+  const handleNodeClick = useCallback((_e: React.MouseEvent, node: Node) => {
+    if (node.type === 'hub') return;
+    const d = node.data as ClaimNodeData;
+    if (d.claimId) go(d.claimId);
+  }, [go]);
 
   const { nodes, edges } = useMemo(() => {
     const ns: Node[] = [];
@@ -370,6 +376,7 @@ export default function ClaimGraph({
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
+          onNodeClick={handleNodeClick}
           minZoom={0.2}
           maxZoom={2}
         />
