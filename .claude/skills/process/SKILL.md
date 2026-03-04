@@ -154,9 +154,19 @@ If status is "error", report and abort.
 
 ### Stage 2: Distill
 
+**Before spawning**, query active content filters:
+
+```sql
+docker exec -i knowledge-db mysql knowledge -e "
+SELECT id, name, description FROM content_filters WHERE is_active = TRUE ORDER BY name;"
+```
+
+- If **no active filters**: set `filter_id = NULL`, proceed without asking.
+- If **one or more** active filters: ask the user to pick one (or "None"), then use their selection.
+
 **Agent prompt:** `process/agents/distill.md`
 **Model:** sonnet
-**Substitutions:** `{{source_id}}` → from stage 1
+**Substitutions:** `{{source_id}}` → from stage 1, `{{filter_id}}` → selected filter ID or `NULL`
 **Extract from result:** `source_id`, `title`, `word_count`
 
 Report to user:

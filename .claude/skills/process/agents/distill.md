@@ -23,30 +23,23 @@ SELECT id, title, source_type, content, status FROM sources WHERE id = {{source_
 - If `content` is empty or NULL, return error: "Source has no content"
 - If `status` is not `collected`, return error: "Source status is '<status>', expected 'collected'"
 
-### 2. Select Content Filter
+### 2. Load Content Filter
 
-Query active filters and their current versions:
+The orchestrator provides the content filter via `{{filter_id}}` (an integer ID or `NULL`).
+
+If `{{filter_id}}` is NULL, proceed with no filter (skip to Step 3).
+
+If `{{filter_id}}` is not NULL, fetch the latest version's instructions:
 
 ```sql
-SELECT cf.id, cf.name, cf.description,
-       cfv.id AS version_id, cfv.version, cfv.instructions
-FROM content_filters cf
-JOIN content_filter_versions cfv
-  ON cfv.filter_id = cf.id
-  AND cfv.version = (
-    SELECT MAX(v2.version) FROM content_filter_versions v2 WHERE v2.filter_id = cf.id
-  )
-WHERE cf.is_active = TRUE
-ORDER BY cf.name;
+SELECT cfv.id AS version_id, cfv.instructions
+FROM content_filter_versions cfv
+WHERE cfv.filter_id = {{filter_id}}
+ORDER BY cfv.version DESC
+LIMIT 1;
 ```
 
-If no active filters exist in the database, proceed with no filter (skip to Step 3).
-
-Otherwise, present the filters to the user. For each filter show: name, description, current version number, and instructions. Also present **"None"** as an option.
-
-Wait for the user to confirm their selection before proceeding.
-
-Record the selected `version_id` (or `NULL` if no filter). This will be saved in Step 5.
+Apply those instructions during distillation (Step 4) to shape what content survives. Record the `version_id` for Step 5.
 
 ### 3. Update Status
 
