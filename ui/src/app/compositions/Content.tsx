@@ -1,49 +1,13 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import InlineEdit from '@/components/InlineEdit';
-import LinkChip from '@/components/LinkChip';
-import SourceTypeBadge from '@/components/SourceTypeBadge';
-import MarkdownViewer from '@/components/MarkdownViewer';
-import { compositionStatusLabel } from '@/lib/enumLabels';
+import { CompositionListItem, CompositionDetail } from '@/lib/types';
 import { pageIcon } from '@/lib/pageIcons';
+import CompositionList from './CompositionList';
+import CompositionDetailView from './CompositionDetail';
 import s from '../shared.module.scss';
-import ps from './page.module.scss';
 
 const CompositionsIcon = pageIcon('compositions');
-
-interface CompositionListItem {
-  id: number;
-  title: string;
-  word_count: number;
-  status: string;
-  created_at: string;
-}
-
-interface CompositionSource {
-  id: number;
-  title: string;
-  source_type: string;
-  url: string | null;
-  published_date: string | null;
-  word_count: number;
-  status: string;
-  contribution_note: string | null;
-}
-
-interface CompositionDetail {
-  id: number;
-  title: string;
-  content: string;
-  word_count: number;
-  evaluation_results: Record<string, unknown> | null;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  sources: CompositionSource[];
-  claim_count: number;
-}
 
 export default function CompositionsContent() {
   const router = useRouter();
@@ -137,30 +101,11 @@ export default function CompositionsContent() {
         <div className={s.loading}>Loading compositions...</div>
       ) : (
         <div className={s.splitLayout}>
-          <div className={s.listPanel}>
-            {compositions.length === 0 ? (
-              <div className={s.empty}>No compositions found</div>
-            ) : (
-              compositions.map((a) => (
-                <div
-                  key={a.id}
-                  className={
-                    String(a.id) === selectedId
-                      ? s.listItemActive
-                      : s.listItem
-                  }
-                  onClick={() => setFilter('id', String(a.id))}
-                >
-                  <div className={s.listItemTitle}>{a.title}</div>
-                  <div className={s.listItemMeta}>
-                    <span className={ps.statusBadge}>{compositionStatusLabel(a.status)}</span>
-                    {' \u00B7 '}
-                    <span>{a.word_count?.toLocaleString()} words</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <CompositionList
+            compositions={compositions}
+            selectedId={selectedId}
+            onSelect={(id) => setFilter('id', String(id))}
+          />
 
           <div className={s.detailPanel}>
             {!detail ? (
@@ -168,56 +113,10 @@ export default function CompositionsContent() {
                 Select a composition to view details
               </div>
             ) : (
-              <>
-                <div className={s.detailTitle}>{detail.title}</div>
-                <div className={ps.detailMeta}>
-                  {detail.word_count?.toLocaleString()} words
-                  {' \u00B7 '}
-                  <span className={ps.statusBadge}>{compositionStatusLabel(detail.status)}</span>
-                  {' \u00B7 '}
-                  {detail.claim_count} claims
-                </div>
-
-                {detail.sources.length > 0 && (
-                  <div className={s.detailSection}>
-                    <div className={s.detailLabel}>
-                      Sources ({detail.sources.length})
-                    </div>
-                    <div className={ps.linkedList}>
-                      {detail.sources.map((src) => (
-                        <div key={src.id} className={ps.sourceRow}>
-                          <Link
-                            href={`/sources?id=${src.id}`}
-                            className={ps.linkedItem}
-                          >
-                            {src.title}
-                          </Link>
-                          <SourceTypeBadge type={src.source_type} size={13} />
-                          {src.contribution_note && (
-                            <span className={ps.contributionNote}>
-                              {src.contribution_note}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {detail.evaluation_results && (
-                  <div className={s.detailSection}>
-                    <div className={s.detailLabel}>Evaluation Results</div>
-                    <div className={ps.evalBlock}>
-                      {JSON.stringify(detail.evaluation_results, null, 2)}
-                    </div>
-                  </div>
-                )}
-
-                <div className={s.detailSection}>
-                  <div className={s.detailLabel}>Content</div>
-                  <MarkdownViewer content={detail.content} />
-                </div>
-              </>
+              <CompositionDetailView
+                detail={detail}
+                onPatch={patchComposition}
+              />
             )}
           </div>
         </div>

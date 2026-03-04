@@ -3,38 +3,10 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import LinkChip from '@/components/LinkChip';
-import MultiSelectDropdown, { FlatOption } from '@/components/MultiSelectDropdown';
+import MultiSelectDropdown from '@/components/MultiSelectDropdown';
+import { Claim, TopicNode, FlatOption } from '@/lib/types';
 import { claimTypeLabel } from '@/lib/enumLabels';
 import s from './ClaimsList.module.scss';
-
-interface Claim {
-  id: number;
-  statement: string;
-  claim_type: string;
-  parent_claim_id: number | null;
-  computed_confidence: string;
-  score: number;
-  supporting_sources: number;
-  contradicting_sources: number;
-  supporting_evidence: number;
-  contradicting_evidence: number;
-  qualifying_evidence: number;
-  topics: string[];
-  themes: string[];
-  tags: string[];
-  device_count: number;
-  context_count: number;
-  method_count: number;
-  reasoning_count: number;
-  child_count: number;
-}
-
-interface TopicNode {
-  id: number;
-  name: string;
-  parent_topic_id: number | null;
-  children: TopicNode[];
-}
 
 function flattenTree(nodes: TopicNode[], depth = 0, parentId: number | null = null): FlatOption[] {
   const result: FlatOption[] = [];

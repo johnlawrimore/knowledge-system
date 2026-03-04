@@ -10,20 +10,11 @@ import {
   type NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { TopicNode } from '@/lib/types';
+import { countClaims, findInTree, buildPath } from '@/lib/treeUtils';
 import f from './TopicFlow.module.scss';
 
 /* ── Types ──────────────────────────────────────────────────────── */
-
-interface TopicTree {
-  id: number;
-  name: string;
-  claim_count: number;
-  evidence_count: number;
-  source_count: number;
-  avg_claim_score: number | null;
-  children: TopicTree[];
-  parent_topic_id: number | null;
-}
 
 interface NodeData {
   label: string;
@@ -33,32 +24,6 @@ interface NodeData {
   isSelected: boolean;
   onSelect: () => void;
   [key: string]: unknown;
-}
-
-/* ── Helpers ────────────────────────────────────────────────────── */
-
-function countClaims(node: TopicTree): number {
-  let total = node.claim_count;
-  for (const child of node.children) total += countClaims(child);
-  return total;
-}
-
-function findInTree(nodes: TopicTree[], id: number): TopicTree | null {
-  for (const n of nodes) {
-    if (n.id === id) return n;
-    const found = findInTree(n.children, id);
-    if (found) return found;
-  }
-  return null;
-}
-
-function buildPath(nodes: TopicTree[], targetId: number): TopicTree[] {
-  for (const n of nodes) {
-    if (n.id === targetId) return [n];
-    const sub = buildPath(n.children, targetId);
-    if (sub.length > 0) return [n, ...sub];
-  }
-  return [];
 }
 
 /* ── Custom node ────────────────────────────────────────────────── */
@@ -95,7 +60,7 @@ export default function TopicFlow({
   selectedId,
   onSelect,
 }: {
-  topics: TopicTree[];
+  topics: TopicNode[];
   selectedId: string | null;
   onSelect: (id: number | null) => void;
 }) {
@@ -111,7 +76,7 @@ export default function TopicFlow({
     const flowEdges: Edge[] = [];
 
     // Collect tiers: each tier is an array of { node, parentId }
-    type TierEntry = { node: TopicTree; parentId: number | null };
+    type TierEntry = { node: TopicNode; parentId: number | null };
     const tiers: TierEntry[][] = [];
 
     if (selected) {
@@ -128,7 +93,7 @@ export default function TopicFlow({
         }));
         tiers.push(tier);
         const nextParentIds: number[] = [];
-        const next: TopicTree[] = [];
+        const next: TopicNode[] = [];
         for (const c of current) {
           if (c.children.length > 0) {
             nextParentIds.push(c.id);

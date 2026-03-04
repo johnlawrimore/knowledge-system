@@ -1,128 +1,14 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import ConfidenceBadge from '@/components/ConfidenceBadge';
 import { pageIcon } from '@/lib/pageIcons';
+import { TopicNode, TopicDetail } from '@/lib/types';
 import TopicFlow from './TopicFlow';
+import TopicTree from './TopicTree';
+import TopicDetailPanel from './TopicDetailPanel';
 import s from '../shared.module.scss';
 
 const TopicsIcon = pageIcon('topics');
-
-interface TopicNode {
-  id: number;
-  name: string;
-  description: string | null;
-  parent_topic_id: number | null;
-  claim_count: number;
-  evidence_count: number;
-  source_count: number;
-  avg_claim_score: number | null;
-  children: TopicNode[];
-}
-
-interface ClaimRow {
-  id: number;
-  statement: string;
-  claim_type: string;
-  computed_confidence: string;
-  score: number;
-  supporting_sources: number;
-  contradicting_sources: number;
-  supporting_evidence: number;
-  contradicting_evidence: number;
-}
-
-interface TopicDetail {
-  id: number;
-  name: string;
-  description: string | null;
-  parent_topic_id: number | null;
-  claims: ClaimRow[];
-  strongest: ClaimRow[];
-  source_count: number;
-  avg_claim_score: number | null;
-}
-
-function countAllClaims(node: TopicNode): number {
-  let total = node.claim_count;
-  for (const child of node.children) {
-    total += countAllClaims(child);
-  }
-  return total;
-}
-
-function TreeNode({
-  node,
-  selectedId,
-  onSelect,
-  depth = 0,
-}: {
-  node: TopicNode;
-  selectedId: string | null;
-  onSelect: (id: number) => void;
-  depth?: number;
-}) {
-  const [expanded, setExpanded] = useState(true);
-  const hasChildren = node.children.length > 0;
-  const isActive = String(node.id) === selectedId;
-
-  return (
-    <div>
-      <div
-        className={isActive ? s.treeItemActive : s.treeItem}
-        onClick={() => onSelect(node.id)}
-      >
-        {hasChildren && (
-          <span
-            className={s.treeToggle}
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpanded(!expanded);
-            }}
-          >
-            {expanded ? '\u25BE' : '\u25B8'}
-          </span>
-        )}
-        {!hasChildren && <span className={s.treeToggle}>&nbsp;</span>}
-        {node.name}
-        <span className={s.treeCount}>({countAllClaims(node)})</span>
-      </div>
-      {hasChildren && expanded && (
-        <div className={s.treeChildren}>
-          {node.children.map((child) => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              depth={depth + 1}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ClaimSection({ title, claims }: { title: string; claims: ClaimRow[] }) {
-  if (claims.length === 0) return null;
-  return (
-    <div className={s.detailSection}>
-      <div className={s.detailLabel}>{title}</div>
-      <div className={s.claimList}>
-        {claims.map((c) => (
-          <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
-            <span className={s.claimScore}>
-              <ConfidenceBadge confidence={c.computed_confidence} score={c.score} />
-            </span>{' '}
-            <span className={s.claimStatement}>{c.statement}</span>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function TopicsContent() {
   const router = useRouter();
@@ -188,16 +74,11 @@ export default function TopicsContent() {
             {topics.length === 0 ? (
               <div className={s.empty}>No topics found</div>
             ) : (
-              <div className={s.tree}>
-                {topics.map((node) => (
-                  <TreeNode
-                    key={node.id}
-                    node={node}
-                    selectedId={selectedId}
-                    onSelect={selectTopic}
-                  />
-                ))}
-              </div>
+              <TopicTree
+                topics={topics}
+                selectedId={selectedId ? Number(selectedId) : null}
+                onSelect={selectTopic}
+              />
             )}
           </div>
 
@@ -211,39 +92,7 @@ export default function TopicsContent() {
             {detailLoading ? (
               <div className={s.loading}>Loading topic...</div>
             ) : detail ? (
-              <>
-                {detail.description && (
-                  <div className={s.detailSection}>
-                    <div className={s.detailValue}>{detail.description}</div>
-                  </div>
-                )}
-
-                <div className={s.detailSection}>
-                  <div className={s.detailLabel}>Statistics</div>
-                  <div className={s.detailValue}>
-                    {detail.claims.length} claims
-                    {detail.source_count > 0 && <> &middot; {detail.source_count} sources</>}
-                    {detail.avg_claim_score != null && (
-                      <> &middot; avg score: {Number(detail.avg_claim_score).toFixed(1)}</>
-                    )}
-                  </div>
-                </div>
-
-                <hr className={s.divider} />
-
-                <ClaimSection title="Strongest Claims" claims={detail.strongest} />
-
-                {detail.claims.length > 0 && (
-                  <div className={s.detailSection}>
-                    <Link
-                      href={`/claims?topic=${detail.id}`}
-                      style={{ fontSize: '0.8125rem', color: 'var(--accent-blue)' }}
-                    >
-                      All {detail.claims.length} claims →
-                    </Link>
-                  </div>
-                )}
-              </>
+              <TopicDetailPanel detail={detail} />
             ) : null}
           </div>
         </div>

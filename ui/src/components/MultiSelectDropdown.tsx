@@ -1,15 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { FlatOption } from '@/lib/types';
 import s from './MultiSelectDropdown.module.scss';
-
-export interface FlatOption {
-  id: number;
-  name: string;
-  depth: number;
-  childIds: number[];
-  parentId: number | null;
-}
 
 interface Props {
   label: string;

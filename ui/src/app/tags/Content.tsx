@@ -1,43 +1,15 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 // @ts-expect-error -- react-tagcloud has no type declarations
-import { TagCloud } from 'react-tagcloud';
-import ConfidenceBadge from '@/components/ConfidenceBadge';
+import { TagCloud as ReactTagCloud } from 'react-tagcloud';
+import { TagItem, TagGroup, ClaimRow } from '@/lib/types';
 import { pageIcon } from '@/lib/pageIcons';
+import TagCloud from './TagCloud';
+import TagDetail from './TagDetail';
 import s from '../shared.module.scss';
 
 const TagsIcon = pageIcon('tags');
-
-interface TagItem {
-  tag: string;
-  claim_count: number;
-}
-
-interface ClaimRow {
-  id: number;
-  statement: string;
-  claim_type: string;
-  computed_confidence: string;
-  score: number;
-  supporting_sources: number;
-  contradicting_sources: number;
-  supporting_evidence: number;
-  contradicting_evidence: number;
-}
-
-interface TagGroup {
-  prefix: string;
-  tags: TagItem[];
-}
-
-function tagTierClass(count: number): string {
-  if (count >= 11) return s.tagTier4;
-  if (count >= 6) return s.tagTier3;
-  if (count >= 2) return s.tagTier2;
-  return s.tagItem;
-}
 
 function groupTags(tags: TagItem[]): TagGroup[] {
   // Count how many tags share each first segment (split on "-")
@@ -79,8 +51,6 @@ export default function TagsContent() {
   const [loading, setLoading] = useState(true);
   const [claims, setClaims] = useState<ClaimRow[]>([]);
   const [claimsLoading, setClaimsLoading] = useState(false);
-  const [renaming, setRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState('');
 
   const selectedTag = searchParams.get('tag');
 
@@ -95,7 +65,6 @@ export default function TagsContent() {
 
   const closeModal = useCallback(() => {
     router.push('/tags');
-    setRenaming(false);
   }, [router]);
 
   useEffect(() => {
@@ -120,22 +89,21 @@ export default function TagsContent() {
       .finally(() => setClaimsLoading(false));
   }, [selectedTag]);
 
-  const handleRename = async () => {
-    if (!selectedTag || !renameValue.trim()) return;
-    const newTag = renameValue.trim();
+  const refreshTags = async () => {
+    const tagsRes = await fetch('/api/tags');
+    const tagsData = await tagsRes.json();
+    setTags(tagsData.tags || []);
+  };
+
+  const handleRename = async (oldTag: string, newTag: string) => {
     try {
-      const res = await fetch(`/api/tags/${encodeURIComponent(selectedTag)}`, {
+      const res = await fetch(`/api/tags/${encodeURIComponent(oldTag)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newTag }),
       });
       if (res.ok) {
-        // Refresh tags list
-        const tagsRes = await fetch('/api/tags');
-        const tagsData = await tagsRes.json();
-        setTags(tagsData.tags || []);
-        setRenaming(false);
-        // Navigate to the new tag
+        await refreshTags();
         router.push(`/tags?tag=${encodeURIComponent(newTag)}`);
       }
     } catch (err) {
@@ -143,18 +111,13 @@ export default function TagsContent() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedTag) return;
-    if (!confirm(`Delete tag "${selectedTag}" from all claims?`)) return;
+  const handleDelete = async (tag: string) => {
     try {
-      const res = await fetch(`/api/tags/${encodeURIComponent(selectedTag)}`, {
+      const res = await fetch(`/api/tags/${encodeURIComponent(tag)}`, {
         method: 'DELETE',
       });
       if (res.ok) {
-        // Refresh tags list
-        const tagsRes = await fetch('/api/tags');
-        const tagsData = await tagsRes.json();
-        setTags(tagsData.tags || []);
+        await refreshTags();
         setClaims([]);
         router.push('/tags');
       }
@@ -178,7 +141,7 @@ export default function TagsContent() {
       ) : (
         <>
           <div className={s.tagCloud}>
-            <TagCloud
+            <ReactTagCloud
               minSize={14}
               maxSize={40}
               tags={tags.map((t) => ({ value: t.tag, count: t.claim_count, key: t.tag }))}
@@ -188,96 +151,17 @@ export default function TagsContent() {
             />
           </div>
 
-          {groups.map((group) => (
-            <div key={group.prefix} className={s.tagGroup}>
-              <div className={s.tagGroupTitle}>{group.prefix}</div>
-              <div className={s.tagGrid}>
-                {group.tags.map((t) => (
-                  <span
-                    key={t.tag}
-                    className={t.tag === selectedTag ? s.tagItemActive : tagTierClass(t.claim_count)}
-                    onClick={() => selectTag(t.tag)}
-                  >
-                    {t.tag}
-                    <span className={s.tagCount}>{t.claim_count}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+          <TagCloud groups={groups} selectedTag={selectedTag} onSelect={selectTag} />
 
           {selectedTag && (
-            <div className={s.modalOverlay} onClick={closeModal}>
-              <div className={s.modal} onClick={(e) => e.stopPropagation()}>
-                <div className={s.modalHeader}>
-                  <span className={s.modalTitle}>{selectedTag}</span>
-                  <button className={s.modalClose} onClick={closeModal}>&times;</button>
-                </div>
-
-                <div className={s.actions}>
-                  {renaming ? (
-                    <>
-                      <input
-                        className={s.searchInput}
-                        type="text"
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleRename();
-                          if (e.key === 'Escape') setRenaming(false);
-                        }}
-                        placeholder="New tag name..."
-                      />
-                      <button className={s.actionBtn} onClick={handleRename}>
-                        Save
-                      </button>
-                      <button className={s.actionBtn} onClick={() => setRenaming(false)}>
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className={s.actionBtn}
-                        onClick={() => {
-                          setRenameValue(selectedTag);
-                          setRenaming(true);
-                        }}
-                      >
-                        Rename
-                      </button>
-                      <button className={s.dangerBtn} onClick={handleDelete}>
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                <hr className={s.divider} />
-
-                <div className={s.detailSection}>
-                  <div className={s.detailLabel}>
-                    Claims ({claims.length})
-                  </div>
-                  {claimsLoading ? (
-                    <div className={s.loading}>Loading claims...</div>
-                  ) : claims.length === 0 ? (
-                    <div className={s.empty}>No claims with this tag</div>
-                  ) : (
-                    <div className={s.claimList}>
-                      {claims.map((c) => (
-                        <Link key={c.id} href={`/claims/${c.id}`} className={s.claimRow}>
-                          <span className={s.claimScore}>
-                            <ConfidenceBadge confidence={c.computed_confidence} score={c.score} />
-                          </span>{' '}
-                          <span className={s.claimStatement}>{c.statement}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <TagDetail
+              tag={selectedTag}
+              claims={claims}
+              claimsLoading={claimsLoading}
+              onRename={handleRename}
+              onDelete={handleDelete}
+              onClose={closeModal}
+            />
           )}
         </>
       )}

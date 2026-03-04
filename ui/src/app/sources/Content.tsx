@@ -1,62 +1,15 @@
 'use client';
+
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import InlineEdit from '@/components/InlineEdit';
-import InlineComboBox from '@/components/InlineComboBox';
-import MarkdownViewer from '@/components/MarkdownViewer';
-import ClaimsList from '@/components/ClaimsList';
-import SourceTypeBadge from '@/components/SourceTypeBadge';
-import GradeBadge from '@/components/GradeBadge';
-import EvalSection, { DimensionGrid } from '@/components/EvalSection';
+import { SourceListItem, SourceDetail } from '@/lib/types';
 import { SOURCE_TYPES } from '@/lib/sourceTypes';
-import { contributorRoleLabel } from '@/lib/enumLabels';
-import { formatDate } from '@/lib/formatDate';
 import { pageIcon } from '@/lib/pageIcons';
+import SourceList from './SourceList';
+import SourceDetailView from './SourceDetail';
 import s from './page.module.scss';
 
 const SourcesIcon = pageIcon('sources');
-
-interface SourceListItem {
-  id: number;
-  title: string;
-  source_type: string;
-  publication: string | null;
-  word_count: number;
-  status: string;
-  date_collected: string;
-  main_contributor: string | null;
-}
-
-interface SourceEvaluation {
-  quality?: Record<string, number>;
-  rigor?: Record<string, number>;
-  grade?: string;
-  bias_notes?: string;
-  evaluated_at?: string;
-}
-
-interface SourceDetail {
-  id: number;
-  title: string;
-  source_type: string;
-  url: string | null;
-  publication: string | null;
-  published_date: string | null;
-  word_count: number;
-  status: string;
-  description: string | null;
-  evaluation_results: SourceEvaluation | null;
-  content_preview: string;
-  original: string;
-  content_has_more: boolean;
-  distillation: string | null;
-  contributors: { id: number; name: string; affiliation: string; avatar: string | null; contributor_role: string }[];
-  compositions: { count: number; items: { id: number; title: string; status: string }[] };
-  content_filter: { filter_id: number; name: string; version_id: number; version: number; instructions: string } | null;
-  evidence: { total: number; byStance: Record<string, number> };
-  claims_count: number;
-}
 
 export default function SourcesContent() {
   const router = useRouter();
@@ -65,10 +18,8 @@ export default function SourcesContent() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<SourceDetail | null>(null);
-  const [contentTab, setContentTab] = useState<'about' | 'distillation' | 'original' | 'claims'>('about');
 
   const [publicationNames, setPublicationNames] = useState<string[]>([]);
-  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   const selectedId = searchParams.get('id');
   const status = searchParams.get('status') || '';
@@ -114,7 +65,7 @@ export default function SourcesContent() {
     if (!selectedId) { setDetail(null); return; }
     fetch(`/api/sources/${selectedId}`)
       .then((r) => r.json())
-      .then(setDetail)
+      .then((d) => { if (!d.error) setDetail(d); })
       .catch(console.error);
   }, [selectedId]);
 
@@ -133,7 +84,6 @@ export default function SourcesContent() {
     if (!selectedId) return;
     await fetch(`/api/sources/${selectedId}`, { method: 'DELETE' });
     setDetail(null);
-    setConfirmDiscard(false);
     router.push('/sources');
     // Refresh list
     const params = new URLSearchParams();
@@ -174,244 +124,27 @@ export default function SourcesContent() {
         <div className={s.loading}>Loading sources...</div>
       ) : (
         <div className={s.splitLayout}>
-          <div className={s.listPanel}>
-            {sources.length === 0 ? (
-              <div className={s.empty}>No sources found</div>
-            ) : (
-              sources.map((src) => {
-                const isReady = src.status === 'decomposed';
-                return (
-                  <div
-                    key={src.id}
-                    className={
-                      !isReady ? s.sourceItemDisabled
-                        : String(src.id) === selectedId ? s.sourceItemActive
-                        : s.sourceItem
-                    }
-                    onClick={isReady ? () => setFilter('id', String(src.id)) : undefined}
-                  >
-                    <div className={s.sourceTitle}>{src.title}</div>
-                    <div className={s.sourceMeta}>
-                      <SourceTypeBadge type={src.source_type} size={14} />
-                      {src.main_contributor && (
-                        <>
-                          <span>&middot;</span>
-                          <span>{src.main_contributor}</span>
-                        </>
-                      )}
-                      {!isReady && (
-                        <>
-                          <span>&middot;</span>
-                          <span className={s.processingBadge}>Processing</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              }))
-            }
-          </div>
+          <SourceList
+            sources={sources}
+            total={total}
+            selectedId={selectedId}
+            status={status}
+            type={type}
+            search={search}
+            onFilter={setFilter}
+            onSelect={(id) => setFilter('id', String(id))}
+          />
 
           <div className={s.detailPanel}>
             {!detail ? (
               <div className={s.emptyDetail}>Select a source to view details</div>
             ) : (
-              <>
-                <div className={s.detailTitle}>{detail.title}</div>
-                <div className={s.detailMeta}>
-                  <SourceTypeBadge type={detail.source_type} size={16} />
-                  {detail.publication && (
-                    <> &middot; {detail.publication}</>
-                  )}
-                  {' '}&middot; <strong>{formatDate(detail.published_date)}</strong> &middot;{' '}
-                  {detail.word_count?.toLocaleString()} words
-                  {detail.contributors.length > 0 && (
-                    <> &middot; <strong>{detail.contributors[0].name}</strong></>
-                  )}
-                </div>
-
-                <div className={s.contentTabs}>
-                  <button
-                    className={contentTab === 'about' ? s.contentTabActive : s.contentTab}
-                    onClick={() => setContentTab('about')}
-                  >
-                    About
-                  </button>
-                  <button
-                    className={contentTab === 'distillation' ? s.contentTabActive : s.contentTab}
-                    onClick={() => setContentTab('distillation')}
-                  >
-                    Distillation
-                  </button>
-                  <button
-                    className={contentTab === 'original' ? s.contentTabActive : s.contentTab}
-                    onClick={() => setContentTab('original')}
-                  >
-                    Original
-                  </button>
-                  <button
-                    className={contentTab === 'claims' ? s.contentTabActive : s.contentTab}
-                    onClick={() => setContentTab('claims')}
-                  >
-                    Claims
-                    {detail.claims_count > 0 && (
-                      <span className={s.tabBadge}>{detail.claims_count}</span>
-                    )}
-                  </button>
-                </div>
-
-                {contentTab === 'about' ? (
-                  <div className={s.tabContent}>
-                    <div className={s.fieldGrid}>
-                      {detail.contributors.length > 0 && (
-                        <div className={s.detailSection}>
-                          <div className={s.detailLabel}>Contributors</div>
-                          {detail.contributors.map((c) => (
-                            <div key={c.id} className={s.contributorRow}>
-                              {c.avatar ? (
-                                <img src={c.avatar} alt="" className={s.contributorAvatar} />
-                              ) : (
-                                <span className={s.contributorAvatarPlaceholder}>{c.name.charAt(0)}</span>
-                              )}
-                              <Link href={`/contributors?id=${c.id}`}>{c.name}</Link>
-                              {c.affiliation && <span>({c.affiliation})</span>}
-                              <span className={s.contributorRole}>{contributorRoleLabel(c.contributor_role)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className={s.detailSection}>
-                        <div className={s.detailLabel}>Publication</div>
-                        <InlineComboBox
-                          value={detail.publication}
-                          onSave={(v) => patchSource('publication', v)}
-                          suggestions={publicationNames}
-                          placeholder="Add publication..."
-                        />
-                      </div>
-                    </div>
-
-                    {detail.url && (
-                      <div className={s.detailSection}>
-                        <div className={s.detailLabel}>Source URL</div>
-                        <a href={detail.url} target="_blank" rel="noopener noreferrer" className={s.linkedItem}>
-                          {detail.url}
-                        </a>
-                      </div>
-                    )}
-
-                    <div className={s.detailSection}>
-                      <div className={s.detailLabel}>Description</div>
-                      <InlineEdit
-                        value={detail.description}
-                        onSave={(v) => patchSource('description', v)}
-                        multiline
-                        placeholder="Add description..."
-                      />
-                    </div>
-
-                    <div className={s.detailSection}>
-                      <div className={s.detailLabel}>Content Filter</div>
-                      {detail.content_filter ? (
-                        <>
-                          <div className={s.detailValue}>
-                            {detail.content_filter.name}
-                            <span style={{ color: 'var(--text-muted)', marginLeft: '0.375rem' }}>
-                              v{detail.content_filter.version}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.375rem', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)' }}>
-                            {detail.content_filter.instructions}
-                          </div>
-                        </>
-                      ) : (
-                        <div className={s.detailValue} style={{ color: 'var(--text-muted)' }}>
-                          None
-                        </div>
-                      )}
-                    </div>
-
-                    {detail.evaluation_results?.grade && (
-                      <EvalSection
-                        label="Source Evaluation"
-                        headerRight={<GradeBadge grade={detail.evaluation_results.grade} />}
-                        notes={detail.evaluation_results.bias_notes}
-                      >
-                        {detail.evaluation_results.quality && (
-                          <DimensionGrid label="Quality" dimensions={detail.evaluation_results.quality} columns={4} />
-                        )}
-                        {detail.evaluation_results.rigor && (
-                          <DimensionGrid label="Rigor" dimensions={detail.evaluation_results.rigor} columns={4} />
-                        )}
-                      </EvalSection>
-                    )}
-
-                    {detail.evidence.total > 0 && (
-                      <div className={s.detailSection}>
-                        <div className={s.detailLabel}>Evidence ({detail.evidence.total})</div>
-                        <div className={s.evidenceStats}>
-                          {detail.evidence.byStance.supports && (
-                            <span className={s.evStatSupporting}>{detail.evidence.byStance.supports} supporting</span>
-                          )}
-                          {detail.evidence.byStance.contradicts && (
-                            <span className={s.evStatContradicting}>{detail.evidence.byStance.contradicts} contradicting</span>
-                          )}
-                          {detail.evidence.byStance.qualifies && (
-                            <span className={s.evStatQualifying}>{detail.evidence.byStance.qualifies} qualifying</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {detail.compositions.count > 0 && (
-                      <div className={s.detailSection}>
-                        <div className={s.detailLabel}>Compositions ({detail.compositions.count})</div>
-                        <div className={s.linkedList}>
-                          {detail.compositions.items.map((a) => (
-                            <Link key={a.id} href={`/compositions?id=${a.id}`} className={s.linkedItem}>
-                              {a.title}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <hr className={s.divider} />
-                    <div className={s.discardSection}>
-                      {!confirmDiscard ? (
-                        <button className={s.discardBtn} onClick={() => setConfirmDiscard(true)}>
-                          Discard Source
-                        </button>
-                      ) : (
-                        <div className={s.confirmBox}>
-                          <div className={s.confirmText}>
-                            This will permanently remove this source and all its evidence, devices, contexts, methods, and reasonings. Claims will not be deleted but will lose their link to this source.
-                          </div>
-                          <div className={s.confirmActions}>
-                            <button className={s.confirmCancel} onClick={() => setConfirmDiscard(false)}>
-                              Cancel
-                            </button>
-                            <button className={s.confirmDiscard} onClick={discardSource}>
-                              Yes, Discard Source
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : contentTab === 'distillation' ? (
-                  detail.distillation ? (
-                    <MarkdownViewer content={detail.distillation} />
-                  ) : (
-                    <div className={s.emptyContent}>No distillation available</div>
-                  )
-                ) : contentTab === 'original' ? (
-                  <MarkdownViewer content={detail.original} />
-                ) : (
-                  <ClaimsList sourceId={detail.id} showFilters={false} />
-                )}
-              </>
+              <SourceDetailView
+                detail={detail}
+                publicationNames={publicationNames}
+                onPatch={patchSource}
+                onDiscard={discardSource}
+              />
             )}
           </div>
         </div>

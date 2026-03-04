@@ -13,28 +13,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { claimTypeLabel, relationshipLabel } from '@/lib/enumLabels';
+import { GraphClaim, GraphRelationship } from '@/lib/types';
 import f from './ClaimGraph.module.scss';
-
-/* ── Public types ───────────────────────────────────────────────── */
-
-export interface GraphClaim {
-  id: number;
-  statement: string;
-  claim_type: string;
-  computed_confidence?: string | null;
-  score?: number | null;
-}
-
-export interface GraphRelationship {
-  id: number;
-  related_claim_id: number;
-  related_statement: string;
-  related_claim_type?: string | null;
-  related_confidence?: string | null;
-  related_score?: number | null;
-  relationship: string;
-  direction: string;
-}
 
 export interface ClaimGraphProps {
   focalId: number;
