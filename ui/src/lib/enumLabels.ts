@@ -10,12 +10,12 @@ const CLAIM_TYPE_LABELS: Record<string, string> = {
 };
 
 const EVIDENCE_TYPE_LABELS: Record<string, string> = {
-  quote: 'Quote',
-  data: 'Data',
-  example: 'Example',
-  anecdote: 'Anecdote',
-  citation: 'Citation',
-  reasoning: 'Reasoning',
+  empirical: 'Empirical',
+  case_study: 'Case Study',
+  expert_opinion: 'Expert Opinion',
+  anecdotal: 'Anecdotal',
+  theoretical: 'Theoretical',
+  statistical: 'Statistical',
   other: 'Other',
 };
 
@@ -52,6 +52,7 @@ const CONTRIBUTOR_ROLE_LABELS: Record<string, string> = {
 
 const COMPOSITION_STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
+  reviewed: 'Reviewed',
   published: 'Published',
   archived: 'Archived',
 };

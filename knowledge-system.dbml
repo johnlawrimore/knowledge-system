@@ -89,7 +89,7 @@ Table compositions {
   content longtext [not null]
   word_count int
   evaluation_results json
-  status enum('draft','reviewed','published') [not null, default: 'draft']
+  status enum('draft','reviewed','published','archived') [not null, default: 'draft']
   created_at timestamp
   updated_at timestamp
 }

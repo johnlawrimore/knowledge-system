@@ -87,7 +87,7 @@ CREATE TABLE compositions (
         LENGTH(content) - LENGTH(REPLACE(content, ' ', '')) + 1
     ) STORED,
     evaluation_results JSON              COMMENT 'Quality scores, coverage assessment, etc.',
-    status ENUM('draft', 'reviewed', 'published') NOT NULL DEFAULT 'draft',
+    status ENUM('draft', 'reviewed', 'published', 'archived') NOT NULL DEFAULT 'draft',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
