@@ -102,14 +102,11 @@ export default function SourceDetailView({
             </DetailSection>
           )}
 
-          <DetailSection label="Description">
-            <InlineEdit
-              value={detail.description}
-              onSave={(v) => onPatch('description', v)}
-              multiline
-              placeholder="Add description..."
-            />
-          </DetailSection>
+          {detail.summary && (
+            <DetailSection label="Summary">
+              <span>{detail.summary}</span>
+            </DetailSection>
+          )}
 
           <DetailSection label="Content Filter">
             {detail.content_filter ? (

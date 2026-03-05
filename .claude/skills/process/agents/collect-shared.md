@@ -132,3 +132,19 @@ Scoring guidance:
 - A practitioner blogging on their personal site = Expertise 3-4, Reach 2
 - A senior partner at a major consultancy publishing via their firm = Authority 4, Reach 3-4
 - If insufficient information to score, leave `evaluation_results` NULL and add a note: "Contributor scoring deferred — insufficient public information"
+
+## source_summary
+
+After composing the source markdown and before inserting into the database, write a 3–4 sentence summary of the raw source content. This gives the curator a quick understanding of what a source contains before any curation rules are applied. It describes the raw source, not a filtered or distilled version of it.
+
+Answer:
+1. What is the source's subject and key arguments?
+2. What does it cover?
+
+Write in third-person neutral, professional register.
+
+Do not:
+- Evaluate the source's quality, credibility, or usefulness
+- Reference the source's format or medium ("in this video," "the article discusses")
+- Editorialize or indicate whether the content is interesting, important, or novel
+- Exceed 4 sentences

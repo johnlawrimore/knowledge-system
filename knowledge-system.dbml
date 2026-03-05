@@ -41,7 +41,7 @@ Table sources {
   distillation longtext
   word_count int
   status enum('collected','distilling','distilled','decomposing','decomposed') [not null, default: 'collected']
-  description text
+  summary text
   content_filter_version_id int
   created_at timestamp
   updated_at timestamp

@@ -77,7 +77,11 @@ Format as clean markdown. Preserve headings, lists, code blocks, links from the 
 
 {{markdown_rules}}
 
-### 6. Insert Everything (Single Batched Script)
+### 6. Write Source Summary
+
+{{source_summary}}
+
+### 7. Insert Everything (Single Batched Script)
 
 Write ALL statements to /tmp/collect.sql and execute as one batch. Do NOT run statements individually — session variables (`@source_id`, `@contrib_id`) only persist within a single piped script.
 
@@ -93,8 +97,8 @@ INSERT IGNORE INTO publications (name) VALUES ('<publication_name>');
 SET @pub_id = (SELECT id FROM publications WHERE name = '<publication_name>');
 
 -- Insert source (use @pub_id, or NULL if no publication)
-INSERT INTO sources (title, source_type, url, publication_id, published_date, content, status, description)
-VALUES ('<title>', '<type>', '{{url}}', @pub_id, '<date>', '<markdown_content>', 'collected', '<description>');
+INSERT INTO sources (title, source_type, url, publication_id, published_date, content, status, summary)
+VALUES ('<title>', '<type>', '{{url}}', @pub_id, '<date>', '<markdown_content>', 'collected', '<summary>');
 SET @source_id = LAST_INSERT_ID();
 
 -- Link contributor to THIS source only
@@ -107,7 +111,7 @@ FROM sources s, contributors c
 WHERE s.id = @source_id AND c.id = @contrib_id;
 ```
 
-### 7. Enrich Contributor
+### 8. Enrich Contributor
 
 {{contributor_enrichment}}
 

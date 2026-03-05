@@ -190,22 +190,17 @@ export async function PATCH(
 
   try {
     const body = await request.json();
-    const { description, evaluation_results, publication } = body;
+    const { evaluation_results, publication } = body;
 
-    if (description === undefined && evaluation_results === undefined && publication === undefined) {
+    if (evaluation_results === undefined && publication === undefined) {
       return NextResponse.json(
-        { error: 'Request must include description, evaluation_results, and/or publication' },
+        { error: 'Request must include evaluation_results and/or publication' },
         { status: 400 }
       );
     }
 
     const updates: string[] = [];
     const values: (string | null)[] = [];
-
-    if (description !== undefined) {
-      updates.push('description = ?');
-      values.push(description);
-    }
 
     if (evaluation_results !== undefined) {
       updates.push('evaluation_results = ?');
@@ -262,7 +257,7 @@ export async function PATCH(
 
       // Return the updated source
       const [updatedRows] = await conn.query<RowDataPacket[]>(
-        `SELECT s.id, s.description, s.evaluation_results, pub.name AS publication
+        `SELECT s.id, s.summary, s.evaluation_results, pub.name AS publication
          FROM sources s
          LEFT JOIN publications pub ON s.publication_id = pub.id
          WHERE s.id = ?`,
@@ -283,7 +278,7 @@ export async function PATCH(
 
       return NextResponse.json({
         id: updated.id,
-        description: updated.description,
+        summary: updated.summary,
         evaluation_results: parsedEval,
         publication: updated.publication,
       });

@@ -141,7 +141,11 @@ Format: `**SPEAKER NAME:** <text>` with blank lines between turns. Speaker names
 <Full speaker-attributed transcript>
 ```
 
-### 7. Insert Everything (Single Batched Script)
+### 7. Write Source Summary
+
+{{source_summary}}
+
+### 8. Insert Everything (Single Batched Script)
 
 Write ALL statements to /tmp/collect_yt.sql and execute as one batch. Do NOT run statements individually — session variables (`@source_id`, `@contrib1`, etc.) only persist within a single piped script.
 
@@ -161,8 +165,8 @@ INSERT IGNORE INTO publications (name) VALUES ('<channel_name>');
 SET @pub_id = (SELECT id FROM publications WHERE name = '<channel_name>');
 
 -- Insert source
-INSERT INTO sources (title, source_type, url, publication_id, published_date, content, status, description)
-VALUES ('<title>', 'youtube_video', '{{url}}', @pub_id, '<date>', '<full_markdown>', 'collected', '<caption_type, attribution_notes>');
+INSERT INTO sources (title, source_type, url, publication_id, published_date, content, status, summary)
+VALUES ('<title>', 'youtube_video', '{{url}}', @pub_id, '<date>', '<full_markdown>', 'collected', '<summary>');
 SET @source_id = LAST_INSERT_ID();
 
 -- Link contributors to THIS source only
@@ -188,7 +192,7 @@ Contributor roles mapping:
 - Panelist → `panelist`
 - Solo speaker → `speaker`
 
-### 8. Enrich Contributors
+### 9. Enrich Contributors
 
 {{contributor_enrichment}}
 

@@ -109,7 +109,7 @@ Credibility read from `evidence.evaluation_results` JSON via `JSON_EXTRACT(e.eva
 
 ## Conventions
 
-- Claims are written in the user's voice, not source language
+- Claims are written in a consistent, neutral voice — not source language
 - Evidence always traces to original `source_id`, even when extracted from distillations
 - `claim_sources` records which sources assert which claims; populated during decomposition alongside evidence
 - `evaluation_results` is JSON — use `JSON_EXTRACT()` to query

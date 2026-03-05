@@ -335,7 +335,7 @@ export interface SourceDetail {
   published_date: string | null;
   word_count: number;
   status: string;
-  description: string | null;
+  summary: string | null;
   evaluation_results: SourceEvaluation | null;
   content_preview: string;
   original: string;

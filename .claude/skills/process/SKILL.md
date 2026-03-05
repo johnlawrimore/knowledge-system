@@ -245,7 +245,7 @@ Knowledge Base Impact:
 For each stage, follow this pattern:
 
 1. Read the agent prompt file using the Read tool (no description needed — Read tool doesn't display)
-2. If the prompt contains `{{markdown_rules}}` or `{{contributor_enrichment}}`, read `process/agents/collect-shared.md` and substitute each placeholder with the content under its matching `##` heading (everything from the heading to the next `##` or end of file)
+2. If the prompt contains `{{markdown_rules}}`, `{{contributor_enrichment}}`, or `{{source_summary}}`, read `process/agents/collect-shared.md` and substitute each placeholder with the content under its matching `##` heading (everything from the heading to the next `##` or end of file)
 3. Replace all remaining `{{placeholder}}` strings with actual runtime values
 4. Append these rules to every agent prompt (after all substitutions):
    > **Encoding (mandatory):** All text written to the database must use clean Unicode. Fix mojibake on sight — never store double-encoded sequences like `â€"`, `â€™`, `â€œ`, `Ã©`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`, ellipsis `…`. This applies to every field in every table.
