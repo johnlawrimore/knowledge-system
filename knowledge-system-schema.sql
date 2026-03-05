@@ -53,6 +53,7 @@ CREATE TABLE sources (
     status ENUM('collected', 'distilling', 'distilled', 'decomposing', 'decomposed')
         NOT NULL DEFAULT 'collected',
     summary TEXT,
+    distillation_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

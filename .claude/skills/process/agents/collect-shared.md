@@ -1,44 +1,5 @@
 # Shared Blocks for Collect Agents
 
-## markdown_rules
-
-**Markdown rules (mandatory for all content output):**
-
-Headings:
-- Exactly one H1 (the title), always first
-- Use ## for sections, ### for subsections, #### for sub-subsections
-- Never skip levels (## → #### is wrong)
-- Numbered sections map to levels: 1. → ##, 1.1 → ###, 1.1.1 → ####
-- Blank line before and after every heading
-- Never wrap headings in bold (not `**## Title**` or `## **Title**`)
-- Never use bold on its own line as a heading substitute
-- Never use a URL as a heading
-
-Paragraphs and spacing:
-- One blank line between paragraphs — never more than one consecutive blank line
-- No trailing whitespace; no non-breaking space characters
-
-Lists:
-- Use `-` for unordered lists (not `•` or `*`)
-- Indent nested items with two spaces
-
-HTML: Do not use HTML tags. Native markdown only.
-
-Tables:
-- Do not use a single-row table for a blockquote (use `>`)
-- Do not use bold in table headers (markdown renders them bold by default)
-- Do not wrap entire cell values in bold
-
-Inline formatting:
-- No empty bold markers (`****`)
-- Bold markers flush against text: `**word**`, not `** word **`
-- Bold for emphasis within sentences, not as structural elements
-- `**Label:**` acceptable for inline labels
-
-Blockquotes: Use `>` with a blank line before and after.
-
-No YAML frontmatter — metadata lives in database columns.
-
 ## contributor_enrichment
 
 For each NEW contributor (not pre-existing), gather context and research their profile.

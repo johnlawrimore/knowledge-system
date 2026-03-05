@@ -168,12 +168,12 @@ docker exec -i knowledge-db mysql knowledge -e "
 SELECT id, name, description FROM curation_rules WHERE is_active = TRUE ORDER BY name;"
 ```
 
-- If **no active rules**: set `filter_id = NULL`, proceed without asking.
+- If **no active rules**: set `rule_id = NULL`, proceed without asking.
 - If **one or more** active rules: ask the user to pick one (or "None"), then use their selection.
 
 **Agent prompt:** `process/agents/distill.md`
 **Model:** sonnet
-**Substitutions:** `{{source_id}}` → from stage 1, `{{filter_id}}` → selected filter ID or `NULL`
+**Substitutions:** `{{source_id}}` → from stage 1, `{{rule_id}}` → selected rule ID or `NULL`
 **Extract from result:** `source_id`, `title`, `word_count`
 
 Report to user:
@@ -245,12 +245,49 @@ Knowledge Base Impact:
 For each stage, follow this pattern:
 
 1. Read the agent prompt file using the Read tool (no description needed — Read tool doesn't display)
-2. If the prompt contains `{{markdown_rules}}`, `{{contributor_enrichment}}`, or `{{source_summary}}`, read `process/agents/collect-shared.md` and substitute each placeholder with the content under its matching `##` heading (everything from the heading to the next `##` or end of file)
+2. If the prompt contains `{{contributor_enrichment}}` or `{{source_summary}}`, read `process/agents/collect-shared.md` and substitute each placeholder with the content under its matching `##` heading (everything from the heading to the next `##` or end of file)
 3. Replace all remaining `{{placeholder}}` strings with actual runtime values
 4. Append these rules to every agent prompt (after all substitutions):
    > **Encoding (mandatory):** All text written to the database must use clean Unicode. Fix mojibake on sight — never store double-encoded sequences like `â€"`, `â€™`, `â€œ`, `Ã©`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`, ellipsis `…`. This applies to every field in every table.
    >
    > **Tool call tracking (mandatory):** Track every tool call you make. In your final JSON output, include a `"tool_calls"` array listing each call in order. Each entry: `{"tool": "<tool_name>", "action": "<brief description>"}`. Use short, specific descriptions (e.g., `{"tool": "Bash", "action": "SELECT source content"}`, `{"tool": "WebFetch", "action": "fetch article URL"}`, `{"tool": "Bash", "action": "INSERT 5 claims"}`). The tool name should match exactly what you called (Bash, WebFetch, WebSearch, Read, Grep, Glob, etc.).
+   >
+   > **Markdown formatting:**
+   >
+   > Headings:
+   > - Exactly one H1 (the title), always first
+   > - Use ## for sections, ### for subsections, #### for sub-subsections
+   > - Never skip levels (## → #### is wrong)
+   > - Numbered sections map to levels: 1. → ##, 1.1 → ###, 1.1.1 → ####
+   > - Blank line before and after every heading
+   > - Never wrap headings in bold (not `**## Title**` or `## **Title**`)
+   > - Never use bold on its own line as a heading substitute
+   > - Never use a URL as a heading
+   >
+   > Paragraphs and spacing:
+   > - One blank line between paragraphs — never more than one consecutive blank line
+   > - No trailing whitespace; no non-breaking space characters
+   >
+   > Lists:
+   > - Use `-` for unordered lists (not `•` or `*`)
+   > - Indent nested items with two spaces
+   >
+   > HTML: Do not use HTML tags. Native markdown only.
+   >
+   > Tables:
+   > - Do not use a single-row table for a blockquote (use `>`)
+   > - Do not use bold in table headers (markdown renders them bold by default)
+   > - Do not wrap entire cell values in bold
+   >
+   > Inline formatting:
+   > - No empty bold markers (`****`)
+   > - Bold markers flush against text: `**word**`, not `** word **`
+   > - Bold for emphasis within sentences, not as structural elements
+   > - `**Label:**` acceptable for inline labels
+   >
+   > Blockquotes: Use `>` with a blank line before and after.
+   >
+   > No YAML frontmatter — metadata lives in database columns.
 5. Call the Agent tool with:
    - `subagent_type`: `"general-purpose"`
    - `model`: as specified per stage (sonnet or haiku)

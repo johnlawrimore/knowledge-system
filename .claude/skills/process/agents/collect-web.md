@@ -127,9 +127,7 @@ If duplicate found, return error status.
 
 ### 5. Compose Markdown
 
-Format as clean markdown. Preserve headings, lists, code blocks, links from the source. Strip navigation, ads, sidebars, footers.
-
-{{markdown_rules}}
+Format as clean markdown in accordance with markdown formatting rules.
 
 ### 6. Write Source Summary
 

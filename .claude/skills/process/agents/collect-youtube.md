@@ -123,9 +123,7 @@ Format is always `transcript` for YouTube sources. Determine the source type fro
 Use the speaker roster, title, and description to classify. When uncertain, prefer `lecture` for solo speakers and `interview` when a host/guest dynamic is evident.
 
 ### 7. Compose Source Markdown
-
-{{markdown_rules}}
-
+Format as clean markdown in accordance with markdown formatting rules.
 ```markdown
 # <Video Title>
 

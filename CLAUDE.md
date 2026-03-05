@@ -40,7 +40,7 @@ URL/Upload → process skill
 ### Tables (27)
 
 **Curation Rules**: `curation_rules`, `curation_rule_versions`
-**Collection**: `contributors`, `publications`, `sources` (includes `distillation` and `curation_rule_version_id` columns), `source_contributors`
+**Collection**: `contributors`, `publications`, `sources` (includes `distillation`, `distillation_notes`, and `curation_rule_version_id` columns), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
 **Decomposition**: `topics`, `themes`, `claims`, `claim_sources`, `claim_links`, `claim_topics`, `claim_themes`, `claim_tags`
 **Decomposition Entities**: `devices`, `claim_devices`, `contexts`, `claim_contexts`, `methods`, `claim_methods`
