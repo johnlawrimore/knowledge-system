@@ -161,15 +161,15 @@ If status is "error", report and abort.
 
 ### Stage 2: Distill
 
-**Before spawning**, query active content filters. Description: `"Checking for active content filters"`
+**Before spawning**, query active curation rules. Description: `"Checking for active curation rules"`
 
 ```sql
 docker exec -i knowledge-db mysql knowledge -e "
-SELECT id, name, description FROM content_filters WHERE is_active = TRUE ORDER BY name;"
+SELECT id, name, description FROM curation_rules WHERE is_active = TRUE ORDER BY name;"
 ```
 
-- If **no active filters**: set `filter_id = NULL`, proceed without asking.
-- If **one or more** active filters: ask the user to pick one (or "None"), then use their selection.
+- If **no active rules**: set `filter_id = NULL`, proceed without asking.
+- If **one or more** active rules: ask the user to pick one (or "None"), then use their selection.
 
 **Agent prompt:** `process/agents/distill.md`
 **Model:** sonnet

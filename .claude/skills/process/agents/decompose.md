@@ -240,6 +240,27 @@ INSERT INTO reasonings (content, source_id, evidence_id, claim_id, reasoning_typ
 UPDATE evidence SET derived_from_evidence_id = <original_evidence_id> WHERE id = <new_evidence_id>;
 ```
 
+### 8. Flag Key Claims
+
+Review all claims linked to this source and identify the 3–7 that represent the source's central arguments.
+
+**A claim is key if:**
+- It represents a central thesis or primary argument — the source was written to make this point
+- It is thesis-level, not supporting detail — typically a parent claim rather than a child
+- The source devotes significant effort to developing, defending, or illustrating it
+- Removing it would fundamentally change what the source is about
+
+**Not a key claim:**
+- Child claims that support or elaborate on a parent thesis
+- Tangential observations or asides
+- Definitions or context-setting claims unless they ARE the point
+- Claims the source merely references without developing
+
+```sql
+UPDATE claim_sources SET is_key = TRUE
+WHERE source_id = {{source_id}} AND claim_id IN (<key_claim_ids>);
+```
+
 **Status update** (always last):
 
 ```sql
@@ -251,7 +272,7 @@ UPDATE sources SET status = 'decomposed' WHERE id = {{source_id}};
 End your response with this exact JSON block:
 
 ```json
-{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "parent_child_groups": <count>, "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>, "device_ids": [<ids>], "context_ids": [<ids>], "method_ids": [<ids>], "reasoning_ids": [<ids>], "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
+{"stage": "decompose", "status": "success", "claim_ids": [<ids>], "key_claim_ids": [<ids>], "parent_child_groups": <count>, "evidence_ids": [<ids>], "existing_claims_linked": [<ids>], "tags_applied": <count>, "device_ids": [<ids>], "context_ids": [<ids>], "method_ids": [<ids>], "reasoning_ids": [<ids>], "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
 
 On error:

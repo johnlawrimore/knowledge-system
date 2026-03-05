@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
+import KeyBadge from '@/components/KeyBadge';
 import LinkChip from '@/components/LinkChip';
 import MultiSelectDropdown from '@/components/MultiSelectDropdown';
 import { Claim, TopicNode, FlatOption } from '@/lib/types';
@@ -81,6 +82,7 @@ function ClaimNode({
             <div className={s.claimHeaderLeft}>
               <span className={s.claimId}>#{claim.id}</span>
               <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
+              {claim.is_key && <KeyBadge />}
               {hasChildren && (
                 <button
                   className={s.expandBtn}

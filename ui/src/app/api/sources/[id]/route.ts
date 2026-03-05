@@ -52,19 +52,20 @@ export async function GET(
     const conn = await pool.getConnection();
 
     try {
-      // Full source record with publication and content filter JOINs
+      // Full source record with publication and curation rule JOINs
       const [sourceRows] = await conn.query<RowDataPacket[]>(
         `SELECT s.*, pub.name AS publication,
            cfv.id      AS filter_version_id,
            cfv.version AS filter_version_num,
-           cfv.instructions AS filter_instructions,
+           cfv.content_filter AS filter_content_filter,
+           cfv.preferred_terminology AS filter_preferred_terminology,
            cf.id       AS filter_id,
            cf.name     AS filter_name,
            cf.description AS filter_description
          FROM sources s
          LEFT JOIN publications pub ON s.publication_id = pub.id
-         LEFT JOIN content_filter_versions cfv ON s.content_filter_version_id = cfv.id
-         LEFT JOIN content_filters cf ON cfv.filter_id = cf.id
+         LEFT JOIN curation_rule_versions cfv ON s.curation_rule_version_id = cfv.id
+         LEFT JOIN curation_rules cf ON cfv.filter_id = cf.id
          WHERE s.id = ?`,
         [sourceId]
       );
@@ -140,18 +141,29 @@ export async function GET(
         [sourceId]
       );
 
+      // Key claims
+      const [keyClaims] = await conn.query<RowDataPacket[]>(
+        `SELECT c.id, c.statement, c.claim_type
+         FROM claim_sources cs
+         JOIN claims c ON cs.claim_id = c.id
+         WHERE cs.source_id = ? AND cs.is_key = TRUE
+         ORDER BY c.id`,
+        [sourceId]
+      );
+
       return NextResponse.json({
         ...source,
         content_preview: contentPreview,
         original,
         content_has_more: hasMore,
         evaluation_results: evaluationResults,
-        content_filter: source.filter_version_id ? {
+        curation_rule: source.filter_version_id ? {
           filter_id: source.filter_id,
           name: source.filter_name,
           version_id: source.filter_version_id,
           version: source.filter_version_num,
-          instructions: source.filter_instructions,
+          content_filter: source.filter_content_filter,
+          preferred_terminology: source.filter_preferred_terminology,
           description: source.filter_description || null,
         } : null,
         contributors,
@@ -164,6 +176,7 @@ export async function GET(
           total: evidenceTotal,
         },
         claims_count: Number(claimsCount.count),
+        key_claims: keyClaims,
       });
     } finally {
       conn.release();

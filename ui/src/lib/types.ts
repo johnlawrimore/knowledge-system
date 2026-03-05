@@ -131,7 +131,9 @@ export interface SourceLinkItem {
  * Source reference on a claim.
  * From: claims/[id]/page.tsx
  */
-export interface ClaimSource extends SourceLinkItem {}
+export interface ClaimSource extends SourceLinkItem {
+  is_key?: boolean;
+}
 
 /**
  * Rhetorical device linked to a claim.
@@ -262,6 +264,7 @@ export interface Claim {
   method_count: number;
   reasoning_count: number;
   child_count: number;
+  is_key?: boolean;
 }
 
 /**
@@ -337,6 +340,7 @@ export interface SourceDetail {
   published_date: string | null;
   word_count: number;
   status: string;
+  created_at: string;
   summary: string | null;
   evaluation_results: SourceEvaluation | null;
   content_preview: string;
@@ -354,12 +358,13 @@ export interface SourceDetail {
     count: number;
     items: { id: number; title: string; status: string }[];
   };
-  content_filter: {
+  curation_rule: {
     filter_id: number;
     name: string;
     version_id: number;
     version: number;
-    instructions: string;
+    content_filter: string;
+    preferred_terminology: string | null;
     description: string | null;
   } | null;
   evidence: {
@@ -367,6 +372,7 @@ export interface SourceDetail {
     byStance: Record<string, number>;
   };
   claims_count: number;
+  key_claims: { id: number; statement: string; claim_type: string }[];
 }
 
 // -----------------------------------------------------------------------------
@@ -400,6 +406,7 @@ export interface Position {
   strength: number | null;
   evidence_content: string;
   source_title: string;
+  is_key?: boolean;
 }
 
 /**
@@ -466,13 +473,14 @@ export interface FilterListItem {
 }
 
 /**
- * A single immutable version of a content filter's instructions.
+ * A single immutable version of a curation rule.
  * From: filters/Content.tsx
  */
 export interface FilterVersion {
   version_id: number;
   version: number;
-  instructions: string;
+  content_filter: string;
+  preferred_terminology: string | null;
   version_created_at: string;
 }
 

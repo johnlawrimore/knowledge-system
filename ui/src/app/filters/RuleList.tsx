@@ -4,7 +4,7 @@ import { FilterListItem } from '@/lib/types';
 import EmptyState from '@/components/EmptyState';
 import s from '../shared.module.scss';
 
-export default function FilterList({
+export default function RuleList({
   filters,
   selectedId,
   onSelect,

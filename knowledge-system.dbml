@@ -43,7 +43,7 @@ Table sources {
   word_count int
   status enum('collected','distilling','distilled','decomposing','decomposed') [not null, default: 'collected']
   summary text
-  content_filter_version_id int
+  curation_rule_version_id int
   created_at timestamp
   updated_at timestamp
 }
@@ -56,13 +56,13 @@ Table source_contributors {
 }
 
 Ref: sources.publication_id > publications.id [delete: set null]
-Ref: sources.content_filter_version_id > content_filter_versions.id [delete: set null]
+Ref: sources.curation_rule_version_id > curation_rule_versions.id [delete: set null]
 Ref: source_contributors.source_id > sources.id [delete: cascade]
 Ref: source_contributors.contributor_id > contributors.id [delete: restrict]
 
 // --- CONTENT FILTERING ---
 
-Table content_filters {
+Table curation_rules {
   id          int [pk, increment]
   name        varchar(255) [not null]
   description text
@@ -71,16 +71,17 @@ Table content_filters {
   updated_at  timestamp
 }
 
-Table content_filter_versions {
-  id           int [pk, increment]
-  filter_id    int [not null]
-  version      int [not null]
-  instructions text [not null]
-  created_at   timestamp
+Table curation_rule_versions {
+  id                     int [pk, increment]
+  filter_id              int [not null]
+  version                int [not null]
+  content_filter         text [not null]
+  preferred_terminology  text
+  created_at             timestamp
   indexes { (filter_id, version) [unique] }
 }
 
-Ref: content_filter_versions.filter_id > content_filters.id [delete: cascade]
+Ref: curation_rule_versions.filter_id > curation_rules.id [delete: cascade]
 
 // --- STAGE 2: COMPOSITION ---
 
@@ -182,6 +183,7 @@ Ref: claim_tags.claim_id > claims.id [delete: cascade]
 Table claim_sources {
   claim_id int [not null]
   source_id int [not null]
+  is_key boolean [not null, default: false]
   indexes { (claim_id, source_id) [pk] }
 }
 
@@ -323,9 +325,9 @@ Ref: pipeline_stages.run_id > pipeline_runs.id
 
 // --- TABLE GROUPS ---
 
-TableGroup content_filtering {
-  content_filters
-  content_filter_versions
+TableGroup curation_rules {
+  curation_rules
+  curation_rule_versions
 }
 
 TableGroup collection {

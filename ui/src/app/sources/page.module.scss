@@ -186,6 +186,18 @@
   padding: 0.125rem 0;
 }
 
+.keyClaim {
+  font-size: 0.8125rem;
+  padding: 0.25rem 0;
+  line-height: 1.4;
+
+  a {
+    color: var(--text-primary);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
 .contributorAvatar,
 .contributorAvatarPlaceholder {
   width: 1.5rem;

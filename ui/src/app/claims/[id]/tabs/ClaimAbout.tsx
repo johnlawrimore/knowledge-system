@@ -4,11 +4,12 @@ import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
 import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
+import KeyBadge from '@/components/KeyBadge';
 import SourceLinkList from '@/components/SourceLinkList';
-import type { ClaimDetail } from '@/lib/types';
+import type { ClaimDetail, ClaimSource } from '@/lib/types';
 import s from '../page.module.scss';
 
-interface ClaimAboutTabProps {
+interface ClaimAboutProps {
   claim: ClaimDetail;
   patchClaim: (field: string, value: string) => Promise<void>;
   onRemoveTopic: (topicId: number) => void;
@@ -16,18 +17,21 @@ interface ClaimAboutTabProps {
   onRemoveTag: (tag: string) => void;
 }
 
-export default function ClaimAboutTab({
+export default function ClaimAbout({
   claim,
   patchClaim,
   onRemoveTopic,
   onRemoveTheme,
   onRemoveTag,
-}: ClaimAboutTabProps) {
+}: ClaimAboutProps) {
   return (
     <>
       {claim.sources.length > 0 && (
         <DetailSection label="Sources" count={claim.sources.length}>
-          <SourceLinkList sources={claim.sources} />
+          <SourceLinkList
+            sources={claim.sources}
+            renderExtra={(src: ClaimSource) => src.is_key ? <KeyBadge /> : null}
+          />
         </DetailSection>
       )}
 

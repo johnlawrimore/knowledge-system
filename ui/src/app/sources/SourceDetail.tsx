@@ -71,7 +71,14 @@ export default function SourceDetailView({
         {detail.contributors.length > 0 && <strong>{detail.contributors[0].name}</strong>}
       </MetaLine>
 
-      <Tabs tabs={tabs} active={contentTab} onChange={setContentTab} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Tabs tabs={tabs} active={contentTab} onChange={setContentTab} />
+        {detail.created_at && (
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            Collected {formatDate(detail.created_at)}
+          </span>
+        )}
+      </div>
 
       {contentTab === 'about' ? (
         <div className={s.tabContent}>
@@ -113,14 +120,24 @@ export default function SourceDetailView({
             </DetailSection>
           )}
 
-          <DetailSection label="Content Filter">
-            {detail.content_filter ? (
+          {detail.key_claims.length > 0 && (
+            <DetailSection label="Key Claims" count={detail.key_claims.length}>
+              {detail.key_claims.map((c) => (
+                <div key={c.id} className={s.keyClaim}>
+                  <Link href={`/claims?id=${c.id}`}>{c.statement}</Link>
+                </div>
+              ))}
+            </DetailSection>
+          )}
+
+          <DetailSection label="Curation Rule">
+            {detail.curation_rule ? (
               <div className={s.detailValue} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>
-                {detail.content_filter.name}
+                {detail.curation_rule.name}
                 <span style={{ color: 'var(--text-muted)' }}>
-                  v{detail.content_filter.version}
+                  v{detail.curation_rule.version}
                 </span>
-                {detail.content_filter.description && <Tooltip text={detail.content_filter.description} />}
+                {detail.curation_rule.description && <Tooltip text={detail.curation_rule.description} />}
               </div>
             ) : (
               <div className={s.detailValue} style={{ color: 'var(--text-muted)' }}>

@@ -49,15 +49,21 @@ export async function GET(
         [contributorId]
       );
 
-      // Expert positions from v_expert_positions
+      // Expert positions from v_expert_positions with is_key flag
       const [positions] = await conn.query<RowDataPacket[]>(
         `SELECT
-           claim_id, statement,
-           stance, strength, evidence_content, source_title
-         FROM v_expert_positions
-         WHERE contributor_id = ?
-         ORDER BY claim_id`,
-        [contributorId]
+           vep.claim_id, vep.statement,
+           vep.stance, vep.strength, vep.evidence_content, vep.source_title,
+           COALESCE(
+             (SELECT MAX(cs_k.is_key) FROM claim_sources cs_k
+              JOIN source_contributors sc_k ON cs_k.source_id = sc_k.source_id
+              WHERE cs_k.claim_id = vep.claim_id AND sc_k.contributor_id = ?),
+             FALSE
+           ) AS is_key
+         FROM v_expert_positions vep
+         WHERE vep.contributor_id = ?
+         ORDER BY vep.claim_id`,
+        [contributorId, contributorId]
       );
 
       // Contribution stats from v_contributor_scores

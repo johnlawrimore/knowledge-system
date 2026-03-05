@@ -20,29 +20,31 @@ export default function SourceLinkList<T extends SourceLinkItem>({
     <div className={s.list}>
       {sources.map((src) => (
         <div key={src.id} className={s.row}>
-          {layout === 'inline' ? (
-            <MetaLine>
-              <Link href={`/sources?id=${src.id}`} className={s.title}>
-                {src.title}
-              </Link>
-              <SourceTypeBadge type={src.source_type} size={13} />
-              {src.main_contributor && <span>{src.main_contributor}</span>}
-              {src.publication && src.publication !== src.main_contributor && <span>{src.publication}</span>}
-              {src.published_date && <span>{formatDate(src.published_date)}</span>}
-            </MetaLine>
-          ) : (
-            <>
-              <Link href={`/sources?id=${src.id}`} className={s.title}>
-                {src.title}
-              </Link>
+          <div className={s.rowContent}>
+            {layout === 'inline' ? (
               <MetaLine>
+                <Link href={`/sources?id=${src.id}`} className={s.title}>
+                  {src.title}
+                </Link>
                 <SourceTypeBadge type={src.source_type} size={13} />
                 {src.main_contributor && <span>{src.main_contributor}</span>}
                 {src.publication && src.publication !== src.main_contributor && <span>{src.publication}</span>}
                 {src.published_date && <span>{formatDate(src.published_date)}</span>}
               </MetaLine>
-            </>
-          )}
+            ) : (
+              <>
+                <Link href={`/sources?id=${src.id}`} className={s.title}>
+                  {src.title}
+                </Link>
+                <MetaLine>
+                  <SourceTypeBadge type={src.source_type} size={13} />
+                  {src.main_contributor && <span>{src.main_contributor}</span>}
+                  {src.publication && src.publication !== src.main_contributor && <span>{src.publication}</span>}
+                  {src.published_date && <span>{formatDate(src.published_date)}</span>}
+                </MetaLine>
+              </>
+            )}
+          </div>
           {renderExtra?.(src)}
         </div>
       ))}

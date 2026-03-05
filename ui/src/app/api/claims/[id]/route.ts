@@ -104,6 +104,7 @@ export async function GET(
     const [sourceRows] = await pool.query<RowDataPacket[]>(
       `SELECT s.id, s.title, s.source_type, s.published_date,
               pub.name AS publication,
+              cs.is_key,
               (SELECT c.name FROM source_contributors sc2
                JOIN contributors c ON c.id = sc2.contributor_id
                WHERE sc2.source_id = s.id LIMIT 1) AS main_contributor

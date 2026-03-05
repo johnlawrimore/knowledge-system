@@ -77,6 +77,35 @@ CREATE TABLE source_contributors (
 
 
 -- ============================================================================
+-- CURATION RULES
+-- ============================================================================
+
+CREATE TABLE curation_rules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE curation_rule_versions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    filter_id INT NOT NULL,
+    version INT NOT NULL,
+    content_filter TEXT NOT NULL,
+    preferred_terminology TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE INDEX idx_rule_version (filter_id, version),
+    FOREIGN KEY (filter_id) REFERENCES curation_rules(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE sources ADD COLUMN curation_rule_version_id INT,
+    ADD FOREIGN KEY (curation_rule_version_id) REFERENCES curation_rule_versions(id) ON DELETE SET NULL;
+
+
+-- ============================================================================
 -- STAGE 2: COMPOSITION
 -- ============================================================================
 
@@ -202,6 +231,7 @@ CREATE TABLE claim_tags (
 CREATE TABLE claim_sources (
     claim_id INT NOT NULL,
     source_id INT NOT NULL,
+    is_key BOOLEAN NOT NULL DEFAULT FALSE,
 
     PRIMARY KEY (claim_id, source_id),
     FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,

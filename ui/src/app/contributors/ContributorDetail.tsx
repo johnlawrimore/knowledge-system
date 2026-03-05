@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ContributorDetail as ContributorDetailType, Position } from '@/lib/types';
 import Avatar from '@/components/Avatar';
 import InlineEdit from '@/components/InlineEdit';
+import KeyBadge from '@/components/KeyBadge';
 import TierBadge from '@/components/TierBadge';
 import MetaLine from '@/components/MetaLine';
 import DetailSection from '@/components/DetailSection';
@@ -168,6 +169,7 @@ export default function ContributorDetailView({
                     <span style={{ color: ss.color, fontSize: '0.75rem' }}>{ss.label}</span>
                     {' '}
                     <span className={s.claimScore}>#{p.claim_id}</span>
+                    {p.is_key && <> <KeyBadge /></>}
                     {' '}
                     <span className={s.claimStatement}>{p.statement}</span>
                   </div>

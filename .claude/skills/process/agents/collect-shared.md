@@ -137,6 +137,8 @@ Scoring guidance:
 
 After composing the source markdown and before inserting into the database, write a 3–4 sentence summary of the raw source content. This gives the curator a quick understanding of what a source contains before any curation rules are applied. It describes the raw source, not a filtered or distilled version of it.
 
+**Lead with attribution.** Open the first sentence by naming the contributor(s) and using an active verb that characterizes their rhetorical stance — e.g., "X and Y argue that," "X examines," "X interviews Y about," "X shares reflection on." Choose the verb to match what the contributor is actually doing (arguing, presenting findings, examining, proposing, reflecting, etc.).
+
 Answer:
 1. What is the source's subject and key arguments?
 2. What does it cover?

@@ -9,9 +9,9 @@ export async function GET() {
       SELECT cf.id, cf.name, cf.description, cf.is_active, cf.created_at, cf.updated_at,
         COALESCE(MAX(cfv.version), 0) AS current_version,
         COUNT(DISTINCT s.id) AS sources_applied
-      FROM content_filters cf
-      LEFT JOIN content_filter_versions cfv ON cfv.filter_id = cf.id
-      LEFT JOIN sources s ON s.content_filter_version_id = cfv.id
+      FROM curation_rules cf
+      LEFT JOIN curation_rule_versions cfv ON cfv.filter_id = cf.id
+      LEFT JOIN sources s ON s.curation_rule_version_id = cfv.id
       GROUP BY cf.id, cf.name, cf.description, cf.is_active, cf.created_at, cf.updated_at
       ORDER BY cf.name
     `);
@@ -23,13 +23,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { name, description, instructions } = body;
+  const { name, description, content_filter, preferred_terminology } = body;
 
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   }
-  if (!instructions || typeof instructions !== 'string' || instructions.trim().length === 0) {
-    return NextResponse.json({ error: 'Instructions are required' }, { status: 400 });
+  if (!content_filter || typeof content_filter !== 'string' || content_filter.trim().length === 0) {
+    return NextResponse.json({ error: 'Content filter is required' }, { status: 400 });
   }
 
   const conn = await pool.getConnection();
@@ -37,14 +37,14 @@ export async function POST(request: NextRequest) {
     await conn.beginTransaction();
 
     const [filterResult] = await conn.query<ResultSetHeader>(
-      `INSERT INTO content_filters (name, description) VALUES (?, ?)`,
+      `INSERT INTO curation_rules (name, description) VALUES (?, ?)`,
       [name.trim(), description?.trim() || null]
     );
     const filterId = filterResult.insertId;
 
     const [versionResult] = await conn.query<ResultSetHeader>(
-      `INSERT INTO content_filter_versions (filter_id, version, instructions) VALUES (?, 1, ?)`,
-      [filterId, instructions.trim()]
+      `INSERT INTO curation_rule_versions (filter_id, version, content_filter, preferred_terminology) VALUES (?, 1, ?, ?)`,
+      [filterId, content_filter.trim(), preferred_terminology?.trim() || null]
     );
 
     await conn.commit();

@@ -17,9 +17,9 @@ export async function GET(
   try {
     const [rows] = await conn.query<RowDataPacket[]>(
       `SELECT cf.id, cf.name, cf.description, cf.is_active, cf.created_at, cf.updated_at,
-         cfv.id AS version_id, cfv.version, cfv.instructions, cfv.created_at AS version_created_at
-       FROM content_filters cf
-       LEFT JOIN content_filter_versions cfv ON cfv.filter_id = cf.id
+         cfv.id AS version_id, cfv.version, cfv.content_filter, cfv.preferred_terminology, cfv.created_at AS version_created_at
+       FROM curation_rules cf
+       LEFT JOIN curation_rule_versions cfv ON cfv.filter_id = cf.id
        WHERE cf.id = ?
        ORDER BY cfv.version DESC`,
       [filterId]
@@ -41,7 +41,8 @@ export async function GET(
         .map((r) => ({
           version_id: r.version_id,
           version: r.version,
-          instructions: r.instructions,
+          content_filter: r.content_filter,
+          preferred_terminology: r.preferred_terminology,
           version_created_at: r.version_created_at,
         })),
     };
@@ -64,13 +65,13 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const { name, description, is_active, instructions } = body;
+  const { name, description, is_active, content_filter, preferred_terminology } = body;
 
   const conn = await pool.getConnection();
   try {
     // Verify filter exists
     const [existing] = await conn.query<RowDataPacket[]>(
-      `SELECT id FROM content_filters WHERE id = ?`,
+      `SELECT id FROM curation_rules WHERE id = ?`,
       [filterId]
     );
     if (existing.length === 0) {
@@ -99,21 +100,32 @@ export async function PATCH(
     if (fields.length > 0) {
       values.push(filterId);
       await conn.query<ResultSetHeader>(
-        `UPDATE content_filters SET ${fields.join(', ')} WHERE id = ?`,
+        `UPDATE curation_rules SET ${fields.join(', ')} WHERE id = ?`,
         values
       );
     }
 
-    // If instructions changed, create a new version
-    if (instructions !== undefined && typeof instructions === 'string' && instructions.trim().length > 0) {
+    // If content_filter or preferred_terminology changed, create a new version
+    if ((content_filter !== undefined && typeof content_filter === 'string' && content_filter.trim().length > 0) || preferred_terminology !== undefined) {
       const [maxRow] = await conn.query<RowDataPacket[]>(
-        `SELECT COALESCE(MAX(version), 0) AS max_version FROM content_filter_versions WHERE filter_id = ?`,
+        `SELECT COALESCE(MAX(version), 0) AS max_version FROM curation_rule_versions WHERE filter_id = ?`,
         [filterId]
       );
       const nextVersion = (maxRow[0].max_version as number) + 1;
+      // Get previous version values as defaults
+      const [prevRow] = await conn.query<RowDataPacket[]>(
+        `SELECT content_filter, preferred_terminology FROM curation_rule_versions WHERE filter_id = ? ORDER BY version DESC LIMIT 1`,
+        [filterId]
+      );
+      const prev = prevRow[0] || {};
       await conn.query<ResultSetHeader>(
-        `INSERT INTO content_filter_versions (filter_id, version, instructions) VALUES (?, ?, ?)`,
-        [filterId, nextVersion, instructions.trim()]
+        `INSERT INTO curation_rule_versions (filter_id, version, content_filter, preferred_terminology) VALUES (?, ?, ?, ?)`,
+        [
+          filterId,
+          nextVersion,
+          content_filter !== undefined ? content_filter.trim() : prev.content_filter,
+          preferred_terminology !== undefined ? (preferred_terminology?.trim() || null) : prev.preferred_terminology,
+        ]
       );
     }
 
@@ -145,7 +157,7 @@ export async function DELETE(
     const [usageRows] = await conn.query<RowDataPacket[]>(
       `SELECT COUNT(DISTINCT s.id) AS source_count
        FROM sources s
-       JOIN content_filter_versions cfv ON s.content_filter_version_id = cfv.id
+       JOIN curation_rule_versions cfv ON s.curation_rule_version_id = cfv.id
        WHERE cfv.filter_id = ?`,
       [filterId]
     );
@@ -159,7 +171,7 @@ export async function DELETE(
     }
 
     const [result] = await conn.query<ResultSetHeader>(
-      `DELETE FROM content_filters WHERE id = ?`,
+      `DELETE FROM curation_rules WHERE id = ?`,
       [filterId]
     );
 

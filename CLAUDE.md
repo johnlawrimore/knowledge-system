@@ -2,7 +2,7 @@
 
 ## Overview
 
-A domain-agnostic research synthesis engine. It takes source material — articles, talks, videos, papers — and breaks them into atomic intellectual components (claims, evidence, reasoning, rhetorical devices, contexts, methods), scores everything for credibility, cross-references across sources, and identifies where evidence is strong, thin, or contested. The composition side assembles scored building blocks into original content with traceable evidence chains. Processes source material through four stages:
+A domain-agnostic research synthesis engine optimized for thought leadership and educational material. It takes source material — articles, talks, videos, papers — and breaks them into atomic intellectual components (claims, evidence, reasoning, rhetorical devices, contexts, methods), scores everything for credibility, cross-references across sources, and identifies where evidence is strong, thin, or contested. The composition side assembles scored building blocks into original content with traceable evidence chains. Processes source material through four stages:
 
 1. **Collection** — Ingest raw sources (URLs, YouTube, uploads) into the `sources` table
 2. **Distillation** — Rewrite sources into uniform-voice distillations stored in `sources.distillation`
@@ -39,23 +39,23 @@ URL/Upload → process skill
 
 ### Tables (27)
 
-**Content Filtering**: `content_filters`, `content_filter_versions`
-**Collection**: `contributors`, `publications`, `sources` (includes `distillation` and `content_filter_version_id` columns), `source_contributors`
+**Curation Rules**: `curation_rules`, `curation_rule_versions`
+**Collection**: `contributors`, `publications`, `sources` (includes `distillation` and `curation_rule_version_id` columns), `source_contributors`
 **Composition**: `compositions`, `composition_sources`
 **Decomposition**: `topics`, `themes`, `claims`, `claim_sources`, `claim_links`, `claim_topics`, `claim_themes`, `claim_tags`
 **Decomposition Entities**: `devices`, `claim_devices`, `contexts`, `claim_contexts`, `methods`, `claim_methods`
 **Evidence & Reasoning**: `evidence`, `claim_evidence`, `reasonings`
 **Pipeline Logging**: `pipeline_runs`, `pipeline_stages`
 
-### Content Filters
+### Curation Rules
 
-`content_filters` stores user-defined filters that control what material survives the distillation process. Each filter has a `name`, `description`, and an `is_active` flag. Filters are versioned — every time a filter's `instructions` are edited, a new record is created in `content_filter_versions` (immutable; previous versions are never modified). The `version` field is an integer incrementing from 1.
+`curation_rules` stores user-defined rules that control what material survives the distillation process. Each rule has a `name`, `description`, and an `is_active` flag. Rules are versioned — every time a rule's `content_filter` or `preferred_terminology` is edited, a new record is created in `curation_rule_versions` (immutable; previous versions are never modified). The `version` field is an integer incrementing from 1. `content_filter` contains the filtering instructions. `preferred_terminology` is a comma-separated list of favored vocabulary used during distillation.
 
-`sources.content_filter_version_id` records which version of which filter was applied when this source was distilled. NULL means no content filter was applied (only built-in filtering). This field is set during the distillation step and never changes afterward, preserving a stable audit trail of exactly what instructions shaped the distilled content.
+`sources.curation_rule_version_id` records which version of which rule was applied when this source was distilled. NULL means no curation rule was applied (only built-in filtering). This field is set during the distillation step and never changes afterward, preserving a stable audit trail of exactly what rules shaped the distilled content.
 
 ### Claim Sources
 
-`claim_sources` provides a direct link between claims and the sources that assert them. This is distinct from the evidence chain (`claim_evidence` → `evidence` → `sources`): a source can assert a claim directly and separately provide evidence for it.
+`claim_sources` provides a direct link between claims and the sources that assert them. The `is_key` flag marks 3–7 central claims per source — the claims the source was written to make. Set during decomposition. This is distinct from the evidence chain (`claim_evidence` → `evidence` → `sources`): a source can assert a claim directly and separately provide evidence for it.
 
 ### Source Classification
 

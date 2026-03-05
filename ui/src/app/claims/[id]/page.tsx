@@ -7,7 +7,7 @@ import InlineEdit from '@/components/InlineEdit';
 import Tabs from '@/components/Tabs';
 import { claimTypeLabel } from '@/lib/enumLabels';
 import type { ClaimDetail } from '@/lib/types';
-import ClaimAboutTab from './tabs/ClaimAboutTab';
+import ClaimAbout from './tabs/ClaimAbout';
 import ClaimEvidenceTab from './tabs/ClaimEvidenceTab';
 import ClaimRelationshipsTab from './tabs/ClaimRelationshipsTab';
 import ClaimEntitiesTab from './tabs/ClaimEntitiesTab';
@@ -94,7 +94,7 @@ export default function ClaimDetailPage() {
         />
       </blockquote>
 
-      <ClaimAboutTab
+      <ClaimAbout
         claim={claim}
         patchClaim={patchClaim}
         onRemoveTopic={removeTopic}

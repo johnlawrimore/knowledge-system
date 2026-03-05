@@ -13,17 +13,17 @@ For multi-statement scripts, write to /tmp/distill.sql and pipe it.
 
 ## Procedure
 
-### 1. Load Source and Content Filter (single query)
+### 1. Load Source and Curation Rule (single query)
 
-The orchestrator provides the content filter via `{{filter_id}}` (an integer ID or `NULL`).
+The orchestrator provides the curation rule via `{{filter_id}}` (an integer ID or `NULL`).
 
 Run as a single piped script to /tmp/distill_load.sql:
 
 ```sql
 SELECT id, title, source_type, content, status FROM sources WHERE id = {{source_id}};
 -- Only if {{filter_id}} is not NULL:
-SELECT cfv.id AS version_id, cfv.instructions
-FROM content_filter_versions cfv
+SELECT cfv.id AS version_id, cfv.content_filter, cfv.preferred_terminology
+FROM curation_rule_versions cfv
 WHERE cfv.filter_id = {{filter_id}}
 ORDER BY cfv.version DESC
 LIMIT 1;
@@ -35,7 +35,7 @@ If `{{filter_id}}` is NULL, omit the second SELECT.
 - If `content` is empty or NULL, return error: "Source has no content"
 - If `status` is not `collected`, return error: "Source status is '<status>', expected 'collected'"
 
-If a content filter was loaded, apply its instructions during distillation (Step 3) to shape what content survives. Record the `version_id` for Step 4.
+If a curation rule was loaded, apply its `content_filter` during distillation (Step 3) to shape what content survives. If `preferred_terminology` is present, use those terms in preference to synonyms when rewriting. Record the `version_id` for Step 4.
 
 ### 2. Distill the Content
 
@@ -80,13 +80,17 @@ Rewrite the source into a structured distillation. Your voice: direct, precise, 
 
 Omit sections that don't apply.
 
-**Content filter (if selected):**
+**Curation rule (if selected):**
 
-In addition to the standard distillation rules above, apply the following user-defined filter instructions. Treat them as an additive constraint: material that passes the standard rules but violates the filter should be excluded.
+In addition to the standard distillation rules above, apply the following user-defined content filter. Treat it as an additive constraint: material that passes the standard rules but violates the filter should be excluded.
 
-> {{content_filter_instructions}}
+> {{content_filter}}
 
-If no content filter was selected in Step 1, ignore this block entirely.
+If `preferred_terminology` was loaded, use those terms in preference to synonyms throughout the distillation. For example, if "observability" is in the list, prefer it over "monitoring" where the meaning aligns.
+
+> {{preferred_terminology}}
+
+If no curation rule was selected in Step 1, ignore this block entirely.
 
 **Quality checks before saving:**
 - **Minimum length:** 300 words. If under 200, return error status — the source may not have enough content.
@@ -104,11 +108,11 @@ Write to /tmp/distill.sql:
 UPDATE sources SET
   distillation = '<distilled_markdown>',
   status = 'distilled',
-  content_filter_version_id = <selected_version_id_or_NULL>
+  curation_rule_version_id = <selected_version_id_or_NULL>
 WHERE id = {{source_id}};
 ```
 
-Replace `<selected_version_id_or_NULL>` with the `version_id` recorded in Step 1, or `NULL` if no filter was selected.
+Replace `<selected_version_id_or_NULL>` with the `version_id` recorded in Step 1, or `NULL` if no curation rule was selected.
 
 ## Required Output
 

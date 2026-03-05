@@ -78,6 +78,11 @@ export async function GET(request: NextRequest) {
       values.push(parseInt(sourceId, 10));
     }
 
+    // is_key subquery (only meaningful when source_id is provided)
+    const isKeySelect = sourceId
+      ? `(SELECT cs_k.is_key FROM claim_sources cs_k WHERE cs_k.claim_id = c.id AND cs_k.source_id = ${parseInt(sourceId, 10)}) AS is_key`
+      : 'NULL AS is_key';
+
     // Fulltext search
     if (search) {
       conditions.push('MATCH(c.statement) AGAINST(? IN BOOLEAN MODE)');
@@ -152,7 +157,8 @@ export async function GET(request: NextRequest) {
         (SELECT COUNT(*) FROM claim_contexts cc WHERE cc.claim_id = c.id) AS context_count,
         (SELECT COUNT(*) FROM claim_methods mc WHERE mc.claim_id = c.id) AS method_count,
         (SELECT COUNT(*) FROM reasonings r WHERE r.claim_id = c.id) AS reasoning_count,
-        (SELECT COUNT(*) FROM claims ch WHERE ch.parent_claim_id = c.id) AS child_count
+        (SELECT COUNT(*) FROM claims ch WHERE ch.parent_claim_id = c.id) AS child_count,
+        ${isKeySelect}
       FROM claims c
       LEFT JOIN v_standalone_claim_scores scs ON c.id = scs.claim_id
       ${whereClause}
@@ -183,6 +189,7 @@ export async function GET(request: NextRequest) {
       method_count: Number(row.method_count),
       reasoning_count: Number(row.reasoning_count),
       child_count: Number(row.child_count),
+      is_key: row.is_key === 1,
     }));
 
     return NextResponse.json({

@@ -4,9 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FilterListItem, FilterDetail as FilterDetailType } from '@/lib/types';
 import { pageIcon } from '@/lib/pageIcons';
 import EmptyState from '@/components/EmptyState';
-import FilterList from './FilterList';
-import FilterDetailComponent from './FilterDetail';
-import FilterCreateForm from './FilterCreateForm';
+import RuleList from './RuleList';
+import RuleDetailComponent from './RuleDetail';
+import RuleCreateForm from './RuleCreateForm';
 import s from '../shared.module.scss';
 
 const FiltersIcon = pageIcon('filters');
@@ -54,7 +54,7 @@ export default function FiltersContent() {
     router.push(`/filters?id=${id}`);
   };
 
-  const handleCreate = async (data: { name: string; description: string; instructions: string }) => {
+  const handleCreate = async (data: { name: string; description: string; content_filter: string }) => {
     const res = await fetch('/api/filters', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,8 +78,14 @@ export default function FiltersContent() {
     await loadDetail(String(detail.id));
   };
 
-  const handleSaveInstructions = async (instructions: string) => {
-    await patch('instructions', instructions);
+  const handleSaveVersion = async (data: { content_filter: string; preferred_terminology: string }) => {
+    await fetch(`/api/filters/${detail!.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    await loadFilters();
+    await loadDetail(String(detail!.id));
   };
 
   return (
@@ -87,21 +93,21 @@ export default function FiltersContent() {
       <div className={s.header}>
         <div className={s.title}>
           <FiltersIcon size={20} className={s.pageIcon} />
-          <h1>Content Filters</h1>
+          <h1>Curation Rules</h1>
         </div>
         <button className={s.createBtn} onClick={() => setShowCreate(true)}>
-          + New Filter
+          + New Rule
         </button>
       </div>
       <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: '0 0 1.25rem', maxWidth: '65rem' }}>
-        Content filters shape what material survives the distillation process. Content filters can optionally be applied during source processing to limit what data is included in claims, evidence, etc.
+        Curation rules shape how sources are distilled. Rules allows a <strong>content filter</strong> that controls what material survives distillation and a a comma-separated list of <strong>preferred terminology</strong> that guides use of vocabulary..
       </p>
 
       {loading ? (
         <div className={s.loading}>Loading…</div>
       ) : (
         <div className={s.splitLayout}>
-          <FilterList
+          <RuleList
             filters={filters}
             selectedId={selectedId}
             onSelect={selectFilter}
@@ -112,10 +118,10 @@ export default function FiltersContent() {
             {!detail ? (
               <EmptyState message="Select a filter to view details" variant="detail" />
             ) : (
-              <FilterDetailComponent
+              <RuleDetailComponent
                 detail={detail}
                 onPatch={patch}
-                onSaveInstructions={handleSaveInstructions}
+                onSaveVersion={handleSaveVersion}
               />
             )}
           </div>
@@ -123,7 +129,7 @@ export default function FiltersContent() {
       )}
 
       {showCreate && (
-        <FilterCreateForm
+        <RuleCreateForm
           onSubmit={handleCreate}
           onCancel={() => setShowCreate(false)}
         />

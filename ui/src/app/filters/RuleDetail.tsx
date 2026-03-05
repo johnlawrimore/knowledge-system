@@ -9,32 +9,38 @@ import s from '../shared.module.scss';
 
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), { ssr: false });
 
-export default function FilterDetail({
+export default function RuleDetail({
   detail,
   onPatch,
-  onSaveInstructions,
+  onSaveVersion,
 }: {
   detail: FilterDetailType;
   onPatch: (field: string, value: unknown) => Promise<void>;
-  onSaveInstructions: (instructions: string) => Promise<void>;
+  onSaveVersion: (data: { content_filter: string; preferred_terminology: string }) => Promise<void>;
 }) {
   const [historyExpanded, setHistoryExpanded] = useState(false);
-  const [instructionsDraft, setInstructionsDraft] = useState('');
-  const [instructionsSaving, setInstructionsSaving] = useState(false);
+  const [contentFilterDraft, setContentFilterDraft] = useState('');
+  const [preferredTerminologyDraft, setPreferredTerminologyDraft] = useState('');
+  const [contentFilterSaving, setContentFilterSaving] = useState(false);
 
   const currentVersion = detail.versions[0];
 
   // Reset local state when detail changes
   useEffect(() => {
-    setInstructionsDraft(detail.versions?.[0]?.instructions ?? '');
+    setContentFilterDraft(detail.versions?.[0]?.content_filter ?? '');
+    setPreferredTerminologyDraft(detail.versions?.[0]?.preferred_terminology ?? '');
     setHistoryExpanded(false);
   }, [detail.id, detail.versions]);
 
+  const hasVersionChanges =
+    contentFilterDraft !== (currentVersion?.content_filter ?? '') ||
+    preferredTerminologyDraft !== (currentVersion?.preferred_terminology ?? '');
+
   const handleSave = async () => {
-    if (!instructionsDraft.trim()) return;
-    setInstructionsSaving(true);
-    await onSaveInstructions(instructionsDraft);
-    setInstructionsSaving(false);
+    if (!contentFilterDraft.trim()) return;
+    setContentFilterSaving(true);
+    await onSaveVersion({ content_filter: contentFilterDraft, preferred_terminology: preferredTerminologyDraft });
+    setContentFilterSaving(false);
   };
 
   const toggleActive = async () => {
@@ -66,11 +72,21 @@ export default function FilterDetail({
 
       <div className={s.divider} />
 
-      <DetailSection label="Instructions">
+      <DetailSection label="Content Filter">
         <MarkdownEditor
-          value={instructionsDraft}
-          onChange={setInstructionsDraft}
+          value={contentFilterDraft}
+          onChange={setContentFilterDraft}
           placeholder="Describe what content to include or exclude from distillation…"
+        />
+      </DetailSection>
+
+      <DetailSection label="Preferred Terminology">
+        <textarea
+          style={{ width: '100%', padding: '0.5rem', background: 'var(--bg-primary)', border: '1px solid var(--border-default)', borderRadius: '0.25rem', color: 'var(--text-primary)', fontSize: '0.8125rem', resize: 'vertical', boxSizing: 'border-box' }}
+          rows={3}
+          value={preferredTerminologyDraft}
+          onChange={(e) => setPreferredTerminologyDraft(e.target.value)}
+          placeholder="Comma-separated vocabulary, e.g. AI agent, prompt engineering, LLM"
         />
       </DetailSection>
 
@@ -134,8 +150,13 @@ export default function FilterDetail({
                       v{v.version} &mdash; {new Date(v.version_created_at).toLocaleDateString()}
                     </div>
                     <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)' }}>
-                      {v.instructions}
+                      {v.content_filter}
                     </div>
+                    {v.preferred_terminology && (
+                      <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                        <span style={{ fontWeight: 600 }}>Terminology:</span> {v.preferred_terminology}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -150,9 +171,9 @@ export default function FilterDetail({
         <button
           className={s.createBtn}
           onClick={handleSave}
-          disabled={instructionsSaving || instructionsDraft === (currentVersion?.instructions ?? '')}
+          disabled={contentFilterSaving || !hasVersionChanges}
         >
-          {instructionsSaving ? 'Saving\u2026' : 'Save'}
+          {contentFilterSaving ? 'Saving\u2026' : 'Save'}
         </button>
       </div>
     </>
