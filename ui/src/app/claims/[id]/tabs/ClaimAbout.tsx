@@ -7,6 +7,7 @@ import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import KeyBadge from '@/components/KeyBadge';
 import SourceLinkList from '@/components/SourceLinkList';
 import type { ClaimDetail, ClaimSource } from '@/lib/types';
+import shared from '../../../shared.module.scss';
 import s from '../page.module.scss';
 
 interface ClaimAboutProps {
@@ -27,15 +28,17 @@ export default function ClaimAbout({
   return (
     <>
       {claim.sources.length > 0 && (
-        <DetailSection label="Sources" count={claim.sources.length}>
-          <SourceLinkList
-            sources={claim.sources}
-            renderExtra={(src: ClaimSource) => src.is_key ? <KeyBadge /> : null}
-          />
-        </DetailSection>
+        <div className={shared.box}>
+          <DetailSection label="Sources" count={claim.sources.length}>
+            <SourceLinkList
+              sources={claim.sources}
+              renderExtra={(src: ClaimSource) => src.is_key ? <KeyBadge /> : null}
+            />
+          </DetailSection>
+        </div>
       )}
 
-      <div className={s.taxonomyBox}>
+      <div className={shared.boxGrid}>
         <div>
           <DetailSection label="Topics">
             <div className={s.chipRow}>
@@ -89,7 +92,7 @@ export default function ClaimAbout({
         </EvalSection>
       )}
 
-      <div className={s.notesGrid}>
+      <div className={shared.boxGrid}>
         <DetailSection label="Notes">
           <InlineEdit
             value={claim.notes}

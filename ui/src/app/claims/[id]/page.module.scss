@@ -118,31 +118,6 @@
 }
 
 // ── About section ─────────────────────────────────────────────
-.taxonomyBox {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  border: 1px solid var(--border-default);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.aboutSection {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.notesGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  border: 1px solid var(--border-default);
-  border-radius: 0.5rem;
-  padding: 1rem;
-}
-
 .metaLabel {
   font-size: 0.6875rem;
   font-weight: 600;

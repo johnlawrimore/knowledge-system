@@ -84,56 +84,60 @@ export default function TopicDetailPanel({
 
   return (
     <>
-      <DetailSection label="Name">
-        <InlineEdit
-          value={detail.name}
-          onSave={(v) => patch('name', v)}
-          placeholder="Topic name..."
-        />
-      </DetailSection>
+      <div className={s.box}>
+        <DetailSection label="Name">
+          <InlineEdit
+            value={detail.name}
+            onSave={(v) => patch('name', v)}
+            placeholder="Topic name..."
+          />
+        </DetailSection>
 
-      <DetailSection label="Description">
-        <InlineEdit
-          value={detail.description}
-          onSave={(v) => patch('description', v)}
-          multiline
-          placeholder="Click to add description..."
-        />
-      </DetailSection>
+        <DetailSection label="Description">
+          <InlineEdit
+            value={detail.description}
+            onSave={(v) => patch('description', v)}
+            multiline
+            placeholder="Click to add description..."
+          />
+        </DetailSection>
 
-      <DetailSection label="Parent Topic">
-        <InlineComboBox
-          value={detail.parent_name}
-          onSave={handleParentSave}
-          suggestions={['None', ...parentSuggestions]}
-          placeholder="None (top-level)"
-        />
-      </DetailSection>
+        <DetailSection label="Parent Topic">
+          <InlineComboBox
+            value={detail.parent_name}
+            onSave={handleParentSave}
+            suggestions={['None', ...parentSuggestions]}
+            placeholder="None (top-level)"
+          />
+        </DetailSection>
+      </div>
 
-      <DetailSection label="Statistics">
-        <div className={s.detailValue}>
-          {detail.claims.length} claims
-          {detail.source_count > 0 && <> &middot; {detail.source_count} sources</>}
-          {detail.avg_claim_score != null && (
-            <> &middot; avg score: {Number(detail.avg_claim_score).toFixed(1)}</>
-          )}
-        </div>
-      </DetailSection>
+      <div className={s.box}>
+        <DetailSection label="Statistics">
+          <div className={s.detailValue}>
+            {detail.claims.length} claims
+            {detail.source_count > 0 && <> &middot; {detail.source_count} sources</>}
+            {detail.avg_claim_score != null && (
+              <> &middot; avg score: {Number(detail.avg_claim_score).toFixed(1)}</>
+            )}
+          </div>
+        </DetailSection>
+      </div>
 
-      <hr className={s.divider} />
+      <div className={s.box}>
+        <ClaimSection title="Strongest Claims" claims={detail.strongest} />
 
-      <ClaimSection title="Strongest Claims" claims={detail.strongest} />
-
-      {detail.claims.length > 0 && (
-        <div className={s.detailSection}>
-          <Link
-            href={`/claims?topic=${detail.id}`}
-            style={{ fontSize: '0.8125rem', color: 'var(--accent-blue)' }}
-          >
-            All {detail.claims.length} claims →
-          </Link>
-        </div>
-      )}
+        {detail.claims.length > 0 && (
+          <div className={s.detailSection}>
+            <Link
+              href={`/claims?topic=${detail.id}`}
+              style={{ fontSize: '0.8125rem', color: 'var(--accent-blue)' }}
+            >
+              All {detail.claims.length} claims →
+            </Link>
+          </div>
+        )}
+      </div>
     </>
   );
 }
