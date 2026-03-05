@@ -1,41 +1,44 @@
 import {
-  IconBrandYoutube,
-  IconArticle,
-  IconSchool,
-  IconBook,
-  IconBookmark,
-  IconPresentation,
   IconMicrophone,
+  IconPresentation,
+  IconUsers,
+  IconArticle,
+  IconFlask,
+  IconSchool,
+  IconNews,
   IconFileAnalytics,
   IconFileDescription,
-  IconMail,
-  IconFlask,
-  IconWorld,
   IconFile,
 } from '@tabler/icons-react';
 import type { ComponentType } from 'react';
 
-interface SourceTypeConfig {
+interface TypeConfig {
   label: string;
   icon: ComponentType<{ size?: number; stroke?: number; className?: string }>;
 }
 
-const SOURCE_TYPE_MAP: Record<string, SourceTypeConfig> = {
-  youtube_video: { label: 'YouTube Video', icon: IconBrandYoutube },
-  blog_post: { label: 'Blog Post', icon: IconArticle },
-  academic_paper: { label: 'Academic Paper', icon: IconSchool },
-  book: { label: 'Book', icon: IconBook },
-  book_chapter: { label: 'Book Chapter', icon: IconBookmark },
-  conference_talk: { label: 'Conference Talk', icon: IconPresentation },
-  podcast: { label: 'Podcast', icon: IconMicrophone },
-  report: { label: 'Report', icon: IconFileAnalytics },
-  documentation: { label: 'Documentation', icon: IconFileDescription },
-  newsletter: { label: 'Newsletter', icon: IconMail },
+// Source type: content classification (what kind of intellectual work it is)
+const SOURCE_TYPE_MAP: Record<string, TypeConfig> = {
+  interview: { label: 'Interview', icon: IconMicrophone },
+  lecture: { label: 'Lecture', icon: IconPresentation },
+  panel: { label: 'Panel', icon: IconUsers },
+  essay: { label: 'Essay', icon: IconArticle },
   research: { label: 'Research', icon: IconFlask },
-  website: { label: 'Website', icon: IconWorld },
+  tutorial: { label: 'Tutorial', icon: IconSchool },
+  news: { label: 'News', icon: IconNews },
+  review: { label: 'Review', icon: IconFileAnalytics },
+  documentation: { label: 'Documentation', icon: IconFileDescription },
+  report: { label: 'Report', icon: IconFileAnalytics },
+  other: { label: 'Other', icon: IconFile },
 };
 
-const FALLBACK: SourceTypeConfig = { label: '', icon: IconFile };
+// Format: delivery medium (how the content was originally delivered)
+const FORMAT_MAP: Record<string, TypeConfig> = {
+  transcript: { label: 'Transcript', icon: IconMicrophone },
+  text: { label: 'Text', icon: IconArticle },
+};
+
+const FALLBACK: TypeConfig = { label: '', icon: IconFile };
 
 export function sourceTypeLabel(type: string): string {
   return SOURCE_TYPE_MAP[type]?.label || type;
@@ -45,7 +48,20 @@ export function sourceTypeIcon(type: string): ComponentType<{ size?: number; str
   return SOURCE_TYPE_MAP[type]?.icon || FALLBACK.icon;
 }
 
+export function formatLabel(format: string): string {
+  return FORMAT_MAP[format]?.label || format;
+}
+
+export function formatIcon(format: string): ComponentType<{ size?: number; stroke?: number; className?: string }> {
+  return FORMAT_MAP[format]?.icon || FALLBACK.icon;
+}
+
 export const SOURCE_TYPES = Object.entries(SOURCE_TYPE_MAP).map(([value, { label }]) => ({
+  value,
+  label,
+}));
+
+export const FORMATS = Object.entries(FORMAT_MAP).map(([value, { label }]) => ({
   value,
   label,
 }));

@@ -150,7 +150,7 @@ SELECT
 
 **Model:** sonnet
 **Substitutions:** `{{url}}` → the input URL
-**Extract from result:** `source_id`, `contributor_ids`, `title`, `source_type`, `word_count`
+**Extract from result:** `source_id`, `contributor_ids`, `title`, `source_type`, `format`, `word_count`
 
 Report to user:
 ```
@@ -227,7 +227,7 @@ Source: "<title>" (ID: <source_id>)
 URL: <url>
 
 Stage Results:
-  ✓ Collected — <source_type>, <word_count> words          <duration>s
+  ✓ Collected — <format> <source_type>, <word_count> words   <duration>s
   ✓ Distilled — <word_count> words                          <duration>s
   ✓ Decomposed — <N> claims, <N> evidence records          <duration>s
   ✓ Categorized — <N> topics, <N> themes, <N> tags    ┐

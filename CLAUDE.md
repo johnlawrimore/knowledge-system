@@ -57,6 +57,13 @@ URL/Upload → process skill
 
 `claim_sources` provides a direct link between claims and the sources that assert them. This is distinct from the evidence chain (`claim_evidence` → `evidence` → `sources`): a source can assert a claim directly and separately provide evidence for it.
 
+### Source Classification
+
+Sources have two classification fields:
+
+- **`format`** — delivery medium: `transcript` (video/audio that was transcribed), `text` (originally written)
+- **`source_type`** — content classification: `interview`, `lecture`, `panel`, `essay`, `research`, `tutorial`, `news`, `review`, `documentation`, `report`, `other`
+
 ### Claim Types
 
 `claim_type` enum: `assertion` (declarative), `recommendation` (prescriptive), `prediction` (forward-looking), `definition` (conceptual), `observation` (descriptive), `mechanism` (causal), `distinction` (comparative), `other`
@@ -118,3 +125,4 @@ Credibility read from `evidence.evaluation_results` JSON via `JSON_EXTRACT(e.eva
 - All type enums include `other` as an escape valve
 - All markdown follows shared formatting rules (embedded in agent prompts)
 - **Encoding**: All text written to the database must use clean Unicode. Fix mojibake on sight — never store double-encoded sequences like `â€"`, `â€™`, `â€œ`, `Ã©`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`, ellipsis `…`. This applies to every field in every table, with no exceptions.
+- **Schema sync**: When modifying the database schema (ALTER TABLE, new columns, enum changes), update ALL three schema artifacts: the live DB, `knowledge-system-schema.sql`, and `knowledge-system.dbml`.

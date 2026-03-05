@@ -36,10 +36,10 @@ CREATE TABLE sources (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
     source_type ENUM(
-        'youtube_video', 'podcast', 'blog_post', 'website',
-        'academic_paper', 'book', 'book_chapter', 'conference_talk',
-        'newsletter', 'social_media', 'report', 'research', 'documentation', 'other'
+        'interview', 'lecture', 'panel', 'essay', 'research',
+        'tutorial', 'news', 'review', 'documentation', 'report', 'other'
     ) NOT NULL,
+    format ENUM('transcript', 'text') NOT NULL,
     url VARCHAR(1024),
     publication_id INT                    COMMENT 'FK to publications table',
     published_date DATE,
@@ -58,6 +58,7 @@ CREATE TABLE sources (
 
     INDEX idx_sources_status (status),
     INDEX idx_sources_type (source_type),
+    INDEX idx_sources_format (format),
     FULLTEXT INDEX ft_sources_content (content),
     FULLTEXT INDEX ft_sources_distillation (distillation),
     FOREIGN KEY (publication_id) REFERENCES publications(id) ON DELETE SET NULL

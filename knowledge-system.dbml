@@ -31,7 +31,8 @@ Table publications {
 Table sources {
   id int [pk, increment]
   title varchar(500) [not null]
-  source_type enum('youtube_video','podcast','blog_post','website','academic_paper','book','book_chapter','conference_talk','newsletter','social_media','report','research','documentation','other') [not null]
+  source_type enum('interview','lecture','panel','essay','research','tutorial','news','review','documentation','report','other') [not null]
+  format enum('transcript','text') [not null]
   url varchar(1024)
   publication_id int
   published_date date

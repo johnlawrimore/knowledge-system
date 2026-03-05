@@ -20,6 +20,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import Tooltip from '@/components/Tooltip';
 import { contributorRoleLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
+import { formatLabel } from '@/lib/sourceTypes';
 import { SourceDetail as SourceDetailType } from '@/lib/types';
 import s from './page.module.scss';
 
@@ -30,10 +31,10 @@ interface SourceDetailProps {
   onDiscard: () => void;
 }
 
-const TABS = [
+const BASE_TABS = [
   { key: 'about', label: 'About' },
   { key: 'distillation', label: 'Distillation' },
-  { key: 'original', label: 'Original' },
+  { key: 'original', label: 'Original Text' },
   { key: 'claims', label: 'Claims' },
 ];
 
@@ -46,11 +47,15 @@ export default function SourceDetailView({
   const [contentTab, setContentTab] = useState<string>('about');
   const [confirmDiscard, setConfirmDiscard] = useState(false);
 
-  const tabs = TABS.map((t) =>
-    t.key === 'claims' && detail.claims_count > 0
-      ? { ...t, count: detail.claims_count }
-      : t
-  );
+  const tabs = BASE_TABS.map((t) => {
+    if (t.key === 'original') {
+      return { ...t, label: detail.format === 'transcript' ? 'Original Transcript' : 'Original Text' };
+    }
+    if (t.key === 'claims' && detail.claims_count > 0) {
+      return { ...t, count: detail.claims_count };
+    }
+    return t;
+  });
 
   return (
     <>

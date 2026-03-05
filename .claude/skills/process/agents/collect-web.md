@@ -46,14 +46,20 @@ print(' '.join(e.result))
 
 ### 2. Determine Source Type
 
+Format is always `text` for web sources (video and audio are collected by separate agents). Determine the **source type** — the content classification:
+
 | Pattern | source_type |
 |---|---|
-| Blog platforms (medium, substack, dev.to, personal blogs) | blog_post |
-| Documentation sites | documentation |
-| News/newsletter | newsletter |
-| PDF link | academic_paper or report |
-| Research papers, preprints, studies | research |
-| Other | website |
+| Authored argument, opinion, commentary, blog post | essay |
+| Empirical study, formal analysis, preprint | research |
+| How-to, instructional guide | tutorial |
+| Reporting on events or developments | news |
+| Literature review, book review, meta-analysis | review |
+| Reference or technical documentation | documentation |
+| Formal organizational report, whitepaper | report |
+| Interview transcript | interview |
+| Lecture or talk transcript | lecture |
+| Other | other |
 
 ### 3. Extract Metadata
 
@@ -97,8 +103,8 @@ INSERT IGNORE INTO publications (name) VALUES ('<publication_name>');
 SET @pub_id = (SELECT id FROM publications WHERE name = '<publication_name>');
 
 -- Insert source (use @pub_id, or NULL if no publication)
-INSERT INTO sources (title, source_type, url, publication_id, published_date, content, status, summary)
-VALUES ('<title>', '<type>', '{{url}}', @pub_id, '<date>', '<markdown_content>', 'collected', '<summary>');
+INSERT INTO sources (title, source_type, format, url, publication_id, published_date, content, status, summary)
+VALUES ('<title>', '<source_type>', 'text', '{{url}}', @pub_id, '<date>', '<markdown_content>', 'collected', '<summary>');
 SET @source_id = LAST_INSERT_ID();
 
 -- Link contributor to THIS source only
@@ -120,7 +126,7 @@ WHERE s.id = @source_id AND c.id = @contrib_id;
 End your response with this exact JSON block:
 
 ```json
-{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "<type>", "word_count": <approx_words>, "fetch_method": "webfetch|curl|web_search", "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
+{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "<source_type>", "format": "text", "word_count": <approx_words>, "fetch_method": "webfetch|curl|web_search", "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
 
 On error:

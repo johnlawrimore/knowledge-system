@@ -303,6 +303,7 @@ export interface SourceListItem {
   id: number;
   title: string;
   source_type: string;
+  format: string;
   publication: string | null;
   word_count: number;
   status: string;
@@ -330,6 +331,7 @@ export interface SourceDetail {
   id: number;
   title: string;
   source_type: string;
+  format: string;
   url: string | null;
   publication: string | null;
   published_date: string | null;

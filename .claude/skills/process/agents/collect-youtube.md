@@ -109,7 +109,20 @@ If no captions are available, report it and proceed with metadata only.
 
 Format: `**SPEAKER NAME:** <text>` with blank lines between turns. Speaker names must be bold.
 
-### 6. Compose Source Markdown
+### 6. Determine Source Type
+
+Format is always `transcript` for YouTube sources. Determine the source type from the content:
+
+| Pattern | source_type |
+|---|---|
+| Host interviews one or more guests (Q&A structure) | interview |
+| Single speaker or co-presenters delivering a talk | lecture |
+| Multi-speaker discussion, roundtable, debate | panel |
+| Other | other |
+
+Use the speaker roster, title, and description to classify. When uncertain, prefer `lecture` for solo speakers and `interview` when a host/guest dynamic is evident.
+
+### 7. Compose Source Markdown
 
 {{markdown_rules}}
 
@@ -141,11 +154,11 @@ Format: `**SPEAKER NAME:** <text>` with blank lines between turns. Speaker names
 <Full speaker-attributed transcript>
 ```
 
-### 7. Write Source Summary
+### 8. Write Source Summary
 
 {{source_summary}}
 
-### 8. Insert Everything (Single Batched Script)
+### 9. Insert Everything (Single Batched Script)
 
 Write ALL statements to /tmp/collect_yt.sql and execute as one batch. Do NOT run statements individually — session variables (`@source_id`, `@contrib1`, etc.) only persist within a single piped script.
 
@@ -165,8 +178,8 @@ INSERT IGNORE INTO publications (name) VALUES ('<channel_name>');
 SET @pub_id = (SELECT id FROM publications WHERE name = '<channel_name>');
 
 -- Insert source
-INSERT INTO sources (title, source_type, url, publication_id, published_date, content, status, summary)
-VALUES ('<title>', 'youtube_video', '{{url}}', @pub_id, '<date>', '<full_markdown>', 'collected', '<summary>');
+INSERT INTO sources (title, source_type, format, url, publication_id, published_date, content, status, summary)
+VALUES ('<title>', '<source_type>', 'transcript', '{{url}}', @pub_id, '<date>', '<full_markdown>', 'collected', '<summary>');
 SET @source_id = LAST_INSERT_ID();
 
 -- Link contributors to THIS source only
@@ -192,7 +205,7 @@ Contributor roles mapping:
 - Panelist → `panelist`
 - Solo speaker → `speaker`
 
-### 9. Enrich Contributors
+### 10. Enrich Contributors
 
 {{contributor_enrichment}}
 
@@ -201,7 +214,7 @@ Contributor roles mapping:
 End your response with this exact JSON block:
 
 ```json
-{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "youtube_video", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
+{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "<source_type>", "format": "transcript", "word_count": <approx_words>, "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
 
 On error:

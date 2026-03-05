@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
            s.id,
            s.title,
            s.source_type,
+           s.format,
            s.url,
            pub.name AS publication,
            s.published_date,
