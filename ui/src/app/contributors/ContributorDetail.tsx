@@ -169,7 +169,7 @@ export default function ContributorDetailView({
                     <span style={{ color: ss.color, fontSize: '0.75rem' }}>{ss.label}</span>
                     {' '}
                     <span className={s.claimScore}>#{p.claim_id}</span>
-                    {p.is_key && <> <KeyBadge /></>}
+                    {!!p.is_key && <> <KeyBadge /></>}
                     {' '}
                     <span className={s.claimStatement}>{p.statement}</span>
                   </div>

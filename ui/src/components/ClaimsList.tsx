@@ -82,7 +82,7 @@ function ClaimNode({
             <div className={s.claimHeaderLeft}>
               <span className={s.claimId}>#{claim.id}</span>
               <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
-              {claim.is_key && <KeyBadge />}
+              {!!claim.is_key && <KeyBadge />}
               {hasChildren && (
                 <button
                   className={s.expandBtn}

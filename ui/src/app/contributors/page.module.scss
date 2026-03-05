@@ -118,6 +118,11 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
+
+  > *:first-child {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .launchBtn {

@@ -15,7 +15,14 @@ For multi-statement scripts, pipe a SQL file: `docker exec -i knowledge-db mysql
 
 ### 1. Fetch Content
 
-Use WebFetch to retrieve the URL. Ask for the COMPLETE article text, not a summary. If WebFetch summarizes, fall back to:
+Use a tiered approach to get the **original, verbatim** article text. The original content stored must be the author's actual words, not an AI summary.
+
+**Tier 1 — Jina Reader (primary).** Jina renders JavaScript server-side and returns clean markdown. This handles JS-heavy sites (Medium, Substack, SPAs) that raw curl cannot fetch.
+```bash
+curl -sL "https://r.jina.ai/{{url}}"
+```
+
+**Tier 2 — Direct curl + HTML extraction (fallback).** Use if Jina is unavailable or returns an error. Only works for server-rendered pages — will fail on JS-heavy sites.
 ```bash
 curl -sL "{{url}}" | python3 -c "
 import sys, re
@@ -42,7 +49,48 @@ print(' '.join(e.result))
 "
 ```
 
-**Content validation:** If the extracted content is under 100 words, return error status — extraction likely failed. Never insert empty or near-empty content_md. If extraction fails after fallback, return error status.
+**Tier 3 — WebFetch (metadata only).** WebFetch processes content through an AI model that may paraphrase or restructure text. **Never use WebFetch output as the stored article content.** It may be used only to extract metadata (title, author, date) when Tiers 1–2 already succeeded for content, or to confirm a URL exists before attempting extraction.
+
+**Post-processing (strip Jina header).** Jina prepends metadata lines. Strip them before further processing:
+
+```bash
+python3 -c "
+import sys, re
+text = sys.stdin.read()
+text = re.sub(r'^Title:.*\n', '', text)
+text = re.sub(r'^URL Source:.*\n', '', text)
+text = re.sub(r'^Markdown Content:\s*\n?', '', text, count=1)
+text = re.sub(r'^Warning:.*\n', '', text, flags=re.MULTILINE)
+text = re.sub(r'\n{3,}', '\n\n', text)
+print(text.strip())
+" < /tmp/raw_fetch.txt > /tmp/clean_fetch.txt
+```
+
+Save the raw fetch output to `/tmp/raw_fetch.txt` first, then run the header strip. Use `/tmp/clean_fetch.txt` going forward.
+
+**Post-processing (extract article body).** The cleaned fetch will still contain site chrome — navigation menus, sidebars, related article lists, author bios, social links, comment sections, footers, copyright notices, newsletter signup prompts, etc. Read through the full fetched content and identify where the **actual article begins and ends**. Remove everything that is not part of the authored piece. Use your judgment — site chrome takes many forms and cannot be caught by pattern matching alone. When in doubt about whether a section is part of the article, keep it.
+
+**Content validation:** If the extracted content is under 100 words, try the next tier. If all tiers fail, return error status. Never insert empty or near-empty content_md.
+
+**Access blocked detection:** Abort immediately with error status if any of these are detected — do not attempt to collect partial content, as it will produce unreliable downstream results:
+- **Paywalls**: "subscribe to continue reading", "member-only story", truncated article with a "read more" gate, premium/paid content notices
+- **Login walls**: login forms, "sign in to continue", authentication prompts, "create an account"
+- **Bot protection**: CAPTCHA challenges, "performing security verification", Cloudflare challenges, "please verify you are human", HTTP 403/401/429 responses
+- **Rate limiting**: "too many requests", Jina `SecurityCompromiseError`, retry-after headers
+- **Geo-blocking or IP blocks**: "not available in your region", access denied pages
+
+The error message should identify the specific blocker type (e.g. "paywall detected", "bot protection / CAPTCHA", "login required", "rate limited").
+
+**Completeness check:** After extraction, verify the content appears to be the **complete** article, not a truncated fragment. Signs of incomplete content:
+- Article ends mid-sentence or mid-paragraph
+- Content is suspiciously short relative to what the title/URL suggests (e.g. a "comprehensive guide" that's only 200 words)
+- "Continue reading" or "Read more" appears near the end
+- Only an abstract, summary, or introduction is present when the URL clearly points to a full paper or article
+- The article has numbered sections but only the first one or two are present
+
+If the content appears truncated, try the next tier. If all tiers produce truncated content, return error status with a message indicating the full text could not be retrieved.
+
+**Fidelity check:** After extraction, verify that the content faithfully represents the original article. If the returned content reads like a summary or rewrite rather than the original article text, try the next tier. The stored content must be the author's actual words, not an AI interpretation of them.
 
 ### 2. Determine Source Type
 
@@ -126,7 +174,7 @@ WHERE s.id = @source_id AND c.id = @contrib_id;
 End your response with this exact JSON block:
 
 ```json
-{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "<source_type>", "format": "text", "word_count": <approx_words>, "fetch_method": "webfetch|curl|web_search", "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
+{"stage": "collect", "status": "success", "source_id": <id>, "contributor_ids": [<ids>], "title": "<title>", "source_type": "<source_type>", "format": "text", "word_count": <approx_words>, "fetch_method": "jina|curl|webfetch", "process_notes": "<anything unusual, or null>", "tool_calls": [{"tool": "<tool_name>", "action": "<brief description>"}, ...]}
 ```
 
 On error:
