@@ -220,7 +220,7 @@ export interface ClaimDetail {
   parent_claim: ChildClaim | null;
   children: ChildClaim[];
   reviewer_notes: string | null;
-  notes: string | null;
+  decomposition_notes: string | null;
   evaluation_results: ClaimEvaluation | null;
   created_at: string;
   updated_at: string;
@@ -437,7 +437,6 @@ export interface ContributorDetail {
   bio: string | null;
   avatar: string | null;
   website: string | null;
-  notes: string | null;
   created_at: string;
   tier: number | null;
   expertise: number | null;
@@ -554,7 +553,7 @@ export interface CompositionEvaluation {
   completeness?: number | null;
   voice_consistency?: number | null;
   decomposition_readiness?: number | null;
-  notes?: string | null;
+  evaluation_notes?: string | null;
   evaluated_at?: string;
 }
 

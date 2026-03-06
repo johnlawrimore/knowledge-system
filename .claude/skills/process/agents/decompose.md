@@ -78,15 +78,15 @@ Write to /tmp/decompose_claims.sql:
 
 ```sql
 -- Parent claims first
-INSERT INTO claims (statement, claim_type, notes) VALUES
-  ('<parent claim 1>', '<type>', '<notes>'),
-  ('<standalone claim 2>', '<type>', '<notes>');
+INSERT INTO claims (statement, claim_type, decomposition_notes) VALUES
+  ('<parent claim 1>', '<type>', '<decomposition_notes>'),
+  ('<standalone claim 2>', '<type>', '<decomposition_notes>');
 
 SELECT id, LEFT(statement, 60) AS stmt FROM claims WHERE id >= LAST_INSERT_ID() ORDER BY id;
 
 -- Child claims (after noting parent IDs)
-INSERT INTO claims (statement, claim_type, parent_claim_id, notes) VALUES
-  ('<child claim>', '<type>', <parent_id>, '<notes>');
+INSERT INTO claims (statement, claim_type, parent_claim_id, decomposition_notes) VALUES
+  ('<child claim>', '<type>', <parent_id>, '<decomposition_notes>');
 
 SELECT id, LEFT(statement, 60) AS stmt FROM claims WHERE id >= LAST_INSERT_ID() ORDER BY id;
 ```
@@ -110,8 +110,8 @@ Every claim that this source asserts — whether newly created or an existing cl
 Write to /tmp/decompose_evidence.sql:
 
 ```sql
-INSERT INTO evidence (content, source_id, evidence_type, verbatim_quote, notes) VALUES
-  ('<evidence 1 rewritten in your voice>', {{source_id}}, '<type>', '<quote or NULL>', '<notes>'),
+INSERT INTO evidence (content, source_id, evidence_type, verbatim_quote, decomposition_notes) VALUES
+  ('<evidence 1 rewritten in your voice>', {{source_id}}, '<type>', '<quote or NULL>', '<decomposition_notes>'),
   ('<evidence 2>', {{source_id}}, '<type>', NULL, NULL);
 
 SELECT id, LEFT(content, 60) AS ev FROM evidence WHERE id >= LAST_INSERT_ID() ORDER BY id;
@@ -138,12 +138,12 @@ Write ALL of the following to a single /tmp/decompose_all.sql and pipe it. Use s
 INSERT INTO claim_evidence (claim_id, evidence_id, stance, evaluation_results) VALUES
   (<claim_id>, <ev_id>, 'supporting', JSON_OBJECT(
     'strength', <1-5>,
-    'notes', '<justification for this strength score>',
+    'evaluation_notes', '<justification for this strength score>',
     'evaluated_at', NOW()
   )),
   (<claim_id>, <ev_id>, 'qualifying', JSON_OBJECT(
     'strength', <1-5>,
-    'notes', '<justification>',
+    'evaluation_notes', '<justification>',
     'evaluated_at', NOW()
   ));
 ```
@@ -195,7 +195,7 @@ INSERT IGNORE INTO claim_topics (claim_id, topic_id) VALUES (<claim_id>, <topic_
 **Devices** (skip if none) — rhetorical devices: analogies, metaphors, narratives, examples, thought experiments, visuals.
 
 ```sql
-INSERT INTO devices (content, source_id, device_type, effectiveness_note, notes) VALUES
+INSERT INTO devices (content, source_id, device_type, effectiveness_note, decomposition_notes) VALUES
   ('<device content>', {{source_id}}, '<type>', '<why it works or NULL>', NULL);
 SET @dev1 = LAST_INSERT_ID();
 INSERT IGNORE INTO claim_devices (device_id, claim_id) VALUES (@dev1, <claim_id>);
@@ -206,7 +206,7 @@ INSERT IGNORE INTO claim_devices (device_id, claim_id) VALUES (@dev1, <claim_id>
 **Contexts** (skip if none) — boundary conditions, scope limitations, caveats.
 
 ```sql
-INSERT INTO contexts (content, source_id, context_type, notes) VALUES
+INSERT INTO contexts (content, source_id, context_type, decomposition_notes) VALUES
   ('<context content>', {{source_id}}, '<type>', NULL);
 SET @ctx1 = LAST_INSERT_ID();
 INSERT IGNORE INTO claim_contexts (context_id, claim_id) VALUES (@ctx1, <claim_id>);
@@ -217,7 +217,7 @@ INSERT IGNORE INTO claim_contexts (context_id, claim_id) VALUES (@ctx1, <claim_i
 **Methods** (skip if none) — processes, frameworks, techniques, tools, practices, metrics.
 
 ```sql
-INSERT INTO methods (content, source_id, method_type, notes) VALUES
+INSERT INTO methods (content, source_id, method_type, decomposition_notes) VALUES
   ('<method content>', {{source_id}}, '<type>', NULL);
 SET @meth1 = LAST_INSERT_ID();
 INSERT IGNORE INTO claim_methods (method_id, claim_id) VALUES (@meth1, <claim_id>);
@@ -228,7 +228,7 @@ INSERT IGNORE INTO claim_methods (method_id, claim_id) VALUES (@meth1, <claim_id
 **Reasonings** (skip if none) — logical connections explaining why evidence supports a claim. Tied to both an evidence_id and claim_id.
 
 ```sql
-INSERT INTO reasonings (content, source_id, evidence_id, claim_id, reasoning_type, notes) VALUES
+INSERT INTO reasonings (content, source_id, evidence_id, claim_id, reasoning_type, decomposition_notes) VALUES
   ('<reasoning content>', {{source_id}}, <evidence_id>, <claim_id>, '<type>', NULL);
 ```
 

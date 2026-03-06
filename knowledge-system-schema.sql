@@ -16,7 +16,6 @@ CREATE TABLE contributors (
     bio TEXT,
     avatar VARCHAR(512),
     website VARCHAR(512),
-    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -26,7 +25,6 @@ CREATE TABLE publications (
     type ENUM('blog', 'podcast', 'newsletter', 'journal', 'platform', 'conference', 'other')
         NOT NULL DEFAULT 'other',
     url VARCHAR(1024),
-    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE INDEX idx_publications_name (name)
@@ -171,7 +169,7 @@ CREATE TABLE claims (
     ) NOT NULL DEFAULT 'assertion',
     parent_claim_id INT NULL,
     reviewer_notes TEXT,
-    notes TEXT,
+    decomposition_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -189,7 +187,7 @@ CREATE TABLE claim_links (
         'contradicts', 'refines', 'generalizes', 'depends_on',
         'enables', 'tensions_with', 'other'
     ) NOT NULL,
-    notes TEXT,
+    decomposition_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (claim_id_a) REFERENCES claims(id) ON DELETE CASCADE,
@@ -251,7 +249,7 @@ CREATE TABLE devices (
     source_id INT NOT NULL,
     device_type ENUM('analogy', 'metaphor', 'narrative', 'example', 'thought_experiment', 'visual'),
     effectiveness_note TEXT,
-    notes TEXT,
+    decomposition_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
@@ -272,7 +270,7 @@ CREATE TABLE contexts (
     content TEXT NOT NULL,
     source_id INT NOT NULL,
     context_type ENUM('historical', 'industry', 'technical', 'organizational', 'regulatory', 'cultural', 'scope'),
-    notes TEXT,
+    decomposition_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
@@ -293,7 +291,7 @@ CREATE TABLE methods (
     content TEXT NOT NULL,
     source_id INT NOT NULL,
     method_type ENUM('process', 'framework', 'technique', 'tool', 'practice', 'metric'),
-    notes TEXT,
+    decomposition_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
@@ -316,7 +314,7 @@ CREATE TABLE reasonings (
     evidence_id INT NOT NULL,
     claim_id INT NOT NULL,
     reasoning_type ENUM('deductive', 'inductive', 'analogical', 'causal', 'abductive'),
-    notes TEXT,
+    decomposition_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
@@ -343,7 +341,7 @@ CREATE TABLE evidence (
     verbatim_quote TEXT,
     evaluation_results JSON,
     derived_from_evidence_id INT,
-    notes TEXT,
+    decomposition_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
@@ -357,7 +355,7 @@ CREATE TABLE claim_evidence (
     claim_id INT NOT NULL,
     evidence_id INT NOT NULL,
     stance ENUM('supporting', 'contradicting', 'qualifying') NOT NULL DEFAULT 'supporting',
-    evaluation_results JSON NULL     COMMENT 'strength (1–5 numeric), notes (justification), evaluated_at',
+    evaluation_results JSON NULL     COMMENT 'strength (1–5 numeric), evaluation_notes (justification), evaluated_at',
 
     PRIMARY KEY (claim_id, evidence_id),
     FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,
@@ -378,7 +376,6 @@ CREATE TABLE pipeline_runs (
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP NULL,
     total_duration_s INT,
-    notes TEXT,
     FOREIGN KEY (source_id) REFERENCES sources(id),
     INDEX idx_pipeline_runs_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

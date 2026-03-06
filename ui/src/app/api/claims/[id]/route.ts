@@ -21,7 +21,7 @@ export async function GET(
     const [claimRows] = await pool.query<RowDataPacket[]>(
       `SELECT
          c.id, c.statement, c.claim_type, c.parent_claim_id,
-         c.reviewer_notes, c.notes,
+         c.reviewer_notes, c.decomposition_notes,
          c.evaluation_results, c.created_at, c.updated_at
        FROM claims c
        WHERE c.id = ?`,
@@ -202,7 +202,7 @@ export async function GET(
       `SELECT
          cl.id AS link_id,
          cl.link_type,
-         cl.notes,
+         cl.decomposition_notes,
          cl.claim_id_a,
          cl.claim_id_b,
          CASE
@@ -242,7 +242,7 @@ export async function GET(
         verbatim_quote: row.verbatim_quote,
         stance: row.stance,
         strength: ceEval?.strength ?? null,
-        strength_notes: ceEval?.notes ?? null,
+        strength_notes: ceEval?.evaluation_notes ?? null,
         source_id: row.source_id,
         source_title: row.source_title,
         source_type: row.source_type,
@@ -277,7 +277,7 @@ export async function GET(
         score: r.score ?? 0,
       })),
       reviewer_notes: claim.reviewer_notes,
-      notes: claim.notes,
+      decomposition_notes: claim.decomposition_notes,
       evaluation_results: claimEvalResults,
       created_at: claim.created_at,
       updated_at: claim.updated_at,
@@ -301,7 +301,7 @@ export async function GET(
         id: r.link_id,
         link_type: r.link_type,
         direction: r.direction,
-        notes: r.notes,
+        decomposition_notes: r.decomposition_notes,
         related_claim_id: r.related_claim_id,
         related_statement: r.related_claim_statement,
         related_claim_type: r.related_claim_type ?? 'assertion',
@@ -330,7 +330,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const allowedFields = ['statement', 'reviewer_notes', 'notes'];
+    const allowedFields = ['statement', 'reviewer_notes', 'decomposition_notes'];
     const updates: string[] = [];
     const values: (string | null)[] = [];
 
@@ -343,7 +343,7 @@ export async function PATCH(
 
     if (updates.length === 0) {
       return NextResponse.json(
-        { error: 'No valid fields to update. Allowed: statement, reviewer_notes, notes' },
+        { error: 'No valid fields to update. Allowed: statement, reviewer_notes, decomposition_notes' },
         { status: 400 },
       );
     }

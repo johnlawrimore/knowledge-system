@@ -81,7 +81,7 @@ SET evaluation_results = COALESCE(evaluation_results, JSON_OBJECT(
     'reach', <1-5>,
     'reputation', <1-5>,
     'tier', <1-4>,
-    'notes', '<1-2 sentence reasoning for the tier>',
+    'evaluation_notes', '<1-2 sentence reasoning for the tier>',
     'evaluated_at', NOW()
 ))
 WHERE id = @contrib_id;

@@ -19,7 +19,7 @@ export async function GET(
       // Contributor detail
       const [contributorRows] = await conn.query<RowDataPacket[]>(
         `SELECT
-           p.id, p.name, p.sort_name, p.affiliation, p.role, p.bio, p.avatar, p.website, p.notes, p.created_at, p.evaluation_results
+           p.id, p.name, p.sort_name, p.affiliation, p.role, p.bio, p.avatar, p.website, p.created_at, p.evaluation_results
          FROM contributors p
          WHERE p.id = ?`,
         [contributorId]
@@ -90,7 +90,7 @@ export async function GET(
         authority: evalResults?.authority ?? null,
         reach: evalResults?.reach ?? null,
         reputation: evalResults?.reputation ?? null,
-        score_notes: evalResults?.notes ?? null,
+        score_notes: evalResults?.evaluation_notes ?? null,
         evaluated_at: evalResults?.evaluated_at ?? null,
         contributions,
         sources,

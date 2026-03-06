@@ -93,12 +93,12 @@ export default function ClaimAbout({
       )}
 
       <div className={shared.boxGrid}>
-        <DetailSection label="Notes">
+        <DetailSection label="Decomposition Notes">
           <InlineEdit
-            value={claim.notes}
-            onSave={(v) => patchClaim('notes', v)}
+            value={claim.decomposition_notes}
+            onSave={(v) => patchClaim('decomposition_notes', v)}
             multiline
-            placeholder="Add notes..."
+            placeholder="Add decomposition notes..."
           />
         </DetailSection>
         <DetailSection label="Reviewer Notes">

@@ -45,7 +45,7 @@ export default function CompositionDetailView({
         <EvalSection
           label="AI Evaluation"
           evaluatedAt={detail.evaluation_results.evaluated_at}
-          notes={detail.evaluation_results.notes}
+          notes={detail.evaluation_results.evaluation_notes}
         >
           <DimensionGrid
             dimensions={{

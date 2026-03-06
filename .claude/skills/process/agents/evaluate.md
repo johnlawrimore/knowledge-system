@@ -163,7 +163,7 @@ UPDATE evidence SET evaluation_results = JSON_OBJECT(
     'credibility', <1-3>,
     'independence', '<original|derivative|unknown>',
     'verifiability', '<verified|verifiable|unverifiable>',
-    'notes', '<notes or null>',
+    'evaluation_notes', '<evaluation_notes or null>',
     'evaluated_at', NOW()
 ) WHERE id = <evidence_id>;
 ```
