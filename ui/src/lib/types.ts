@@ -150,6 +150,7 @@ export interface Device {
   effectiveness_note: string | null;
   source_id: number;
   source_title: string;
+  contributors: string | null;
 }
 
 /**
@@ -162,6 +163,7 @@ export interface Context {
   context_type: string;
   source_id: number;
   source_title: string;
+  contributors: string | null;
 }
 
 /**
@@ -174,6 +176,7 @@ export interface Method {
   method_type: string;
   source_id: number;
   source_title: string;
+  contributors: string | null;
   abstraction_level: string | null;
   assumed_expertise: string | null;
 }

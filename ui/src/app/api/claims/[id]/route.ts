@@ -122,7 +122,11 @@ export async function GET(
     // ---- Devices ----
     const [deviceRows] = await pool.query<RowDataPacket[]>(
       `SELECT d.id, d.content, d.device_type, d.effectiveness_note,
-              s.id AS source_id, s.title AS source_title
+              s.id AS source_id, s.title AS source_title,
+              (SELECT GROUP_CONCAT(con.name ORDER BY con.name SEPARATOR ', ')
+               FROM source_contributors sc
+               JOIN contributors con ON sc.contributor_id = con.id
+               WHERE sc.source_id = s.id) AS contributors
        FROM claim_devices dc
        JOIN devices d ON dc.device_id = d.id
        JOIN sources s ON d.source_id = s.id
@@ -134,7 +138,11 @@ export async function GET(
     // ---- Contexts ----
     const [contextRows] = await pool.query<RowDataPacket[]>(
       `SELECT ctx.id, ctx.content, ctx.context_type,
-              s.id AS source_id, s.title AS source_title
+              s.id AS source_id, s.title AS source_title,
+              (SELECT GROUP_CONCAT(con.name ORDER BY con.name SEPARATOR ', ')
+               FROM source_contributors sc
+               JOIN contributors con ON sc.contributor_id = con.id
+               WHERE sc.source_id = s.id) AS contributors
        FROM claim_contexts cc
        JOIN contexts ctx ON cc.context_id = ctx.id
        JOIN sources s ON ctx.source_id = s.id
@@ -147,7 +155,11 @@ export async function GET(
     const [methodRows] = await pool.query<RowDataPacket[]>(
       `SELECT m.id, m.content, m.method_type,
               m.abstraction_level, m.assumed_expertise,
-              s.id AS source_id, s.title AS source_title
+              s.id AS source_id, s.title AS source_title,
+              (SELECT GROUP_CONCAT(con.name ORDER BY con.name SEPARATOR ', ')
+               FROM source_contributors sc
+               JOIN contributors con ON sc.contributor_id = con.id
+               WHERE sc.source_id = s.id) AS contributors
        FROM claim_methods mc
        JOIN methods m ON mc.method_id = m.id
        JOIN sources s ON m.source_id = s.id

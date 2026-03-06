@@ -272,35 +272,6 @@
   text-transform: uppercase;
 }
 
-.cardSource {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-
-  a {
-    color: var(--accent-blue);
-    &:hover { text-decoration: underline; }
-  }
-}
-
-.cardMeta {
-  display: flex;
-  gap: 0.75rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.cardMetaLabel {
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-placeholder);
-}
-
-.cardSourceLink {
-  color: var(--accent-blue);
-  &:hover { text-decoration: underline; }
-}
-
 // ── Evidence cards ─────────────────────────────────────────────
 .evidenceCard {
   background: var(--bg-surface);

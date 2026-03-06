@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import EmptyState from '@/components/EmptyState';
+import CardSourceFooter from '@/components/CardSourceFooter';
 import StrengthMeter from '@/components/StrengthMeter';
-import { stanceLabel, evidenceTypeLabel, reasoningTypeLabel, abstractionLevelLabel, assumedExpertiseLabel } from '@/lib/enumLabels';
+import { stanceLabel, evidenceTypeLabel, reasoningTypeLabel } from '@/lib/enumLabels';
 import type { Evidence, Reasoning } from '@/lib/types';
 import s from '../page.module.scss';
 
@@ -58,23 +58,13 @@ export default function ClaimEvidenceTab({ evidence, reasonings }: ClaimEvidence
                 ))}
               </>
             )}
-            <div className={s.cardMeta}>
-              <span>
-                <span className={s.cardMetaLabel}>Source</span>{' '}
-                <Link href={`/sources?id=${ev.source_id}`} className={s.cardSourceLink}>{ev.source_title}</Link>
-                {ev.contributors && ` (${ev.contributors})`}
-              </span>
-            </div>
-            {(ev.abstraction_level || ev.assumed_expertise) && (
-              <div className={s.cardMeta}>
-                {ev.abstraction_level && (
-                  <span><span className={s.cardMetaLabel}>Abstraction</span> {abstractionLevelLabel(ev.abstraction_level)}</span>
-                )}
-                {ev.assumed_expertise && (
-                  <span><span className={s.cardMetaLabel}>Expertise</span> {assumedExpertiseLabel(ev.assumed_expertise)}</span>
-                )}
-              </div>
-            )}
+            <CardSourceFooter
+              sourceId={ev.source_id}
+              sourceTitle={ev.source_title}
+              contributors={ev.contributors}
+              abstractionLevel={ev.abstraction_level}
+              assumedExpertise={ev.assumed_expertise}
+            />
           </div>
         );
       })}
