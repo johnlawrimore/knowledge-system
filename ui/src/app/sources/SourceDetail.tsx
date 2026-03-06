@@ -15,7 +15,6 @@ import GradeBadge from '@/components/GradeBadge';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
 import Tabs from '@/components/Tabs';
 import Avatar from '@/components/Avatar';
-import StanceStats from '@/components/StanceStats';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import Tooltip from '@/components/Tooltip';
 import { contributorRoleLabel } from '@/lib/enumLabels';
@@ -161,15 +160,7 @@ export default function SourceDetailView({
             </EvalSection>
           )}
 
-          {detail.evidence.total > 0 && (
-            <DetailSection label="Evidence" count={detail.evidence.total}>
-              <StanceStats
-                supports={detail.evidence.byStance.supports}
-                contradicts={detail.evidence.byStance.contradicts}
-                qualifies={detail.evidence.byStance.qualifies}
-              />
-            </DetailSection>
-          )}
+
 
           {detail.compositions.count > 0 && (
             <DetailSection label="Compositions" count={detail.compositions.count}>

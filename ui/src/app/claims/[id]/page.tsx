@@ -69,7 +69,9 @@ export default function ClaimDetailPage() {
     { key: 'devices', label: 'Rhetorical Devices', count: claim.devices.length },
     { key: 'contexts', label: 'Contexts', count: claim.contexts.length },
     { key: 'methods', label: 'Application', count: claim.methods.length },
-  ];
+  ].filter((t) => t.count > 0);
+
+  const activeTab = tabs.find((t) => t.key === tab) ? tab : (tabs[0]?.key as Tab);
 
   return (
     <div className={s.page}>
@@ -121,21 +123,21 @@ export default function ClaimDetailPage() {
       />
 
       {/* ── Tab bar ────────────────────────────────────────────────── */}
-      <Tabs tabs={tabs} active={tab} onChange={(key) => setTab(key as Tab)} />
+      <Tabs tabs={tabs} active={activeTab} onChange={(key) => setTab(key as Tab)} />
 
       {/* ── Tab content ────────────────────────────────────────────── */}
       <div className={s.tabContent}>
-        {tab === 'connections' && (
+        {activeTab === 'connections' && (
           <ClaimRelationshipsTab claim={claim} />
         )}
 
-        {tab === 'evidence' && (
+        {activeTab === 'evidence' && (
           <ClaimEvidenceTab evidence={claim.evidence} reasonings={claim.reasonings} />
         )}
 
-        {(tab === 'devices' || tab === 'contexts' || tab === 'methods') && (
+        {(activeTab === 'devices' || activeTab === 'contexts' || activeTab === 'methods') && (
           <ClaimEntitiesTab
-            entityType={tab}
+            entityType={activeTab}
             devices={claim.devices}
             contexts={claim.contexts}
             methods={claim.methods}

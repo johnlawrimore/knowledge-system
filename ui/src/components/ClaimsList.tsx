@@ -106,13 +106,10 @@ function ClaimNode({
               {claim.contradicting_sources > 0 && ` · ${claim.contradicting_sources} contradictions`}
             </span>
           </div>
-          {(claim.topics?.length > 0 || claim.tags?.length > 0) && (
+          {claim.topics?.length > 0 && (
             <div className={s.chipRow}>
-              {claim.topics?.map((t) => (
+              {claim.topics.map((t) => (
                 <LinkChip key={`t-${t}`} label={t} kind="topic" />
-              ))}
-              {claim.tags?.map((t) => (
-                <LinkChip key={`tag-${t}`} label={t} kind="tag" />
               ))}
             </div>
           )}
