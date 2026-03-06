@@ -98,6 +98,8 @@ export interface Evidence {
   source_type: string;
   credibility: number | null;
   contributors: string;
+  abstraction_level: string | null;
+  assumed_expertise: string | null;
 }
 
 /**
@@ -172,6 +174,8 @@ export interface Method {
   method_type: string;
   source_id: number;
   source_title: string;
+  abstraction_level: string | null;
+  assumed_expertise: string | null;
 }
 
 /**

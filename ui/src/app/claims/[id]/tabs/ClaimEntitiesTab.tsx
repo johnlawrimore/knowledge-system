@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import EmptyState from '@/components/EmptyState';
-import { deviceTypeLabel, contextTypeLabel, methodTypeLabel } from '@/lib/enumLabels';
+import { deviceTypeLabel, contextTypeLabel, methodTypeLabel, abstractionLevelLabel, assumedExpertiseLabel } from '@/lib/enumLabels';
 import type { Device, Context, Method } from '@/lib/types';
 import s from '../page.module.scss';
 
@@ -59,9 +59,22 @@ export default function ClaimEntitiesTab({ entityType, devices, contexts, method
             {entityType === 'devices' && (item as Device).effectiveness_note && (
               <div className={s.cardNote}>Effectiveness: {(item as Device).effectiveness_note}</div>
             )}
-            <div className={s.cardSource}>
-              Source: <Link href={`/sources?id=${item.source_id}`}>{item.source_title}</Link>
+            <div className={s.cardMeta}>
+              <span>
+                <span className={s.cardMetaLabel}>Source</span>{' '}
+                <Link href={`/sources?id=${item.source_id}`} className={s.cardSourceLink}>{item.source_title}</Link>
+              </span>
             </div>
+            {entityType === 'methods' && ((item as Method).abstraction_level || (item as Method).assumed_expertise) && (
+              <div className={s.cardMeta}>
+                {(item as Method).abstraction_level && (
+                  <span><span className={s.cardMetaLabel}>Abstraction</span> {abstractionLevelLabel((item as Method).abstraction_level!)}</span>
+                )}
+                {(item as Method).assumed_expertise && (
+                  <span><span className={s.cardMetaLabel}>Expertise</span> {assumedExpertiseLabel((item as Method).assumed_expertise!)}</span>
+                )}
+              </div>
+            )}
           </div>
         );
       })}

@@ -4,9 +4,8 @@ import LinkChip from '@/components/LinkChip';
 import InlineEdit from '@/components/InlineEdit';
 import DetailSection from '@/components/DetailSection';
 import EvalSection, { DimensionGrid } from '@/components/EvalSection';
-import KeyBadge from '@/components/KeyBadge';
-import SourceLinkList from '@/components/SourceLinkList';
-import type { ClaimDetail, ClaimSource } from '@/lib/types';
+import ClaimSourceList from '@/components/ClaimSourceList';
+import type { ClaimDetail } from '@/lib/types';
 import shared from '../../../shared.module.scss';
 import s from '../page.module.scss';
 
@@ -30,10 +29,7 @@ export default function ClaimAbout({
       {claim.sources.length > 0 && (
         <div className={shared.box}>
           <DetailSection label="Sources" count={claim.sources.length}>
-            <SourceLinkList
-              sources={claim.sources}
-              renderExtra={(src: ClaimSource) => src.is_key ? <KeyBadge /> : null}
-            />
+            <ClaimSourceList sources={claim.sources} />
           </DetailSection>
         </div>
       )}

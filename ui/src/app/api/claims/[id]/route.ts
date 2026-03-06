@@ -56,6 +56,8 @@ export async function GET(
          e.evidence_type,
          e.verbatim_quote,
          e.evaluation_results,
+         e.abstraction_level AS evidence_abstraction_level,
+         e.assumed_expertise AS evidence_assumed_expertise,
          ce.stance,
          ce.evaluation_results AS ce_eval,
          s.id AS source_id,
@@ -144,6 +146,7 @@ export async function GET(
     // ---- Methods ----
     const [methodRows] = await pool.query<RowDataPacket[]>(
       `SELECT m.id, m.content, m.method_type,
+              m.abstraction_level, m.assumed_expertise,
               s.id AS source_id, s.title AS source_title
        FROM claim_methods mc
        JOIN methods m ON mc.method_id = m.id
@@ -249,6 +252,8 @@ export async function GET(
         source_type: row.source_type,
         credibility: evalResults?.credibility ?? null,
         contributors: row.contributors,
+        abstraction_level: row.evidence_abstraction_level ?? null,
+        assumed_expertise: row.evidence_assumed_expertise ?? null,
       };
     });
 
