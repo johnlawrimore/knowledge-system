@@ -59,9 +59,14 @@ export default function SourcesContent() {
         const list = d.sources || [];
         setSources(list);
         setTotal(d.total || 0);
-        if (!selectedId && list.length > 0) {
+        const stillInList = selectedId && list.some((s: SourceListItem) => String(s.id) === selectedId);
+        if (!stillInList) {
           const urlParams = new URLSearchParams(searchParams.toString());
-          urlParams.set('id', String(list[0].id));
+          if (list.length > 0) {
+            urlParams.set('id', String(list[0].id));
+          } else {
+            urlParams.delete('id');
+          }
           router.replace(`/sources?${urlParams.toString()}`);
         }
       })

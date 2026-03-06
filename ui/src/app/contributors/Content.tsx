@@ -73,6 +73,15 @@ export default function ContributorsContent() {
     )
     : contributors;
 
+  useEffect(() => {
+    if (!selectedId || filtered.length === 0) return;
+    const stillInList = filtered.some((c) => String(c.id) === selectedId);
+    if (!stillInList) {
+      router.replace(`/contributors?id=${filtered[0].id}${search ? `&search=${search}` : ''}`);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
   return (
     <div className={s.page}>
       <div className={s.header}>

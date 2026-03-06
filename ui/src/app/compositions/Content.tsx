@@ -46,9 +46,14 @@ export default function CompositionsContent() {
         const list = d.compositions || [];
         setCompositions(list);
         setTotal(d.total || 0);
-        if (!selectedId && list.length > 0) {
+        const stillInList = selectedId && list.some((c: CompositionListItem) => String(c.id) === selectedId);
+        if (!stillInList) {
           const urlParams = new URLSearchParams(searchParams.toString());
-          urlParams.set('id', String(list[0].id));
+          if (list.length > 0) {
+            urlParams.set('id', String(list[0].id));
+          } else {
+            urlParams.delete('id');
+          }
           router.replace(`/compositions?${urlParams.toString()}`);
         }
       })
