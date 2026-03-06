@@ -20,7 +20,7 @@ export default function ClaimSourceList({ sources }: ClaimSourceListProps) {
             <Link href={`/sources?id=${src.id}`} className={s.title}>
               {src.title}
             </Link>
-            {src.is_key && <KeyBadge />}
+            {!!src.is_key && <KeyBadge />}
           </div>
           <div className={s.metaLine}>
             <MetaLine>
