@@ -133,6 +133,8 @@ Table claims {
   evaluation_results json
   reviewer_notes text
   decomposition_notes text
+  abstraction_level enum('conceptual','applied','implementation')
+  assumed_expertise enum('foundational','intermediate','advanced')
   created_at timestamp
   updated_at timestamp
 }
@@ -183,6 +185,8 @@ Table claim_sources {
   claim_id int [not null]
   source_id int [not null]
   is_key boolean [not null, default: false]
+  confidence enum('definitive','strong','moderate','tentative','speculative') [not null, default: 'moderate']
+  conviction enum('insistent','firm','moderate','open','passing') [not null, default: 'moderate']
   indexes { (claim_id, source_id) [pk] }
 }
 
@@ -236,6 +240,8 @@ Table methods {
   source_id int [not null]
   method_type enum('process','framework','technique','tool','practice','metric')
   decomposition_notes text
+  abstraction_level enum('conceptual','applied','implementation')
+  assumed_expertise enum('foundational','intermediate','advanced')
   created_at timestamp
 }
 
@@ -275,6 +281,8 @@ Table evidence {
   evaluation_results json
   derived_from_evidence_id int
   decomposition_notes text
+  abstraction_level enum('conceptual','applied','implementation')
+  assumed_expertise enum('foundational','intermediate','advanced')
   created_at timestamp
 }
 

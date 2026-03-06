@@ -78,7 +78,7 @@ export default function FiltersContent() {
     await loadDetail(String(detail.id));
   };
 
-  const handleSaveVersion = async (data: { content_filter: string; preferred_terminology: string }) => {
+  const handleSaveVersion = async (data: { content_filter?: string; preferred_terminology?: string }) => {
     await fetch(`/api/filters/${detail!.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

@@ -1,0 +1,160 @@
+// ── Curation rules detail styles ──────────────────────────────────
+
+.nameRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  > *:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.versionTag {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding-top: 0.25rem;
+}
+
+// ── Toggle switch ────────────────────────────────────────────────
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 2.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  background: var(--border-default);
+  transition: background 0.15s;
+}
+
+.toggleOn {
+  background: var(--accent-green);
+}
+
+.toggleThumb {
+  position: absolute;
+  left: 2px;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: white;
+  transition: left 0.15s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+  .toggleOn & {
+    left: calc(100% - 1rem - 2px);
+  }
+}
+
+.statusActive {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.statusInactive {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+// ── Content filter editor ────────────────────────────────────────
+
+.clickable {
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.25rem;
+  margin: -0.25rem;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--bg-hover);
+  }
+}
+
+.placeholder {
+  color: var(--text-placeholder);
+  font-style: italic;
+}
+
+.editActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.saveBtn {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  background: var(--btn-primary);
+  color: var(--text-on-primary);
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+
+  &:hover { background: var(--btn-primary-hover); }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.cancelBtn {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover { color: var(--text-primary); }
+}
+
+// ── Version history ──────────────────────────────────────────────
+
+.expandIcon {
+  margin-left: 0.375rem;
+}
+
+.historyList {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.historyItem {
+  border-left: 2px solid var(--border-default);
+  padding-left: 0.75rem;
+}
+
+.historyMeta {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.historyFieldLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: 0.375rem;
+  margin-bottom: 0.125rem;
+}
+
+.historyContent {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+}

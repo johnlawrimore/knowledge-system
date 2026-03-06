@@ -170,6 +170,8 @@ CREATE TABLE claims (
     parent_claim_id INT NULL,
     reviewer_notes TEXT,
     decomposition_notes TEXT,
+    abstraction_level ENUM('conceptual', 'applied', 'implementation') NULL,
+    assumed_expertise ENUM('foundational', 'intermediate', 'advanced') NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -231,6 +233,8 @@ CREATE TABLE claim_sources (
     claim_id INT NOT NULL,
     source_id INT NOT NULL,
     is_key BOOLEAN NOT NULL DEFAULT FALSE,
+    confidence ENUM('definitive', 'strong', 'moderate', 'tentative', 'speculative') NOT NULL DEFAULT 'moderate',
+    conviction ENUM('insistent', 'firm', 'moderate', 'open', 'passing') NOT NULL DEFAULT 'moderate',
 
     PRIMARY KEY (claim_id, source_id),
     FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,
@@ -292,6 +296,8 @@ CREATE TABLE methods (
     source_id INT NOT NULL,
     method_type ENUM('process', 'framework', 'technique', 'tool', 'practice', 'metric'),
     decomposition_notes TEXT,
+    abstraction_level ENUM('conceptual', 'applied', 'implementation') NULL,
+    assumed_expertise ENUM('foundational', 'intermediate', 'advanced') NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,
@@ -342,6 +348,8 @@ CREATE TABLE evidence (
     evaluation_results JSON,
     derived_from_evidence_id INT,
     decomposition_notes TEXT,
+    abstraction_level ENUM('conceptual', 'applied', 'implementation') NULL,
+    assumed_expertise ENUM('foundational', 'intermediate', 'advanced') NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE RESTRICT,

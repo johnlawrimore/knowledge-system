@@ -70,7 +70,47 @@ Do NOT create parent-child for: claims that simply share a topic, loosely relate
 
 A claim can only have one parent. Nesting can go multiple levels deep.
 
-### 5. Batch Insert All Claims and Link to Source
+### 5. Classify Each Claim, Evidence, and Method
+
+Before inserting, assign two classification columns to every claim, evidence record, and method. These are also used when linking claims to sources.
+
+**abstraction_level** — how close to action is this entity?
+
+| Value | Description | Assignment test |
+|---|---|---|
+| `conceptual` | Principles, theories, mental models, abstract frameworks. Explains why something matters or how to think about a problem without specifying what to do. | If you removed all domain-specific nouns, the entity would still make sense. |
+| `applied` | Named patterns, recognized approaches, techniques with enough specificity to understand but not enough to execute. | A practitioner could act on this without additional research, but there are no exact steps, thresholds, or configurations. |
+| `implementation` | Specific data points, exact steps, configurations, thresholds, named tools with versions, code, metrics with baselines. | If you removed the numbers, names, or specific steps, the entity would lose its distinctive value. |
+
+**assumed_expertise** — how much does the reader already need to know?
+
+| Value | Description | Assignment test |
+|---|---|---|
+| `foundational` | No domain knowledge assumed. Self-contained and understandable to someone with no background in the field. | Could someone outside the field understand this without looking anything up? |
+| `intermediate` | Common domain concepts assumed. Requires working familiarity with standard terminology and practices. | Would a working professional in the field understand this without pausing, but a newcomer would not? |
+| `advanced` | Deep domain knowledge assumed. Specialized terminology, nuanced distinctions, and prerequisite concepts used without explanation. | Does this assume the reader already holds mental models, distinctions, or vocabulary that take years to acquire? |
+
+**confidence** — how certain is the source that the claim is true? Set when linking a source to a claim via `claim_sources`.
+
+| Value | Source language |
+|---|---|
+| `definitive` | "This is the case." "Research proves." "The data shows definitively." |
+| `strong` | "Evidence strongly suggests." "This is clearly important." |
+| `moderate` | "This generally holds." "In most cases." "The evidence suggests." |
+| `tentative` | "This may be the case." "Early signs indicate." "It appears that." |
+| `speculative` | "It's possible that." "One could argue." "This might eventually." |
+
+**conviction** — how strongly does the source say you need to act on this? Set when linking a source to a claim via `claim_sources`. Independent from confidence — a source can be highly confident something is true while being relaxed about whether anyone needs to act on it, or uncertain about a claim while insisting action is urgent.
+
+| Value | Source language |
+|---|---|
+| `insistent` | "Must." "Non-negotiable." "Essential." "Have to." |
+| `firm` | "Should." "Best practice." "Strongly recommended." "Important to." |
+| `moderate` | "Worth doing." "Recommended." "Generally advisable." |
+| `open` | "Consider." "May want to." "Worth exploring." |
+| `passing` | "Might consider." "Could potentially." "One option among many." |
+
+### 6. Batch Insert All Claims and Link to Source
 
 Insert parent claims first (without `parent_claim_id`), then insert child claims with `parent_claim_id` set to the parent's ID.
 
@@ -78,15 +118,15 @@ Write to /tmp/decompose_claims.sql:
 
 ```sql
 -- Parent claims first
-INSERT INTO claims (statement, claim_type, decomposition_notes) VALUES
-  ('<parent claim 1>', '<type>', '<decomposition_notes>'),
-  ('<standalone claim 2>', '<type>', '<decomposition_notes>');
+INSERT INTO claims (statement, claim_type, abstraction_level, assumed_expertise, decomposition_notes) VALUES
+  ('<parent claim 1>', '<type>', '<conceptual|applied|implementation>', '<foundational|intermediate|advanced>', '<decomposition_notes>'),
+  ('<standalone claim 2>', '<type>', '<conceptual|applied|implementation>', '<foundational|intermediate|advanced>', '<decomposition_notes>');
 
 SELECT id, LEFT(statement, 60) AS stmt FROM claims WHERE id >= LAST_INSERT_ID() ORDER BY id;
 
 -- Child claims (after noting parent IDs)
-INSERT INTO claims (statement, claim_type, parent_claim_id, decomposition_notes) VALUES
-  ('<child claim>', '<type>', <parent_id>, '<decomposition_notes>');
+INSERT INTO claims (statement, claim_type, parent_claim_id, abstraction_level, assumed_expertise, decomposition_notes) VALUES
+  ('<child claim>', '<type>', <parent_id>, '<conceptual|applied|implementation>', '<foundational|intermediate|advanced>', '<decomposition_notes>');
 
 SELECT id, LEFT(statement, 60) AS stmt FROM claims WHERE id >= LAST_INSERT_ID() ORDER BY id;
 ```
@@ -96,23 +136,23 @@ Execute and note the returned IDs. If there are no parent-child relationships, i
 **Link ALL claims (new and existing) to this source:**
 
 ```sql
-INSERT IGNORE INTO claim_sources (claim_id, source_id) VALUES
-  (<new_claim_id>, {{source_id}}),
-  (<existing_claim_id>, {{source_id}});
+INSERT IGNORE INTO claim_sources (claim_id, source_id, confidence, conviction) VALUES
+  (<new_claim_id>, {{source_id}}, '<definitive|strong|moderate|tentative|speculative>', '<insistent|firm|moderate|open|passing>'),
+  (<existing_claim_id>, {{source_id}}, '<definitive|strong|moderate|tentative|speculative>', '<insistent|firm|moderate|open|passing>');
 ```
 
 Every claim that this source asserts — whether newly created or an existing claim matched in step 3 — gets a `claim_sources` entry.
 
-### 6. Batch Insert All Evidence
+### 7. Batch Insert All Evidence
 
 **What counts as evidence:** A data point, a quote, a case study, an expert assertion, a statistical finding, or a logical derivation from established principles. Each evidence record is a discrete piece of support (or contradiction) for one or more claims.
 
 Write to /tmp/decompose_evidence.sql:
 
 ```sql
-INSERT INTO evidence (content, source_id, evidence_type, verbatim_quote, decomposition_notes) VALUES
-  ('<evidence 1 rewritten in your voice>', {{source_id}}, '<type>', '<quote or NULL>', '<decomposition_notes>'),
-  ('<evidence 2>', {{source_id}}, '<type>', NULL, NULL);
+INSERT INTO evidence (content, source_id, evidence_type, verbatim_quote, abstraction_level, assumed_expertise, decomposition_notes) VALUES
+  ('<evidence 1 rewritten in your voice>', {{source_id}}, '<type>', '<quote or NULL>', '<conceptual|applied|implementation>', '<foundational|intermediate|advanced>', '<decomposition_notes>'),
+  ('<evidence 2>', {{source_id}}, '<type>', NULL, '<conceptual|applied|implementation>', '<foundational|intermediate|advanced>', NULL);
 
 SELECT id, LEFT(content, 60) AS ev FROM evidence WHERE id >= LAST_INSERT_ID() ORDER BY id;
 ```
@@ -128,7 +168,7 @@ SELECT id, LEFT(content, 60) AS ev FROM evidence WHERE id >= LAST_INSERT_ID() OR
 
 **verbatim_quote:** Only when exact words matter (expert attribution). NULL otherwise.
 
-### 7. Batch Insert All Relationships, Entities, and Status Update
+### 8. Batch Insert All Relationships, Entities, and Status Update
 
 Write ALL of the following to a single /tmp/decompose_all.sql and pipe it. Use session variables for entity IDs.
 
@@ -217,8 +257,8 @@ INSERT IGNORE INTO claim_contexts (context_id, claim_id) VALUES (@ctx1, <claim_i
 **Methods** (skip if none) — processes, frameworks, techniques, tools, practices, metrics.
 
 ```sql
-INSERT INTO methods (content, source_id, method_type, decomposition_notes) VALUES
-  ('<method content>', {{source_id}}, '<type>', NULL);
+INSERT INTO methods (content, source_id, method_type, abstraction_level, assumed_expertise, decomposition_notes) VALUES
+  ('<method content>', {{source_id}}, '<type>', '<conceptual|applied|implementation>', '<foundational|intermediate|advanced>', NULL);
 SET @meth1 = LAST_INSERT_ID();
 INSERT IGNORE INTO claim_methods (method_id, claim_id) VALUES (@meth1, <claim_id>);
 ```
@@ -240,7 +280,7 @@ INSERT INTO reasonings (content, source_id, evidence_id, claim_id, reasoning_typ
 UPDATE evidence SET derived_from_evidence_id = <original_evidence_id> WHERE id = <new_evidence_id>;
 ```
 
-### 8. Flag Key Claims
+### 9. Flag Key Claims
 
 Review all claims linked to this source and identify the 3–7 that represent the source's central arguments.
 

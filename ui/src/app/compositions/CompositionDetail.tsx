@@ -1,4 +1,6 @@
 'use client';
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { CompositionDetail as CompositionDetailType } from '@/lib/types';
 import MarkdownViewer from '@/components/MarkdownViewer';
 import DetailSection from '@/components/DetailSection';
@@ -7,6 +9,8 @@ import SourceLinkList from '@/components/SourceLinkList';
 import { compositionStatusLabel } from '@/lib/enumLabels';
 import s from '../shared.module.scss';
 import ps from './page.module.scss';
+
+const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), { ssr: false });
 
 interface CompositionDetailProps {
   detail: CompositionDetailType;
@@ -59,9 +63,55 @@ export default function CompositionDetailView({
         </EvalSection>
       )}
 
-      <DetailSection label="Content">
-        <MarkdownViewer content={detail.content} />
-      </DetailSection>
+      <ContentEditor content={detail.content} onSave={(v) => onPatch('content', v)} />
     </>
+  );
+}
+
+function ContentEditor({ content, onSave }: { content: string | null; onSave: (v: string) => Promise<void> }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(content || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleEdit = () => {
+    setDraft(content || '');
+    setEditing(true);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onSave(draft);
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setDraft(content || '');
+    setEditing(false);
+  };
+
+  if (!editing) {
+    return (
+      <DetailSection label="Content">
+        <div onClick={handleEdit} className={ps.contentClickable}>
+          {content ? <MarkdownViewer content={content} /> : <span className={ps.contentPlaceholder}>Click to add content...</span>}
+        </div>
+      </DetailSection>
+    );
+  }
+
+  return (
+    <DetailSection label="Content">
+      <MarkdownEditor value={draft} onChange={setDraft} placeholder="Write content..." />
+      <div className={ps.contentActions}>
+        <button onClick={handleSave} disabled={saving} className={ps.saveBtn}>
+          {saving ? 'Saving...' : 'Save'}
+        </button>
+        <button onClick={handleCancel} className={ps.cancelBtn}>Cancel</button>
+      </div>
+    </DetailSection>
   );
 }

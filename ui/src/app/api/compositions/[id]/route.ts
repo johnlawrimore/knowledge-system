@@ -93,6 +93,20 @@ export async function PATCH(
     const updates: string[] = [];
     const values: (string | number)[] = [];
 
+    const allowedFields = ['title', 'content', 'status'];
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updates.push(`${field} = ?`);
+        values.push(body[field]);
+      }
+    }
+
+    if (body.content !== undefined) {
+      const wordCount = body.content.trim().split(/\s+/).filter(Boolean).length;
+      updates.push('word_count = ?');
+      values.push(wordCount);
+    }
+
     if (body.evaluation_results !== undefined) {
       updates.push('evaluation_results = ?');
       values.push(JSON.stringify(body.evaluation_results));

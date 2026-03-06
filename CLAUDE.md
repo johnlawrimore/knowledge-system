@@ -1,5 +1,14 @@
 # Knowledge Management System
 
+## Schema Changes — Mandatory Checklist
+
+Every schema modification (ALTER TABLE, new columns, enum changes) is a **three-file atomic operation**:
+1. Live DB
+2. `knowledge-system-schema.sql`
+3. `knowledge-system.dbml`
+
+Never mark a schema change as complete until all three are done.
+
 ## Overview
 
 A domain-agnostic research synthesis engine optimized for thought leadership and educational material. It takes source material — articles, talks, videos, papers — and breaks them into atomic intellectual components (claims, evidence, reasoning, rhetorical devices, contexts, methods), scores everything for credibility, cross-references across sources, and identifies where evidence is strong, thin, or contested. The composition side assembles scored building blocks into original content with traceable evidence chains. Processes source material through four stages:
@@ -121,4 +130,3 @@ Claim scores are never stored — computed from evidence at query time via scori
 - All type enums include `other` as an escape valve
 - All markdown follows shared formatting rules (embedded in agent prompts)
 - **Encoding**: All text written to the database must use clean Unicode. Fix mojibake on sight — never store double-encoded sequences like `â€"`, `â€™`, `â€œ`, `Ã©`. Use proper em dashes `—`, en dashes `–`, curly quotes `""''`, ellipsis `…`. This applies to every field in every table, with no exceptions.
-- **Schema sync**: When modifying the database schema (ALTER TABLE, new columns, enum changes), update ALL three schema artifacts: the live DB, `knowledge-system-schema.sql`, and `knowledge-system.dbml`.
