@@ -20,7 +20,8 @@ export async function GET(
     // ---- Claim base fields ----
     const [claimRows] = await pool.query<RowDataPacket[]>(
       `SELECT
-         c.id, c.statement, c.claim_type, c.parent_claim_id,
+         c.id, c.statement, c.claim_type, c.abstraction_level, c.assumed_expertise,
+         c.parent_claim_id,
          c.reviewer_notes, c.decomposition_notes,
          c.evaluation_results, c.created_at, c.updated_at
        FROM claims c
@@ -104,7 +105,7 @@ export async function GET(
     const [sourceRows] = await pool.query<RowDataPacket[]>(
       `SELECT s.id, s.title, s.source_type, s.published_date,
               pub.name AS publication,
-              cs.is_key,
+              cs.is_key, cs.confidence, cs.conviction,
               (SELECT c.name FROM source_contributors sc2
                JOIN contributors c ON c.id = sc2.contributor_id
                WHERE sc2.source_id = s.id LIMIT 1) AS main_contributor
@@ -267,6 +268,8 @@ export async function GET(
       id: claim.id,
       statement: claim.statement,
       claim_type: claim.claim_type,
+      abstraction_level: claim.abstraction_level ?? null,
+      assumed_expertise: claim.assumed_expertise ?? null,
       parent_claim_id: claim.parent_claim_id ?? null,
       parent_claim: parentClaim,
       children: childRows.map((r) => ({

@@ -134,6 +134,34 @@ const REASONING_TYPE_LABELS: Record<string, string> = {
   abductive: 'Abductive',
 };
 
+const ABSTRACTION_LEVEL_LABELS: Record<string, string> = {
+  conceptual: 'Conceptual',
+  applied: 'Applied',
+  implementation: 'Implementation',
+};
+
+const ASSUMED_EXPERTISE_LABELS: Record<string, string> = {
+  foundational: 'Foundational',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+};
+
+const SOURCE_CONFIDENCE_LABELS: Record<string, string> = {
+  definitive: 'Definitive',
+  strong: 'Strong',
+  moderate: 'Moderate',
+  tentative: 'Tentative',
+  speculative: 'Speculative',
+};
+
+const CONVICTION_LABELS: Record<string, string> = {
+  insistent: 'Insistent',
+  firm: 'Firm',
+  moderate: 'Moderate',
+  open: 'Open',
+  passing: 'Passing',
+};
+
 function labelFrom(map: Record<string, string>) {
   return (value: string): string => map[value] ?? value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, ' ');
 }
@@ -154,3 +182,7 @@ export const methodTypeLabel = labelFrom(METHOD_TYPE_LABELS);
 export const linkTypeLabel = labelFrom(LINK_TYPE_LABELS);
 export const reasoningTypeLabel = labelFrom(REASONING_TYPE_LABELS);
 export const strengthTierLabel = labelFrom(STRENGTH_TIER_LABELS);
+export const abstractionLevelLabel = labelFrom(ABSTRACTION_LEVEL_LABELS);
+export const assumedExpertiseLabel = labelFrom(ASSUMED_EXPERTISE_LABELS);
+export const sourceConfidenceLabel = labelFrom(SOURCE_CONFIDENCE_LABELS);
+export const convictionLabel = labelFrom(CONVICTION_LABELS);

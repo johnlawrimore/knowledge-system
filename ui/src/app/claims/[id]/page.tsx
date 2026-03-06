@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import ConfidenceBadge from '@/components/ConfidenceBadge';
 import InlineEdit from '@/components/InlineEdit';
 import Tabs from '@/components/Tabs';
-import { claimTypeLabel } from '@/lib/enumLabels';
+import { claimTypeLabel, abstractionLevelLabel, assumedExpertiseLabel } from '@/lib/enumLabels';
 import type { ClaimDetail } from '@/lib/types';
 import ClaimAbout from './tabs/ClaimAbout';
 import ClaimEvidenceTab from './tabs/ClaimEvidenceTab';
@@ -80,8 +80,26 @@ export default function ClaimDetailPage() {
 
       <div className={s.claimHeader}>
         <span className={s.claimId}>CLAIM #{claim.id}</span>
-        <span className={s.claimType}>{claimTypeLabel(claim.claim_type)}</span>
-        <span className={s.headerSpacer} />
+      </div>
+
+      <div className={s.classificationBox}>
+        <div className={s.classificationItem}>
+          <span className={s.classificationLabel}>Claim Type</span>
+          <span className={s.classificationValue}>{claimTypeLabel(claim.claim_type)}</span>
+        </div>
+        {claim.abstraction_level && (
+          <div className={s.classificationItem}>
+            <span className={s.classificationLabel}>Abstraction</span>
+            <span className={s.classificationValue}>{abstractionLevelLabel(claim.abstraction_level)}</span>
+          </div>
+        )}
+        {claim.assumed_expertise && (
+          <div className={s.classificationItem}>
+            <span className={s.classificationLabel}>Expertise</span>
+            <span className={s.classificationValue}>{assumedExpertiseLabel(claim.assumed_expertise)}</span>
+          </div>
+        )}
+        <span className={s.classificationSpacer} />
         <ConfidenceBadge confidence={claim.computed_confidence} score={claim.score} />
       </div>
 

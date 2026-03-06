@@ -133,6 +133,8 @@ export interface SourceLinkItem {
  */
 export interface ClaimSource extends SourceLinkItem {
   is_key?: boolean;
+  confidence?: string;
+  conviction?: string;
 }
 
 /**
@@ -216,6 +218,8 @@ export interface ClaimDetail {
   id: number;
   statement: string;
   claim_type: string;
+  abstraction_level: string | null;
+  assumed_expertise: string | null;
   parent_claim_id: number | null;
   parent_claim: ChildClaim | null;
   children: ChildClaim[];
