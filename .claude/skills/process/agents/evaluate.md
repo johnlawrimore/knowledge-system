@@ -78,11 +78,15 @@ Compute the **grade** from the average of all 8 scores:
 - D: avg ≥ 1.5 (Weak)
 - F: avg < 1.5 (Unreliable)
 
-Note any **bias** detected: vendor marketing, competitive positioning, ideological leaning. NULL if none.
+**grade_notes (required):** One sentence justifying the letter grade. Include any bias concerns (vendor marketing, competitive positioning, ideological leaning) if detected. E.g., "Strong analytical depth dragged down by one-sided framing that never acknowledges competing approaches." or "Consistently well-evidenced and balanced across all dimensions."
+
+**Per-dimension notes (required):** For each of the 8 dimensions, write one sentence justifying the score. Reference specific content from the source. E.g., "Covers the primary approach thoroughly but never addresses the competing framework mentioned by other sources."
 
 ### 3. Score Each Claim (6 dimensions)
 
 For each claim, score on 1–5. These assess the **idea itself**, not how the source expressed it. Focus on the truth and worth of the idea, not the presentation.
+
+**Per-dimension notes (required):** For each of the 6 dimensions, write one sentence justifying the score. E.g., "Combines two established frameworks in a way not seen in existing literature."
 
 **Validity** — is the idea trustworthy?
 
@@ -133,6 +137,8 @@ If not: note "Evidence #X is derivative but original not in KB."
 
 **Verifiability:** verified, verifiable, unverifiable
 
+**credibility_notes (required):** Explain the credibility score in one sentence. E.g., "Peer-reviewed empirical study with N=500 and reproducible methodology." or "Anecdotal observation without systematic data collection."
+
 ### 5. Write All Evaluations (Single Batched Script)
 
 Write to /tmp/evaluate.sql:
@@ -141,20 +147,34 @@ Write to /tmp/evaluate.sql:
 -- Source
 UPDATE sources SET evaluation_results = JSON_OBJECT(
     'quality', JSON_OBJECT(
-        'completeness', <1-5>, 'coherence', <1-5>, 'depth', <1-5>, 'clarity', <1-5>
+        'completeness', <1-5>, 'completeness_notes', '<1 sentence>',
+        'coherence', <1-5>, 'coherence_notes', '<1 sentence>',
+        'depth', <1-5>, 'depth_notes', '<1 sentence>',
+        'clarity', <1-5>, 'clarity_notes', '<1 sentence>'
     ),
     'rigor', JSON_OBJECT(
-        'objectivity', <1-5>, 'substantiation', <1-5>, 'persuasiveness', <1-5>, 'temperance', <1-5>
+        'objectivity', <1-5>, 'objectivity_notes', '<1 sentence>',
+        'substantiation', <1-5>, 'substantiation_notes', '<1 sentence>',
+        'persuasiveness', <1-5>, 'persuasiveness_notes', '<1 sentence>',
+        'temperance', <1-5>, 'temperance_notes', '<1 sentence>'
     ),
     'grade', '<A-F>',
-    'bias_notes', '<notes or null>',
+    'grade_notes', '<1 sentence justifying grade, including any bias concerns>',
     'evaluated_at', NOW()
 ) WHERE id = {{source_id}};
 
 -- Claims (one per claim)
 UPDATE claims SET evaluation_results = JSON_OBJECT(
-    'validity', JSON_OBJECT('factuality', <1-5>, 'soundness', <1-5>, 'consensus', <1-5>),
-    'substance', JSON_OBJECT('originality', <1-5>, 'practicality', <1-5>, 'impact', <1-5>),
+    'validity', JSON_OBJECT(
+        'factuality', <1-5>, 'factuality_notes', '<1 sentence>',
+        'soundness', <1-5>, 'soundness_notes', '<1 sentence>',
+        'consensus', <1-5>, 'consensus_notes', '<1 sentence>'
+    ),
+    'substance', JSON_OBJECT(
+        'originality', <1-5>, 'originality_notes', '<1 sentence>',
+        'practicality', <1-5>, 'practicality_notes', '<1 sentence>',
+        'impact', <1-5>, 'impact_notes', '<1 sentence>'
+    ),
     'evaluated_at', NOW()
 ) WHERE id = <claim_id>;
 
@@ -163,7 +183,7 @@ UPDATE evidence SET evaluation_results = JSON_OBJECT(
     'credibility', <1-3>,
     'independence', '<original|derivative|unknown>',
     'verifiability', '<verified|verifiable|unverifiable>',
-    'evaluation_notes', '<evaluation_notes or null>',
+    'credibility_notes', '<1 sentence justifying credibility score>',
     'evaluated_at', NOW()
 ) WHERE id = <evidence_id>;
 ```

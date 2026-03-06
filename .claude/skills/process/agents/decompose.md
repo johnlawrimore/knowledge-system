@@ -55,7 +55,7 @@ Read the distillation and extract every distinct assertion. For each:
 You already loaded ALL existing claims in Step 1. Compare each new claim against that list — no additional SQL queries needed for duplicate checking.
 
 **If a strong semantic match exists:** Do NOT create a duplicate. Create evidence and link it to the EXISTING claim.
-**If a partial match exists:** Create the new claim, but note the similar claim ID in `notes`: "Related to claim #X"
+**If a partial match exists:** Create the new claim, but note the similar claim ID in `decomposition_notes`: "Related to claim #X"
 **If no match:** Create a new standalone claim.
 
 ### 4. Identify Parent-Child Relationships
@@ -138,12 +138,12 @@ Write ALL of the following to a single /tmp/decompose_all.sql and pipe it. Use s
 INSERT INTO claim_evidence (claim_id, evidence_id, stance, evaluation_results) VALUES
   (<claim_id>, <ev_id>, 'supporting', JSON_OBJECT(
     'strength', <1-5>,
-    'evaluation_notes', '<justification for this strength score>',
+    'strength_notes', '<1 sentence justifying this strength score>',
     'evaluated_at', NOW()
   )),
   (<claim_id>, <ev_id>, 'qualifying', JSON_OBJECT(
     'strength', <1-5>,
-    'evaluation_notes', '<justification>',
+    'strength_notes', '<1 sentence justifying this strength score>',
     'evaluated_at', NOW()
   ));
 ```
@@ -162,7 +162,7 @@ INSERT INTO claim_evidence (claim_id, evidence_id, stance, evaluation_results) V
 
 Default to 3 (Moderate) when uncertain.
 
-**notes (required):** Explain in one sentence why this strength score is appropriate. E.g., "Single case study from one company with no replication data." or "Controlled experiment with N=500 and peer review."
+**strength_notes (required):** Explain in one sentence why this strength score is appropriate. E.g., "Single case study from one company with no replication data." or "Controlled experiment with N=500 and peer review."
 
 **Reasoning examples:**
 - Empirical data: "This controlled study directly measures the effect described in the claim, with N=500 providing statistical significance."

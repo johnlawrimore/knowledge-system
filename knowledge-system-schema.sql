@@ -355,7 +355,7 @@ CREATE TABLE claim_evidence (
     claim_id INT NOT NULL,
     evidence_id INT NOT NULL,
     stance ENUM('supporting', 'contradicting', 'qualifying') NOT NULL DEFAULT 'supporting',
-    evaluation_results JSON NULL     COMMENT 'strength (1–5 numeric), evaluation_notes (justification), evaluated_at',
+    evaluation_results JSON NULL     COMMENT 'strength (1–5 numeric), strength_notes (justification), evaluated_at',
 
     PRIMARY KEY (claim_id, evidence_id),
     FOREIGN KEY (claim_id) REFERENCES claims(id) ON DELETE CASCADE,

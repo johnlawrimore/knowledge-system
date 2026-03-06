@@ -72,16 +72,17 @@ Compute **tier** from the average of the four scores:
 - Tier 3 "Notable Contributor": avg ≥ 2.0
 - Tier 4 "Emerging Voice": avg < 2.0
 
+**Per-dimension notes (required):** For each of the 4 dimensions, write one sentence justifying the score. Reference specific evidence found during web research.
+
 Store as JSON (only if not already evaluated):
 ```sql
 UPDATE contributors
 SET evaluation_results = COALESCE(evaluation_results, JSON_OBJECT(
-    'expertise', <1-5>,
-    'authority', <1-5>,
-    'reach', <1-5>,
-    'reputation', <1-5>,
+    'expertise', <1-5>, 'expertise_notes', '<1 sentence>',
+    'authority', <1-5>, 'authority_notes', '<1 sentence>',
+    'reach', <1-5>, 'reach_notes', '<1 sentence>',
+    'reputation', <1-5>, 'reputation_notes', '<1 sentence>',
     'tier', <1-4>,
-    'evaluation_notes', '<1-2 sentence reasoning for the tier>',
     'evaluated_at', NOW()
 ))
 WHERE id = @contrib_id;

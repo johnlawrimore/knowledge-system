@@ -191,8 +191,8 @@ export interface Reasoning {
  * From: claims/[id]/page.tsx
  */
 export interface ClaimEvaluation {
-  validity?: Record<string, number>;
-  substance?: Record<string, number>;
+  validity?: Record<string, number | string>;
+  substance?: Record<string, number | string>;
   evaluated_at?: string;
 }
 
@@ -319,10 +319,10 @@ export interface SourceListItem {
  * From: sources/Content.tsx
  */
 export interface SourceEvaluation {
-  quality?: Record<string, number>;
-  rigor?: Record<string, number>;
+  quality?: Record<string, number | string>;
+  rigor?: Record<string, number | string>;
   grade?: string;
-  bias_notes?: string;
+  grade_notes?: string;
   evaluated_at?: string;
 }
 
@@ -443,7 +443,10 @@ export interface ContributorDetail {
   authority: number | null;
   reach: number | null;
   reputation: number | null;
-  score_notes: string | null;
+  expertise_notes: string | null;
+  authority_notes: string | null;
+  reach_notes: string | null;
+  reputation_notes: string | null;
   evaluated_at: string | null;
   contributions: Contributions | null;
   sources: (SourceLinkItem & {

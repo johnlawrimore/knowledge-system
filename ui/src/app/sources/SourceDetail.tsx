@@ -150,7 +150,7 @@ export default function SourceDetailView({
             <EvalSection
               label="Source Evaluation"
               headerRight={<GradeBadge grade={detail.evaluation_results.grade} />}
-              notes={detail.evaluation_results.bias_notes}
+              notes={detail.evaluation_results.grade_notes}
             >
               {detail.evaluation_results.quality && (
                 <DimensionGrid label="Quality" dimensions={detail.evaluation_results.quality} columns={4} />

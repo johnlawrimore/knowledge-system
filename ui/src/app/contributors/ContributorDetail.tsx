@@ -126,14 +126,17 @@ export default function ContributorDetailView({
         <EvalSection
           label="Contributor Evaluation"
           evaluatedAt={detail.evaluated_at}
-          notes={detail.score_notes}
         >
           <DimensionGrid
             dimensions={{
               Expertise: detail.expertise,
+              Expertise_notes: detail.expertise_notes,
               Authority: detail.authority,
+              Authority_notes: detail.authority_notes,
               Reach: detail.reach,
+              Reach_notes: detail.reach_notes,
               Reputation: detail.reputation,
+              Reputation_notes: detail.reputation_notes,
             }}
             columns={4}
           />

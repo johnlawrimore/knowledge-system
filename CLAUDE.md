@@ -99,20 +99,16 @@ Reasonings explain why evidence supports a claim (`reasoning_type`: `deductive`,
 | `v_theme_strength` | Theme support |
 | `v_expert_positions` | Who says what |
 | `v_source_contributions` | Source productivity |
-
 ### Dynamic Scoring
 
-Claim scores are never stored — computed from evidence at query time. Formula weights:
+Claim scores are never stored — computed from evidence at query time via scoring views (`v_all_scored`, `v_claim_scoring_inputs`, `v_standalone_claim_scores`). Primary signal is independent source count (3x weight). Evidence strength, reasoning presence, and contradictions adjust the score. Confidence labels: `strong`, `moderate`, `developing`, `contested`, `unsupported`.
 
-- Independent source count (3x) — primary signal
-- Evidence strength tiers 1–2 (1.0), tier 3 (0.5), tiers 4–5 (0.25) — from `claim_evidence.evaluation_results.strength` (1=Definitive … 5=Speculative)
-- Reasoning presence (0.5 bonus, capped at 3)
-- Derived evidence discount (-0.5)
-- Contradicting sources (-2.0)
+## UI
 
-Confidence labels: `strong`, `moderate`, `developing`, `contested`, `unsupported`
-
-Credibility read from `evidence.evaluation_results` JSON via `JSON_EXTRACT(e.evaluation_results, '$.credibility')`, defaulting to 2 when not yet evaluated.
+- **Stack**: Next.js App Router, SCSS Modules, no UI framework
+- **Shared styles**: `ui/src/app/shared.module.scss` has reusable layout classes (`.box`, `.boxGrid`, `.splitLayout`, `.chipRow`, etc.) — use these before creating page-local styles
+- **Components**: Extract anything reusable, complex, or independently testable into `ui/src/components/`. Component files should only define props interfaces — domain interfaces and enums belong in `ui/src/lib/types.ts`.
+- **CSS**: Use `@extend` for SCSS inheritance. Define styles in SCSS classes, not inline Tailwind utility classes. Use `@apply` in css as needed.
 
 ## Conventions
 

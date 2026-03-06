@@ -7,23 +7,34 @@ import s from './EvalSection.module.scss';
 /* ── DimensionGrid ─────────────────────────────────────────────── */
 
 interface DimensionGridProps {
-  dimensions: Record<string, number | null>;
+  dimensions: Record<string, number | string | null>;
   columns?: 3 | 4;
   label?: string;
 }
 
 export function DimensionGrid({ dimensions, columns = 4, label }: DimensionGridProps) {
   const colClass = columns === 3 ? s.cols3 : s.cols4;
+  const scoreEntries = Object.entries(dimensions).filter(([k]) => !k.endsWith('_notes'));
+
   return (
     <div className={s.group}>
       {label && <div className={s.groupLabel}>{label}</div>}
       <div className={`${s.dimensionGrid} ${colClass}`}>
-        {Object.entries(dimensions).map(([key, val]) => (
-          <div key={key} className={s.dimensionItem}>
-            <ScoreRing value={val} />
-            <span className={s.dimensionLabel}>{key}</span>
-          </div>
-        ))}
+        {scoreEntries.map(([key, val]) => {
+          const note = dimensions[`${key}_notes`];
+          return (
+            <div key={key} className={s.dimensionItem}>
+              {typeof note === 'string' ? (
+                <Tooltip text={note}>
+                  <ScoreRing value={val as number | null} />
+                </Tooltip>
+              ) : (
+                <ScoreRing value={val as number | null} />
+              )}
+              <span className={s.dimensionLabel}>{key}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

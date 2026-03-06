@@ -242,7 +242,7 @@ export async function GET(
         verbatim_quote: row.verbatim_quote,
         stance: row.stance,
         strength: ceEval?.strength ?? null,
-        strength_notes: ceEval?.evaluation_notes ?? null,
+        strength_notes: ceEval?.strength_notes ?? null,
         source_id: row.source_id,
         source_title: row.source_title,
         source_type: row.source_type,
