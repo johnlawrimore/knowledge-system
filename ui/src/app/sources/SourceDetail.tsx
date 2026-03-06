@@ -17,6 +17,7 @@ import Tabs from '@/components/Tabs';
 import Avatar from '@/components/Avatar';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import Tooltip from '@/components/Tooltip';
+import SourceExplorerTab from './SourceExplorerTab';
 import { contributorRoleLabel } from '@/lib/enumLabels';
 import { formatDate } from '@/lib/formatDate';
 import { formatLabel } from '@/lib/sourceTypes';
@@ -32,6 +33,7 @@ interface SourceDetailProps {
 
 const BASE_TABS = [
   { key: 'about', label: 'About' },
+  { key: 'explorer', label: 'Explorer' },
   { key: 'distillation', label: 'Distillation' },
   { key: 'original', label: 'Original Text' },
   { key: 'claims', label: 'Claims' },
@@ -185,6 +187,12 @@ export default function SourceDetailView({
             )}
           </div>
         </div>
+      ) : contentTab === 'explorer' ? (
+        <SourceExplorerTab
+          sourceId={detail.id}
+          sourceTitle={detail.title}
+          sourceType={detail.source_type}
+        />
       ) : contentTab === 'distillation' ? (
         detail.distillation ? (
           <MarkdownViewer content={detail.distillation} />

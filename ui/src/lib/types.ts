@@ -386,6 +386,36 @@ export interface SourceDetail {
   key_claims: { id: number; statement: string; claim_type: string }[];
 }
 
+/**
+ * Graph data for the source content explorer tab.
+ * Returned by /api/sources/:id/graph
+ * Hierarchical: Source → Topics → Claims → Entities
+ */
+export interface SourceGraphEntity {
+  id: number;
+  content: string;
+  type: string;
+}
+
+export interface SourceGraphClaim {
+  id: number;
+  statement: string;
+  claim_type: string;
+  is_key: boolean;
+  computed_confidence: string | null;
+  score: number | null;
+  topic_ids: number[];
+  evidence: SourceGraphEntity[];
+  devices: SourceGraphEntity[];
+  contexts: SourceGraphEntity[];
+  methods: SourceGraphEntity[];
+}
+
+export interface SourceGraphData {
+  topics: { id: number; name: string }[];
+  claims: SourceGraphClaim[];
+}
+
 // -----------------------------------------------------------------------------
 // Contributors
 // -----------------------------------------------------------------------------
